@@ -1,0 +1,13 @@
+/* Fees / Fee Accounts / Invoices / Payments / Receipts / Financial Reports */
+.finance-search { min-width: 220px; }
+.text-right { text-align: right; }
+
+.account-head, .invoice-head {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4);
+  margin-bottom: var(--space-4); padding-bottom: var(--space-4); border-bottom: 1px solid var(--surface-border);
+}
+.invoice-sheet { background: var(--surface-bg); }
+
+@media print {
+  .invoice-sheet { padding: 0; }
+}

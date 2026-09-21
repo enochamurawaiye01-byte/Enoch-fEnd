@@ -1,0 +1,11 @@
+/* Shared styles for academic-sessions / terms / classes / subjects /
+   departments / class-subjects / teacher-assignments / enrollments /
+   promotions — all mostly composed from core table/form/badge primitives. */
+
+.academics-search { min-width: 240px; }
+
+.term-name-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600;
+  color: var(--text-muted);
+}

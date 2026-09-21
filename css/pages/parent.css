@@ -1,0 +1,12 @@
+/* Parent workspace shared styles */
+.child-picker { max-width: 340px; margin-bottom: var(--space-5); }
+
+.children-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-4); }
+.child-card {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-4); border: 1px solid var(--surface-border); border-radius: var(--radius-lg);
+  background: var(--surface-bg); color: var(--text-primary);
+}
+.child-card:hover { border-color: var(--color-emerald-600); background: var(--color-emerald-50); text-decoration: none; }
+.child-card .name { font-weight: 600; font-size: var(--fs-body); }
+.child-card .sub { font-size: var(--fs-xs); color: var(--text-muted); margin-top: 2px; }

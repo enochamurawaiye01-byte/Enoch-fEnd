@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Settings — Enoch International College ERP</title>
+<link rel="stylesheet" href="../../css/style.css" />
+<link rel="stylesheet" href="../../css/responsive.css" />
+<link rel="stylesheet" href="../../css/dark-mode.css" />
+<link rel="stylesheet" href="../../css/components/sidebar.css" />
+<link rel="stylesheet" href="../../css/components/navbar.css" />
+<link rel="stylesheet" href="../../css/components/buttons.css" />
+<link rel="stylesheet" href="../../css/components/forms.css" />
+<link rel="stylesheet" href="../../css/components/tables.css" />
+<link rel="stylesheet" href="../../css/components/badges.css" />
+<link rel="stylesheet" href="../../css/components/modal.css" />
+<link rel="stylesheet" href="../../css/components/alerts.css" />
+<link rel="stylesheet" href="../../css/components/pagination.css" />
+<link rel="stylesheet" href="../../css/components/loader.css" />
+<link rel="stylesheet" href="../../css/pages/facilities.css" />
+<link rel="stylesheet" href="../../css/pages/settings.css" />
+</head>
+<body data-page-title="Settings" data-workspace="parent">
+
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <div class="sidebar-overlay" aria-hidden="true"></div>
+
+  <div class="app-main">
+    <div id="app-navbar"></div>
+
+    <main class="app-content">
+      <div class="page-head">
+        <div class="page-head__title">
+          <h1>Settings</h1>
+          <span class="page-head__desc">Manage your profile, password and notification preferences.</span>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <button type="button" class="tab-btn active" data-tab-target="tab-profile">Profile</button>
+        <button type="button" class="tab-btn" data-tab-target="tab-password">Password</button>
+        <button type="button" class="tab-btn" data-tab-target="tab-preferences">Preferences</button>
+        <button type="button" class="tab-btn" data-tab-target="tab-school" hidden>School</button>
+      </div>
+
+      <div class="tab-panel settings-panel" id="tab-profile">
+        <form id="profile-form" novalidate>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">First Name</label><input type="text" name="firstName" /></div>
+            <div class="form-group"><label class="form-label">Last Name</label><input type="text" name="lastName" /></div>
+          </div>
+          <div class="form-group"><label class="form-label">Email</label><input type="email" name="email" /></div>
+          <div class="form-group"><label class="form-label">Phone</label><input type="text" name="phone" /></div>
+          <button type="submit" class="btn btn-primary" id="profile-save-btn">Save Profile</button>
+        </form>
+      </div>
+
+      <div class="tab-panel settings-panel" id="tab-password" hidden>
+        <form id="password-form" novalidate>
+          <div class="form-group"><label class="form-label">Current Password</label><input type="password" name="currentPassword" /><span class="form-error"></span></div>
+          <div class="form-group"><label class="form-label">New Password</label><input type="password" name="newPassword" /><span class="form-error"></span></div>
+          <div class="form-group"><label class="form-label">Confirm New Password</label><input type="password" name="confirmPassword" /><span class="form-error"></span></div>
+          <button type="submit" class="btn btn-primary" id="password-save-btn">Update Password</button>
+        </form>
+      </div>
+
+      <div class="tab-panel settings-panel" id="tab-preferences" hidden>
+        <form id="preferences-form" novalidate>
+          <label class="checkbox-field" style="margin-bottom:12px;"><input type="checkbox" name="emailNotifications" /><span>Email notifications</span></label>
+          <label class="checkbox-field" style="margin-bottom:12px;"><input type="checkbox" name="smsNotifications" /><span>SMS notifications</span></label>
+          <label class="checkbox-field" style="margin-bottom:12px;"><input type="checkbox" name="announcementAlerts" /><span>Announcement alerts</span></label>
+          <button type="submit" class="btn btn-primary" id="preferences-save-btn" style="margin-top:8px;">Save Preferences</button>
+        </form>
+      </div>
+
+      <div class="tab-panel settings-panel" id="tab-school" hidden>
+        <form id="school-form" novalidate></form>
+      </div>
+    </main>
+
+    <div class="app-footer-note">Enoch International College ERP</div>
+  </div>
+</div>
+
+<script src="../../js/config/api.js"></script>
+<script src="../../js/config/endpoints.js"></script>
+<script src="../../js/utils/storage.js"></script>
+<script src="../../js/utils/format-date.js"></script>
+<script src="../../js/utils/format-currency.js"></script>
+<script src="../../js/utils/validators.js"></script>
+<script src="../../js/utils/helpers.js"></script>
+<script src="../../js/utils/permissions.js"></script>
+<script src="../../js/api/api-client.js"></script>
+<script src="../../js/services/settings.js"></script>
+<script src="../../js/services/auth.js"></script>
+<script src="../../js/components/toast.js"></script>
+<script src="../../js/components/loader.js"></script>
+<script src="../../js/components/modal.js"></script>
+<script src="../../js/components/confirm-dialog.js"></script>
+<script src="../../js/components/pagination.js"></script>
+<script src="../../js/components/dropdown.js"></script>
+<script src="../../js/components/notification.js"></script>
+<script src="../../js/components/table.js"></script>
+<script src="../../js/components/simple-crud.js"></script>
+<script src="../../js/components/sidebar.js"></script>
+<script src="../../js/components/navbar.js"></script>
+<script src="../../js/auth/auth-guard.js"></script>
+<script src="../../js/main.js"></script>
+<script src="../../js/pages/settings.js"></script>
+</body>
+</html>

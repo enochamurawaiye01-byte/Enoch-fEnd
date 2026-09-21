@@ -1,0 +1,9 @@
+/* Dashboard-specific tweaks. Shared .stat-card / .card / .content-grid /
+   .quick-links / .list-row primitives live in css/style.css since every
+   role dashboard (admin, management, teacher, student, parent) reuses them. */
+
+.page-head__title h1 { font-family: var(--font-display); }
+
+@media (max-width: 860px) {
+  .content-grid { grid-template-columns: 1fr; }
+}

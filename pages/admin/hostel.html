@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hostel — Enoch International College ERP</title>
+<link rel="stylesheet" href="../../css/style.css" />
+<link rel="stylesheet" href="../../css/responsive.css" />
+<link rel="stylesheet" href="../../css/dark-mode.css" />
+<link rel="stylesheet" href="../../css/components/sidebar.css" />
+<link rel="stylesheet" href="../../css/components/navbar.css" />
+<link rel="stylesheet" href="../../css/components/buttons.css" />
+<link rel="stylesheet" href="../../css/components/forms.css" />
+<link rel="stylesheet" href="../../css/components/tables.css" />
+<link rel="stylesheet" href="../../css/components/badges.css" />
+<link rel="stylesheet" href="../../css/components/modal.css" />
+<link rel="stylesheet" href="../../css/components/alerts.css" />
+<link rel="stylesheet" href="../../css/components/pagination.css" />
+<link rel="stylesheet" href="../../css/components/loader.css" />
+<link rel="stylesheet" href="../../css/pages/facilities.css" />
+</head>
+<body data-page-title="Hostel" data-workspace="admin">
+
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <div class="sidebar-overlay" aria-hidden="true"></div>
+
+  <div class="app-main">
+    <div id="app-navbar"></div>
+
+    <main class="app-content">
+      <div class="page-head">
+        <div class="page-head__title">
+          <h1>Hostel</h1>
+          <span class="page-head__desc">Manage hostels, rooms and student allocations.</span>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <button type="button" class="tab-btn active" data-tab-target="tab-hostels">Hostels</button>
+        <button type="button" class="tab-btn" data-tab-target="tab-rooms">Rooms</button>
+        <button type="button" class="tab-btn" data-tab-target="tab-allocations">Allocations</button>
+      </div>
+
+      <div class="tab-panel" id="tab-hostels">
+        <div class="tab-panel-head"><h3>Hostels</h3><button type="button" class="btn btn-primary btn-sm" id="add-hostel-btn" hidden>Add Hostel</button></div>
+        <div class="table-wrap"><div class="table-scroll"><table class="data-table">
+          <thead><tr><th>Hostel</th><th>Gender</th><th>Capacity</th></tr></thead>
+          <tbody id="hostels-tbody"></tbody>
+        </table></div></div>
+      </div>
+
+      <div class="tab-panel" id="tab-rooms" hidden>
+        <div class="tab-panel-head"><h3>Rooms</h3><button type="button" class="btn btn-primary btn-sm" id="add-room-btn" hidden>Add Room</button></div>
+        <div class="table-wrap"><div class="table-scroll"><table class="data-table">
+          <thead><tr><th>Hostel</th><th>Room Number</th><th>Beds</th></tr></thead>
+          <tbody id="rooms-tbody"></tbody>
+        </table></div></div>
+      </div>
+
+      <div class="tab-panel" id="tab-allocations" hidden>
+        <div class="tab-panel-head"><h3>Allocations</h3><button type="button" class="btn btn-primary btn-sm" id="add-allocation-btn" hidden>Allocate Student</button></div>
+        <div class="table-wrap"><div class="table-scroll"><table class="data-table">
+          <thead><tr><th>Student</th><th>Hostel</th><th>Room</th></tr></thead>
+          <tbody id="allocations-tbody"></tbody>
+        </table></div></div>
+      </div>
+    </main>
+
+    <div class="app-footer-note">Enoch International College ERP</div>
+  </div>
+</div>
+
+<script src="../../js/config/api.js"></script>
+<script src="../../js/config/endpoints.js"></script>
+<script src="../../js/utils/storage.js"></script>
+<script src="../../js/utils/format-date.js"></script>
+<script src="../../js/utils/format-currency.js"></script>
+<script src="../../js/utils/validators.js"></script>
+<script src="../../js/utils/helpers.js"></script>
+<script src="../../js/utils/permissions.js"></script>
+<script src="../../js/api/api-client.js"></script>
+<script src="../../js/services/students.js"></script>
+<script src="../../js/services/hostel.js"></script>
+<script src="../../js/services/auth.js"></script>
+<script src="../../js/components/toast.js"></script>
+<script src="../../js/components/loader.js"></script>
+<script src="../../js/components/modal.js"></script>
+<script src="../../js/components/confirm-dialog.js"></script>
+<script src="../../js/components/pagination.js"></script>
+<script src="../../js/components/dropdown.js"></script>
+<script src="../../js/components/notification.js"></script>
+<script src="../../js/components/table.js"></script>
+<script src="../../js/components/simple-crud.js"></script>
+<script src="../../js/components/sidebar.js"></script>
+<script src="../../js/components/navbar.js"></script>
+<script src="../../js/auth/auth-guard.js"></script>
+<script src="../../js/main.js"></script>
+<script src="../../js/pages/hostel.js"></script>
+</body>
+</html>

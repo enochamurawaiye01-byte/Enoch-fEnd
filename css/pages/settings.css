@@ -1,0 +1,3 @@
+/* Settings page */
+.settings-panel { max-width: 640px; }
+.settings-section-desc { margin-bottom: var(--space-5); }

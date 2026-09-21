@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Transcripts — Enoch International College ERP</title>
+<link rel="stylesheet" href="../../css/style.css" />
+<link rel="stylesheet" href="../../css/responsive.css" />
+<link rel="stylesheet" href="../../css/dark-mode.css" />
+<link rel="stylesheet" href="../../css/components/sidebar.css" />
+<link rel="stylesheet" href="../../css/components/navbar.css" />
+<link rel="stylesheet" href="../../css/components/buttons.css" />
+<link rel="stylesheet" href="../../css/components/forms.css" />
+<link rel="stylesheet" href="../../css/components/tables.css" />
+<link rel="stylesheet" href="../../css/components/badges.css" />
+<link rel="stylesheet" href="../../css/components/modal.css" />
+<link rel="stylesheet" href="../../css/components/alerts.css" />
+<link rel="stylesheet" href="../../css/components/pagination.css" />
+<link rel="stylesheet" href="../../css/components/loader.css" />
+<link rel="stylesheet" href="../../css/pages/results.css" />
+</head>
+<body data-page-title="Transcripts" data-workspace="admin">
+
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <div class="sidebar-overlay" aria-hidden="true"></div>
+
+  <div class="app-main">
+    <div id="app-navbar"></div>
+
+    <main class="app-content">
+      <div class="page-head">
+        <div class="page-head__title">
+          <h1>Transcripts</h1>
+          <span class="page-head__desc">Search a student to view and print their academic transcript.</span>
+        </div>
+      </div>
+
+      <div class="transcript-search-wrap">
+        <div class="search-field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="search" id="transcript-student-search" placeholder="Search by student name or reg. number…" />
+        </div>
+        <div class="search-result-list" id="transcript-search-results" hidden></div>
+      </div>
+
+      <div id="transcript-viewer">
+        <div class="table-state"><p>Search for a student above to view their transcript.</p></div>
+      </div>
+    </main>
+
+    <div class="app-footer-note">Enoch International College ERP</div>
+  </div>
+</div>
+
+<script src="../../js/config/api.js"></script>
+<script src="../../js/config/endpoints.js"></script>
+<script src="../../js/utils/storage.js"></script>
+<script src="../../js/utils/format-date.js"></script>
+<script src="../../js/utils/format-currency.js"></script>
+<script src="../../js/utils/validators.js"></script>
+<script src="../../js/utils/helpers.js"></script>
+<script src="../../js/utils/permissions.js"></script>
+<script src="../../js/api/api-client.js"></script>
+<script src="../../js/services/students.js"></script>
+<script src="../../js/services/transcripts.js"></script>
+<script src="../../js/services/auth.js"></script>
+<script src="../../js/components/toast.js"></script>
+<script src="../../js/components/loader.js"></script>
+<script src="../../js/components/modal.js"></script>
+<script src="../../js/components/confirm-dialog.js"></script>
+<script src="../../js/components/pagination.js"></script>
+<script src="../../js/components/dropdown.js"></script>
+<script src="../../js/components/notification.js"></script>
+<script src="../../js/components/table.js"></script>
+<script src="../../js/components/simple-crud.js"></script>
+<script src="../../js/components/sidebar.js"></script>
+<script src="../../js/components/navbar.js"></script>
+<script src="../../js/auth/auth-guard.js"></script>
+<script src="../../js/main.js"></script>
+<script src="../../js/pages/transcripts.js"></script>
+</body>
+</html>

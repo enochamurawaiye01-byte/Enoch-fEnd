@@ -1,0 +1,64 @@
+/* ==========================================================================
+   DARK MODE — restrained, professional. Deep charcoal surfaces, emerald
+  emerald accent retained. No neon, no gradients.
+   Activated via <html data-theme="dark">.
+   ========================================================================== */
+
+html[data-theme='dark'] {
+  --color-white: #15181B;
+  --app-bg: #0E1012;
+  --surface-bg: #191C1F;
+  --surface-border: #2A2E32;
+  --color-bg-alt: #1F2226;
+
+  --text-primary: #EDEFF1;
+  --text-secondary: #B7BCC1;
+  --text-muted: #82888E;
+
+  --color-border-strong: #383D42;
+
+  --color-emerald-50: #10241C;
+  --color-success-bg: #10241C;
+  --color-warning-bg: #2A1F14;
+  --color-danger-bg: #2A1615;
+  --color-info-bg: #101E2E;
+
+  --sidebar-bg: #0B0D0F;
+  --sidebar-text: #A9AEB4;
+  --sidebar-active-bg: var(--color-emerald-700);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 2px 10px rgba(0, 0, 0, 0.45);
+  --shadow-pop: 0 10px 28px rgba(0, 0, 0, 0.55);
+}
+
+html[data-theme='dark'] body { background: var(--app-bg); }
+
+html[data-theme='dark'] .btn-secondary { background: var(--surface-bg); border-color: var(--color-border-strong); color: var(--text-primary); }
+html[data-theme='dark'] .btn-secondary:hover:not(:disabled) { background: var(--color-bg-alt); }
+
+html[data-theme='dark'] input,
+html[data-theme='dark'] select,
+html[data-theme='dark'] textarea {
+  background: var(--surface-bg);
+  border-color: var(--color-border-strong);
+  color: var(--text-primary);
+}
+
+html[data-theme='dark'] .data-table thead th { background: var(--color-bg-alt); }
+html[data-theme='dark'] .data-table tbody tr:hover { background: rgba(16, 185, 129, 0.08); }
+
+html[data-theme='dark'] .modal,
+html[data-theme='dark'] .dropdown-panel { background: var(--surface-bg); }
+
+html[data-theme='dark'] .toast { background: var(--surface-bg); }
+
+html[data-theme='dark'] .skeleton {
+  background: linear-gradient(90deg, var(--color-bg-alt) 25%, #262A2E 37%, var(--color-bg-alt) 63%);
+  background-size: 400% 100%;
+}
+
+html[data-theme='dark'] .full-screen-loader { background: rgba(14, 16, 18, 0.9); }
+
+/* Login/auth screens keep the brand card readable in dark mode. */
+html[data-theme='dark'] .auth-card { background: var(--surface-bg); border-color: var(--surface-border); }

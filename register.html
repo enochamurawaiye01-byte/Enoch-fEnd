@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Register — Enoch International College ERP</title>
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/responsive.css" />
+<link rel="stylesheet" href="css/components/forms.css" />
+<link rel="stylesheet" href="css/components/buttons.css" />
+<link rel="stylesheet" href="css/components/alerts.css" />
+<link rel="stylesheet" href="css/pages/login.css" />
+</head>
+<body>
+<main class="auth-screen">
+  <section class="auth-brand-panel">
+    <div class="auth-brand-mark">EIC</div>
+    <div class="auth-brand-copy"><h2>Enoch International College</h2><p>Apply for a student or teacher account. An administrator will review your application.</p><div class="auth-brand-highlights"><div class="auth-brand-highlight">Your application is reviewed by the school administration.</div><div class="auth-brand-highlight">Student and teacher workspaces are tailored to your role.</div><div class="auth-brand-highlight">Your school records stay connected from day one.</div></div></div>
+    <div class="auth-brand-foot">&copy; <span id="year-brand"></span> Enoch International College.</div>
+  </section>
+  <section class="auth-form-panel">
+    <div class="auth-card">
+      <div class="auth-school-intro"><strong>Join Enoch International College</strong><span>Complete the application and wait for an administrator to approve your access.</span></div>
+      <div class="auth-card-head"><h1>Apply for access</h1><p>Choose your account type. New applications require administrator approval.</p></div>
+      <div class="alert alert-error auth-alert" id="register-error" role="alert" hidden></div>
+      <div class="alert alert-success auth-alert" id="register-success" role="status" hidden></div>
+      <form id="register-form" class="auth-form" novalidate>
+        <div class="form-group"><label class="form-label" for="role">Registering as</label><select id="role" name="role"><option value="STUDENT">Student</option><option value="TEACHER">Teacher</option></select></div>
+        <div class="form-row"><div class="form-group"><label class="form-label" for="firstName">First name</label><input id="firstName" name="firstName" required /></div><div class="form-group"><label class="form-label" for="lastName">Last name</label><input id="lastName" name="lastName" required /></div></div>
+        <div class="form-group"><label class="form-label" for="email">Email address</label><input type="email" id="email" name="email" autocomplete="email" required /></div>
+        <div class="form-group"><label class="form-label" for="password">Password</label><input type="password" id="password" name="password" autocomplete="new-password" required /></div>
+        <div class="form-group"><label class="form-label" for="confirmPassword">Confirm password</label><input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required /></div>
+        <div id="teacher-fields" hidden><div class="form-group"><label class="form-label" for="staffNumber">Staff number</label><input id="staffNumber" name="staffNumber" /></div><div class="form-group"><label class="form-label" for="jobTitle">Job title</label><input id="jobTitle" name="jobTitle" value="Teacher" /></div><div class="form-group"><label class="form-label" for="qualification">Qualification</label><input id="qualification" name="qualification" /></div></div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="register-submit">Submit student application</button>
+      </form>
+      <p class="auth-form-foot"><span>Already registered?</span><a href="login.html">Sign in</a></p>
+    </div>
+  </section>
+</main>
+<script>document.getElementById('year-brand').textContent = new Date().getFullYear();</script>
+<script src="js/config/api.js"></script><script src="js/config/endpoints.js"></script><script src="js/utils/storage.js"></script><script src="js/utils/helpers.js"></script><script src="js/utils/validators.js"></script><script src="js/api/api-client.js"></script><script src="js/services/auth.js"></script><script src="js/auth/register.js"></script>
+</body>
+</html>

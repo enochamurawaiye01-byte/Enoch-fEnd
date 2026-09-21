@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sign In — Enoch International College ERP</title>
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/responsive.css" />
+<link rel="stylesheet" href="css/dark-mode.css" />
+<link rel="stylesheet" href="css/components/buttons.css" />
+<link rel="stylesheet" href="css/components/forms.css" />
+<link rel="stylesheet" href="css/components/alerts.css" />
+<link rel="stylesheet" href="css/pages/login.css" />
+</head>
+<body>
+
+<main class="auth-screen">
+  <section class="auth-brand-panel">
+    <div class="auth-brand-mark">EIC</div>
+    <div class="auth-brand-copy">
+      <h2>Enoch International College</h2>
+      <p>Enterprise Resource Planning system for academic, financial and administrative management.</p>
+      <div class="auth-brand-highlights">
+        <div class="auth-brand-highlight">One connected place for students, teachers and administrators.</div>
+        <div class="auth-brand-highlight">Live classes, attendance, results and school operations.</div>
+        <div class="auth-brand-highlight">Secure access to the workspace built for your role.</div>
+      </div>
+    </div>
+    <div class="auth-brand-foot">&copy; <span id="year-brand"></span> Enoch International College. All rights reserved.</div>
+  </section>
+
+  <section class="auth-form-panel">
+    <div class="auth-card">
+      <div class="auth-school-intro"><strong>Welcome to Enoch International College</strong><span>Sign in to continue to your learning, teaching or administration workspace.</span></div>
+      <div class="auth-card-head">
+        <div class="auth-mobile-mark">EIC</div>
+        <h1>Welcome back</h1>
+        <p>Sign in to access your ERP workspace.</p>
+      </div>
+
+      <div class="alert alert-error auth-alert" id="login-error" role="alert" hidden></div>
+
+      <form id="login-form" class="auth-form" novalidate>
+        <div class="form-group">
+          <label for="email" class="form-label">Email address</label>
+          <input type="email" id="email" name="email" autocomplete="email" placeholder="you@enochcollege.edu.ng" />
+          <span class="form-error" id="error-email"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <div class="input-group">
+            <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Enter your password" />
+            <button type="button" class="input-group__action" id="toggle-password" aria-label="Show password">Show</button>
+          </div>
+          <span class="form-error" id="error-password"></span>
+        </div>
+
+        <div class="auth-form-foot">
+          <label class="checkbox-field">
+            <input type="checkbox" id="remember-me" />
+            <span>Keep me signed in</span>
+          </label>
+          <a href="forgot-password.html">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-submit">Sign In</button>
+      </form>
+      <p class="auth-form-foot"><span>New student?</span><a href="register.html">Create an account</a></p>
+    </div>
+  </section>
+</main>
+
+<script>document.getElementById('year-brand').textContent = new Date().getFullYear();</script>
+
+<script src="js/config/api.js?v=20260919"></script>
+<script src="js/config/endpoints.js?v=20260919"></script>
+<script src="js/utils/storage.js"></script>
+<script src="js/utils/helpers.js"></script>
+<script src="js/utils/validators.js"></script>
+<script src="js/utils/permissions.js"></script>
+<script src="js/api/api-client.js?v=20260919"></script>
+<script src="js/services/auth.js?v=20260919"></script>
+<script src="js/components/toast.js"></script>
+<script src="js/auth/login.js?v=20260919"></script>
+</body>
+</html>

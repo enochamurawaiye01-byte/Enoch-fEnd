@@ -1,0 +1,39 @@
+/* ==========================================================================
+   RESPONSIVE — desktop / laptop / tablet / mobile
+   Sidebar and topbar behavior for small screens lives primarily in
+   sidebar.css / navbar.css; this file covers shell/page-level reflow.
+   ========================================================================== */
+
+/* Laptop */
+@media (max-width: 1280px) {
+  .app-content { padding: var(--space-5) var(--space-6); }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .content-grid { grid-template-columns: 1fr; }
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .app-main { margin-left: 0; }
+  .app-shell.sidebar-collapsed .app-main { margin-left: 0; }
+  .app-content { padding: var(--space-4) var(--space-5); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .page-head { flex-direction: column; align-items: stretch; }
+  .page-head__actions { justify-content: flex-start; }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .app-content { padding: var(--space-4); }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  h1 { font-size: 1.3rem; }
+  .stat-card-value, .stat-card__value { font-size: 1.6rem; }
+  .filter-bar { flex-direction: column; align-items: stretch; }
+  .filter-bar .form-group { min-width: 0; }
+  .table-toolbar { flex-direction: column; align-items: stretch; }
+  .modal { margin: 0; }
+  .topbar__crumbs h1 { font-size: 1rem; }
+}
+
+@media (max-width: 400px) {
+  .container { padding: 0 var(--space-4); }
+}

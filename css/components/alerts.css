@@ -1,0 +1,39 @@
+.alert {
+  display: flex; align-items: flex-start; gap: var(--space-3);
+  padding: var(--space-4); border-radius: var(--radius-md);
+  border: 1px solid transparent; font-size: var(--fs-small); margin-bottom: var(--space-4);
+}
+.alert svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+.alert-success { background: var(--color-success-bg); color: var(--color-emerald-800); border-color: #A7E6C6; }
+.alert-error { background: var(--color-danger-bg); color: var(--color-danger); border-color: #F3B4AE; }
+.alert-warning { background: var(--color-warning-bg); color: var(--color-warning); border-color: #E6D58A; }
+.alert-info { background: var(--color-info-bg); color: var(--color-info); border-color: #BFD3FA; }
+.alert__title { font-weight: 700; margin-bottom: 2px; }
+
+.toast-stack {
+  position: fixed; top: 20px; right: 20px; z-index: 200;
+  display: flex; flex-direction: column; gap: var(--space-2); width: 340px; max-width: calc(100vw - 32px);
+}
+.toast {
+  display: flex; align-items: flex-start; gap: var(--space-3);
+  background: #fff; border: 1px solid var(--surface-border); border-left: 3px solid var(--color-emerald-600);
+  border-radius: var(--radius-md); padding: var(--space-3) var(--space-4);
+  box-shadow: var(--shadow-md); animation: toast-in 180ms ease;
+}
+.toast.toast-error { border-left-color: var(--color-danger); }
+.toast.toast-warning { border-left-color: var(--color-warning); }
+.toast.toast-info { border-left-color: var(--color-info); }
+.toast__icon { width: 18px; height: 18px; margin-top: 1px; flex-shrink: 0; color: var(--color-emerald-700); }
+.toast.toast-error .toast__icon { color: var(--color-danger); }
+.toast.toast-warning .toast__icon { color: var(--color-warning); }
+.toast.toast-info .toast__icon { color: var(--color-info); }
+.toast__body { flex: 1; }
+.toast__title { font-size: var(--fs-small); font-weight: 700; }
+.toast__msg { font-size: var(--fs-xs); color: var(--text-muted); margin-top: 2px; }
+.toast__close { width: 20px; height: 20px; color: var(--text-muted); cursor: pointer; flex-shrink: 0; }
+
+@keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 480px) {
+  .toast-stack { left: 12px; right: 12px; width: auto; top: 12px; }
+}

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Audit Logs — Enoch International College ERP</title>
+<link rel="stylesheet" href="../../css/style.css" />
+<link rel="stylesheet" href="../../css/responsive.css" />
+<link rel="stylesheet" href="../../css/dark-mode.css" />
+<link rel="stylesheet" href="../../css/components/sidebar.css" />
+<link rel="stylesheet" href="../../css/components/navbar.css" />
+<link rel="stylesheet" href="../../css/components/buttons.css" />
+<link rel="stylesheet" href="../../css/components/forms.css" />
+<link rel="stylesheet" href="../../css/components/tables.css" />
+<link rel="stylesheet" href="../../css/components/badges.css" />
+<link rel="stylesheet" href="../../css/components/modal.css" />
+<link rel="stylesheet" href="../../css/components/alerts.css" />
+<link rel="stylesheet" href="../../css/components/pagination.css" />
+<link rel="stylesheet" href="../../css/components/loader.css" />
+<link rel="stylesheet" href="../../css/pages/audit-logs.css" />
+</head>
+<body data-page-title="Audit Logs" data-workspace="admin">
+
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <div class="sidebar-overlay" aria-hidden="true"></div>
+
+  <div class="app-main">
+    <div id="app-navbar"></div>
+
+    <main class="app-content">
+      <div class="page-head">
+        <div class="page-head__title">
+          <h1>Audit Logs</h1>
+          <span class="page-head__desc">A record of user actions across the system.</span>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <div class="search-field audit-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="search" id="audit-search" placeholder="Search audit logs…" />
+          </div>
+          <select id="filter-module" style="min-width:180px;">
+            <option value="">All Modules</option>
+            <option value="students">Students</option>
+            <option value="finance">Finance</option>
+            <option value="users">Users</option>
+            <option value="academics">Academics</option>
+            <option value="results">Results</option>
+          </select>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th>User</th><th>Action</th><th>Module</th><th>Details</th><th>Timestamp</th></tr></thead>
+            <tbody id="audit-logs-tbody"></tbody>
+          </table>
+        </div>
+        <div id="audit-logs-pagination"></div>
+      </div>
+    </main>
+
+    <div class="app-footer-note">Enoch International College ERP</div>
+  </div>
+</div>
+
+<script src="../../js/config/api.js"></script>
+<script src="../../js/config/endpoints.js"></script>
+<script src="../../js/utils/storage.js"></script>
+<script src="../../js/utils/format-date.js"></script>
+<script src="../../js/utils/format-currency.js"></script>
+<script src="../../js/utils/validators.js"></script>
+<script src="../../js/utils/helpers.js"></script>
+<script src="../../js/utils/permissions.js"></script>
+<script src="../../js/api/api-client.js"></script>
+<script src="../../js/services/audit-logs.js"></script>
+<script src="../../js/services/auth.js"></script>
+<script src="../../js/components/toast.js"></script>
+<script src="../../js/components/loader.js"></script>
+<script src="../../js/components/modal.js"></script>
+<script src="../../js/components/confirm-dialog.js"></script>
+<script src="../../js/components/pagination.js"></script>
+<script src="../../js/components/dropdown.js"></script>
+<script src="../../js/components/notification.js"></script>
+<script src="../../js/components/table.js"></script>
+<script src="../../js/components/simple-crud.js"></script>
+<script src="../../js/components/sidebar.js"></script>
+<script src="../../js/components/navbar.js"></script>
+<script src="../../js/auth/auth-guard.js"></script>
+<script src="../../js/main.js"></script>
+<script src="../../js/pages/audit-logs.js"></script>
+</body>
+</html>

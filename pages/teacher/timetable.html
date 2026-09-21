@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Timetable — Enoch International College ERP</title>
+<link rel="stylesheet" href="../../css/style.css" />
+<link rel="stylesheet" href="../../css/responsive.css" />
+<link rel="stylesheet" href="../../css/dark-mode.css" />
+<link rel="stylesheet" href="../../css/components/sidebar.css" />
+<link rel="stylesheet" href="../../css/components/navbar.css" />
+<link rel="stylesheet" href="../../css/components/buttons.css" />
+<link rel="stylesheet" href="../../css/components/forms.css" />
+<link rel="stylesheet" href="../../css/components/tables.css" />
+<link rel="stylesheet" href="../../css/components/badges.css" />
+<link rel="stylesheet" href="../../css/components/modal.css" />
+<link rel="stylesheet" href="../../css/components/alerts.css" />
+<link rel="stylesheet" href="../../css/components/pagination.css" />
+<link rel="stylesheet" href="../../css/components/loader.css" />
+<link rel="stylesheet" href="../../css/pages/academics.css" />
+</head>
+<body data-page-title="Timetable" data-workspace="teacher">
+
+<div class="app-shell">
+  <div id="app-sidebar"></div>
+  <div class="sidebar-overlay" aria-hidden="true"></div>
+
+  <div class="app-main">
+    <div id="app-navbar"></div>
+
+    <main class="app-content">
+      <div class="page-head">
+        <div class="page-head__title">
+          <h1>Timetable</h1>
+          <span class="page-head__desc">Manage timetable entries for your classes.</span>
+        </div>
+        <div class="page-head__actions">
+          <button type="button" class="btn btn-primary" id="add-timetable-btn" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            Add Entry
+          </button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <select id="filter-class" style="min-width:200px;"><option value="">All Classes</option></select>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th>Class</th><th>Day</th><th>Time</th><th>Subject</th><th>Teacher</th><th style="text-align:right;">Actions</th></tr></thead>
+            <tbody id="timetable-tbody"></tbody>
+          </table>
+        </div>
+        <div id="timetable-pagination"></div>
+      </div>
+    </main>
+
+    <div class="app-footer-note">Enoch International College ERP</div>
+  </div>
+</div>
+
+<script src="../../js/config/api.js"></script>
+<script src="../../js/config/endpoints.js"></script>
+<script src="../../js/utils/storage.js"></script>
+<script src="../../js/utils/format-date.js"></script>
+<script src="../../js/utils/format-currency.js"></script>
+<script src="../../js/utils/validators.js"></script>
+<script src="../../js/utils/helpers.js"></script>
+<script src="../../js/utils/permissions.js"></script>
+<script src="../../js/api/api-client.js"></script>
+<script src="../../js/services/classes.js"></script>
+<script src="../../js/services/subjects.js"></script>
+<script src="../../js/services/teachers.js"></script>
+<script src="../../js/services/timetable.js"></script>
+<script src="../../js/services/auth.js"></script>
+<script src="../../js/components/toast.js"></script>
+<script src="../../js/components/loader.js"></script>
+<script src="../../js/components/modal.js"></script>
+<script src="../../js/components/confirm-dialog.js"></script>
+<script src="../../js/components/pagination.js"></script>
+<script src="../../js/components/dropdown.js"></script>
+<script src="../../js/components/notification.js"></script>
+<script src="../../js/components/table.js"></script>
+<script src="../../js/components/simple-crud.js"></script>
+<script src="../../js/components/sidebar.js"></script>
+<script src="../../js/components/navbar.js"></script>
+<script src="../../js/auth/auth-guard.js"></script>
+<script src="../../js/main.js"></script>
+<script src="../../js/pages/timetable.js"></script>
+</body>
+</html>

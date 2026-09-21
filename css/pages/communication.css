@@ -1,0 +1,5 @@
+/* Announcements / Notifications / Messages / News / Events / Gallery / Documents */
+.communication-search { min-width: 220px; }
+
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--space-3); }
+.gallery-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--surface-border); }

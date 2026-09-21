@@ -1,0 +1,4 @@
+/* Student workspace shared styles */
+.profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-4); margin-top: var(--space-4); }
+.profile-grid p { margin: 2px 0 0; color: var(--text-primary); font-weight: 500; }
+.student-search { min-width: 220px; }

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Enoch International College ERP</title>
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/components/loader.css" />
+<style>
+  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+</style>
+</head>
+<body>
+<div class="page-loader">
+  <span class="spinner spinner-lg"></span>
+  <span>Loading Enoch International College ERP…</span>
+</div>
+
+<script src="js/config/api.js"></script>
+<script src="js/config/endpoints.js"></script>
+<script src="js/utils/storage.js"></script>
+<script src="js/utils/permissions.js"></script>
+<script>
+  (function () {
+    var token = Storage.getToken();
+    var user = Storage.getUser();
+    if (token && user && user.role) {
+      window.location.replace(Permissions.dashboardPathForRole(user.role));
+    } else {
+      window.location.replace('login.html');
+    }
+  })();
+</script>
+</body>
+</html>

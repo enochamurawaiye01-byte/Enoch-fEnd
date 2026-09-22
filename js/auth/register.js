@@ -8,12 +8,16 @@
     const submitButton = qs('#register-submit');
     const roleSelect = qs('#role');
     const teacherFields = qs('#teacher-fields');
+    const parentFields = qs('#parent-fields');
 
     roleSelect.addEventListener('change', () => {
       const isTeacher = roleSelect.value === 'TEACHER';
+      const isParent = roleSelect.value === 'PARENT';
       teacherFields.hidden = !isTeacher;
+      parentFields.hidden = !isParent;
       teacherFields.querySelectorAll('input').forEach((input) => { input.required = isTeacher; });
-      submitButton.textContent = isTeacher ? 'Submit teacher application' : 'Submit student application';
+      parentFields.querySelectorAll('input').forEach((input) => { input.required = isParent; });
+      submitButton.textContent = isTeacher ? 'Submit teacher application' : isParent ? 'Submit parent application' : 'Submit student application';
     });
 
     form.addEventListener('submit', async (event) => {
@@ -31,6 +35,7 @@
         password: [(value) => Validators.required(value, 'Password'), (value) => Validators.passwordStrength(value)],
         confirmPassword: [(value) => Validators.passwordsMatch(data.password, value)],
         staffNumber: [(value) => data.role === 'TEACHER' ? Validators.required(value, 'Staff number') : null],
+        childRegistrationNumber: [(value) => data.role === 'PARENT' ? Validators.required(value, 'Child registration number') : null],
       });
 
       if (!validation.valid) {

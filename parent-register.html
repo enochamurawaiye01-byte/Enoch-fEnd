@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Parent Registration — Enoch International College</title>
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/responsive.css" />
+<link rel="stylesheet" href="css/components/forms.css" />
+<link rel="stylesheet" href="css/components/buttons.css" />
+<link rel="stylesheet" href="css/components/alerts.css" />
+<link rel="stylesheet" href="css/pages/login.css" />
+</head>
+<body>
+<main class="auth-screen">
+  <section class="auth-form-panel">
+    <div class="auth-card">
+      <div class="auth-school-intro"><strong>Enoch International College</strong><span>Connect your parent account to your child's verified school record.</span></div>
+      <div class="auth-card-head"><h1>Parent registration</h1><p>Applications require administrator approval before sign-in.</p></div>
+      <div class="alert alert-error auth-alert" id="parent-register-error" role="alert" hidden></div>
+      <div class="alert alert-success auth-alert" id="parent-register-success" role="status" hidden></div>
+      <form id="parent-register-form" class="auth-form" novalidate>
+        <div class="form-group"><label class="form-label" for="childRegistrationNumber">Child registration number</label><input id="childRegistrationNumber" name="childRegistrationNumber" placeholder="EIC-2026-00001" required /></div>
+        <div class="form-row"><div class="form-group"><label class="form-label" for="firstName">First name</label><input id="firstName" name="firstName" required /></div><div class="form-group"><label class="form-label" for="lastName">Last name</label><input id="lastName" name="lastName" required /></div></div>
+        <div class="form-group"><label class="form-label" for="relationship">Relationship to child</label><input id="relationship" name="relationship" placeholder="Parent or guardian" required /></div>
+        <div class="form-group"><label class="form-label" for="email">Email address</label><input type="email" id="email" name="email" autocomplete="email" required /></div>
+        <div class="form-group"><label class="form-label" for="password">Password</label><input type="password" id="password" name="password" autocomplete="new-password" required /></div>
+        <div class="form-group"><label class="form-label" for="confirmPassword">Confirm password</label><input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required /></div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="parent-register-submit">Submit parent application</button>
+      </form>
+      <p class="auth-form-foot"><span>Already approved?</span><a href="login.html">Sign in</a></p>
+    </div>
+  </section>
+</main>
+<script src="js/config/api.js"></script>
+<script src="js/config/endpoints.js"></script>
+<script src="js/utils/storage.js"></script>
+<script src="js/utils/helpers.js"></script>
+<script src="js/utils/validators.js"></script>
+<script src="js/api/api-client.js"></script>
+<script src="js/services/auth.js"></script>
+<script src="js/auth/parent-register.js"></script>
+</body>
+</html>

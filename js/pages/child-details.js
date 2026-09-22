@@ -12,7 +12,7 @@
 
     container.innerHTML = Loader.spinnerHtml('Loading student details…');
     try {
-      const student = await StudentsService.get(childId);
+      const student = await ParentsService.child(childId);
       container.innerHTML = `
         <div class="card">
           <div class="card__head">

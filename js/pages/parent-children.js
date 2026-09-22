@@ -5,7 +5,7 @@
     const grid = document.getElementById('children-grid');
     grid.innerHTML = Loader.spinnerHtml('Loading your children…');
     try {
-      const { items } = await ParentsService.children(window.CurrentUser.id);
+      const { items } = await ParentsService.children();
       if (!items.length) {
         grid.innerHTML = '<div class="table-state"><p>No children are linked to your account yet. Please contact the school office.</p></div>';
         return;

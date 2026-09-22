@@ -21,9 +21,13 @@
     async delete(id) {
       return ApiClient.delete(PARENTS.BY_ID(id));
     },
-    async children(id) {
-      const payload = await ApiClient.get(PARENTS.CHILDREN(id));
+    async children() {
+      const payload = await ApiClient.get('/parents/me/children');
       return ApiClient.unwrapList(payload);
+    },
+    async child(id) {
+      const payload = await ApiClient.get(`/parents/me/children/${encodeURIComponent(id)}`);
+      return ApiClient.unwrapItem(payload);
     },
   };
 })(window);

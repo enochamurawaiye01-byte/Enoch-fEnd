@@ -64,6 +64,7 @@
 
     TERMS: {
       BASE: '/terms',
+      BY_SESSION: (sessionId) => `/terms/sessions/${sessionId}`,
       BY_ID: (termId) => `/terms/${termId}`,
       ACTIVATE: (termId) => `/terms/${termId}/activate`,
       CLOSE: (termId) => `/terms/${termId}/close`,

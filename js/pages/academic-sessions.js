@@ -6,9 +6,7 @@
       ? `<button type="button" class="icon-link" data-action="activate" title="Activate">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 13l4 4L19 7"/></svg>
         </button>`
-      : `<button type="button" class="icon-link" data-action="close" title="Close session">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"/><path d="M8 8l8 8"/></svg>
-        </button>`;
+      : '';
     return `
       <div class="row" style="gap:4px; justify-content:flex-end;">
         ${canManage ? activateBtn : ''}
@@ -55,18 +53,6 @@
             onConfirm: async () => {
               await AcademicSessionsService.activate(id);
               Toast.success('Academic session activated.');
-              table.reload();
-            },
-          });
-        } else if (e.target.closest('[data-action="close"]')) {
-          ConfirmDialog.open({
-            title: 'Close Session',
-            message: 'Closing this session will lock it from further changes. This is typically done at year end.',
-            confirmLabel: 'Close Session',
-            tone: 'danger',
-            onConfirm: async () => {
-              await AcademicSessionsService.close(id);
-              Toast.success('Academic session closed.');
               table.reload();
             },
           });

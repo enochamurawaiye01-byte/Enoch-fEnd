@@ -26,6 +26,10 @@
       const payload = await ApiClient.patch(USERS.STATUS(id), { status: 'INACTIVE' });
       return ApiClient.unwrapItem(payload);
     },
+    async reject(id) {
+      const payload = await ApiClient.patch(USERS.STATUS(id), { status: 'DEACTIVATED' });
+      return ApiClient.unwrapItem(payload);
+    },
     async delete(id) {
       return ApiClient.patch(USERS.STATUS(id), { status: 'DEACTIVATED' });
     },

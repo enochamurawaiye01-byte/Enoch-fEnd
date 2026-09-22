@@ -32,6 +32,7 @@
         firstName: [(value) => Validators.required(value, 'First name')],
         lastName: [(value) => Validators.required(value, 'Last name')],
         email: [(value) => Validators.required(value, 'Email'), (value) => Validators.email(value)],
+        phoneNumber: [(value) => Validators.required(value, 'Phone number'), (value) => Validators.phone(value)],
         password: [(value) => Validators.required(value, 'Password'), (value) => Validators.passwordStrength(value)],
         confirmPassword: [(value) => Validators.passwordsMatch(data.password, value)],
         staffNumber: [(value) => data.role === 'TEACHER' ? Validators.required(value, 'Staff number') : null],

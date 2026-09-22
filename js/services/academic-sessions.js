@@ -26,7 +26,7 @@
       return ApiClient.unwrapItem(payload);
     },
     async update(id, data) {
-      const payload = await ApiClient.put(ACADEMIC_SESSIONS.BY_ID(id), data);
+      const payload = await ApiClient.patch(ACADEMIC_SESSIONS.BY_ID(id), data);
       return ApiClient.unwrapItem(payload);
     },
     async activate(id) {
@@ -34,8 +34,7 @@
       return ApiClient.unwrapItem(payload);
     },
     async close(id) {
-      const payload = await ApiClient.patch(ACADEMIC_SESSIONS.CLOSE(id), {});
-      return ApiClient.unwrapItem(payload);
+      throw new Error('Academic sessions can only be deleted or activated.');
     },
     async delete(id) {
       return ApiClient.delete(ACADEMIC_SESSIONS.BY_ID(id));

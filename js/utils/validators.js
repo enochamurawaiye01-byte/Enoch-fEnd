@@ -27,8 +27,8 @@
     },
     phone(value) {
       if (!value) return null;
-      const re = /^[+0-9\s()-]{7,20}$/;
-      return re.test(value) ? null : 'Enter a valid phone number.';
+      const re = /^\+[1-9]\d{7,14}$/;
+      return re.test(String(value).trim()) ? null : 'Use international format, for example +2348012345678.';
     },
     passwordStrength(value) {
       if (!value) return null;

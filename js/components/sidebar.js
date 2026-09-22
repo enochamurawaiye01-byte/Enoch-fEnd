@@ -17,6 +17,7 @@
         group: 'People',
         items: [
           { label: 'Users', href: 'users.html', icon: 'user-cog' },
+           { label: 'Applicants', href: 'applicants.html', icon: 'user-plus' },
           { label: 'Students', href: 'students.html', icon: 'graduation' },
           { label: 'Parents', href: 'parents.html', icon: 'users' },
           { label: 'Teachers', href: 'teachers.html', icon: 'chalkboard' },

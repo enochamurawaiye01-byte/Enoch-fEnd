@@ -57,6 +57,12 @@
         { name: 'startDate', label: 'Start Date', type: 'date', required: true },
         { name: 'endDate', label: 'End Date', type: 'date', required: true },
       ],
+      onFormValues: (values) => ({
+        ...values,
+        type: values.name,
+        startDate: values.startDate ? `${values.startDate}T00:00:00.000Z` : values.startDate,
+        endDate: values.endDate ? `${values.endDate}T23:59:59.999Z` : values.endDate,
+      }),
       deleteMessage: (row) => `Delete ${titleCaseFromEnum(row.name)} term?`,
       extraFilters: () => ({ academicSessionId: filterSession ? filterSession.value : '' }),
       onRowAction: async (e, id) => {

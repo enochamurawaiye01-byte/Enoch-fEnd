@@ -19,6 +19,7 @@
         lastName: [(value) => Validators.required(value, 'Last name')],
         relationship: [(value) => Validators.required(value, 'Relationship')],
         email: [(value) => Validators.required(value, 'Email'), (value) => Validators.email(value)],
+          phoneNumber: [(value) => Validators.required(value, 'Phone number'), (value) => Validators.phone(value)],
         password: [(value) => Validators.required(value, 'Password'), (value) => Validators.passwordStrength(value)],
         confirmPassword: [(value) => Validators.passwordsMatch(data.password, value)],
       });

@@ -2,7 +2,7 @@
   'use strict';
 
   function rowActions(row, canManage) {
-    const activateBtn = row.status !== 'ACTIVE'
+    const activateBtn = !row.isActive
       ? `<button type="button" class="icon-link" data-action="activate" title="Activate">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 13l4 4L19 7"/></svg>
         </button>`
@@ -34,7 +34,7 @@
         { key: 'name', label: 'Session', render: (r) => `<strong>${escapeHtml(r.name)}</strong>` },
         { key: 'startDate', label: 'Start Date', render: (r) => formatDate(r.startDate) },
         { key: 'endDate', label: 'End Date', render: (r) => formatDate(r.endDate) },
-        { key: 'status', label: 'Status', render: (r) => `<span class="badge ${statusBadgeClass(r.status)}">${escapeHtml(titleCaseFromEnum(r.status))}</span>` },
+        { key: 'status', label: 'Status', render: (r) => `<span class="badge ${statusBadgeClass(r.isActive ? 'ACTIVE' : 'INACTIVE')}" >${r.isActive ? 'Active' : 'Inactive'}</span>` },
       ],
       buildRowActions: (row) => rowActions(row, canManage),
       formFields: [

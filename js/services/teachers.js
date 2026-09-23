@@ -15,11 +15,19 @@
       return ApiClient.unwrapItem(payload);
     },
     async update(id, data) {
-      const payload = await ApiClient.put(TEACHERS.BY_ID(id), data);
+      const payload = await ApiClient.patch(TEACHERS.BY_ID(id), data);
+      return ApiClient.unwrapItem(payload);
+    },
+    async activate(id) {
+      const payload = await ApiClient.patch(`${TEACHERS.BY_ID(id)}/status`, { status: 'ACTIVE' });
+      return ApiClient.unwrapItem(payload);
+    },
+    async deactivate(id) {
+      const payload = await ApiClient.patch(`${TEACHERS.BY_ID(id)}/status`, { status: 'INACTIVE' });
       return ApiClient.unwrapItem(payload);
     },
     async delete(id) {
-      return ApiClient.delete(TEACHERS.BY_ID(id));
+      return this.deactivate(id);
     },
     async assignments(id) {
       const payload = await ApiClient.get(TEACHERS.ASSIGNMENTS(id));

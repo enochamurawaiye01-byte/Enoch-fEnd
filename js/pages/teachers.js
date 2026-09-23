@@ -9,7 +9,9 @@
       departmentOptions = items.map((d) => ({ value: d.id, label: d.name }));
     } catch (e) { /* non-fatal */ }
 
-    SimpleCrudPage.init({
+    let table;
+    const rowActions = (row) => `<div class="row" style="gap:4px;justify-content:flex-end;"><button type="button" class="icon-link" data-action="${row.status === 'ACTIVE' ? 'deactivate' : 'activate'}" title="${row.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}">${row.status === 'ACTIVE' ? '×' : '✓'}</button><button type="button" class="icon-link" data-action="edit" title="Edit">✎</button></div>`;
+    table = SimpleCrudPage.init({
       tbody: document.getElementById('teachers-tbody'),
       paginationEl: document.getElementById('teachers-pagination'),
       searchInput: document.getElementById('teachers-search'),
@@ -17,6 +19,7 @@
       moduleKey: 'teachers',
       entityLabel: 'Teacher',
       service: TeachersService,
+      buildRowActions: rowActions,
       columns: [
         {
           key: 'name', label: 'Teacher', render: (r) => `
@@ -38,6 +41,17 @@
         { name: 'qualification', label: 'Qualification' },
       ],
       deleteMessage: (row) => `Delete teacher "${row.firstName} ${row.lastName}"? Existing assignments will need reassignment.`,
+      onRowAction: async (event, id) => {
+        if (event.target.closest('[data-action="activate"]')) {
+          await TeachersService.activate(id);
+          Toast.success('Teacher activated.');
+          table.reload();
+        } else if (event.target.closest('[data-action="deactivate"]')) {
+          await TeachersService.deactivate(id);
+          Toast.success('Teacher deactivated.');
+          table.reload();
+        }
+      },
     });
   });
 })();

@@ -29,11 +29,10 @@
         listEl.innerHTML = '<div class="table-state"><p>You have no notifications.</p></div>';
         return;
       }
-      const workspace = (window.CurrentUser && Permissions.getWorkspaceForRole(window.CurrentUser.role)) || 'admin';
       listEl.innerHTML = items
         .map(
           (n) => `
-          <a class="notif-item ${n.readAt || n.isRead ? '' : 'unread'}" href="${rootPrefix()}pages/${workspace}/notifications.html">
+          <a class="notif-item ${n.readAt || n.isRead ? '' : 'unread'}" href="${n.targetPath ? `${rootPrefix()}${n.targetPath.replace(/^\//, '')}` : `${rootPrefix()}pages/notifications.html`}">
             <div class="title">${escapeHtml(n.title || n.message || 'Notification')}</div>
             <div class="meta">${timeAgo(n.createdAt)}</div>
           </a>`

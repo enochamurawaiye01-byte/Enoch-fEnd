@@ -11,6 +11,7 @@
   const AcademicSessionsService = {
     async list(params = {}) {
       const payload = await ApiClient.get(ACADEMIC_SESSIONS.BASE, params);
+      if (payload?.data?.sessions) return { items: payload.data.sessions, meta: null };
       return ApiClient.unwrapList(payload);
     },
     async get(id) {

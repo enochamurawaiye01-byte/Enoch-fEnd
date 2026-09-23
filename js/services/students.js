@@ -42,17 +42,17 @@
     },
 
     async update(studentId, data) {
-      const payload = await ApiClient.put(STUDENTS.BY_ID(studentId), data);
+      const payload = await ApiClient.patch(STUDENTS.BY_ID(studentId), data);
       return ApiClient.unwrapItem(payload);
     },
 
     async deactivate(studentId) {
-      const payload = await ApiClient.patch(STUDENTS.DEACTIVATE(studentId), {});
+      const payload = await ApiClient.patch(STUDENTS.BY_ID(studentId), { status: 'INACTIVE' });
       return ApiClient.unwrapItem(payload);
     },
 
     async delete(studentId) {
-      return ApiClient.delete(STUDENTS.BY_ID(studentId));
+      return this.deactivate(studentId);
     },
   };
 

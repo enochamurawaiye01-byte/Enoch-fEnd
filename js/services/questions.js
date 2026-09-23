@@ -3,7 +3,7 @@
   const { QUESTIONS } = ENOCH_ENDPOINTS;
   global.QuestionsService = {
     async list(params = {}) {
-      const payload = await ApiClient.get(QUESTIONS.BASE, params);
+      const payload = await ApiClient.get(QUESTIONS.BASE, { ...params, examId: params.examId || params.examinationId });
       return ApiClient.unwrapList(payload);
     },
     async get(id) {
@@ -19,7 +19,7 @@
       return ApiClient.unwrapItem(payload);
     },
     async update(id, data) {
-      const payload = await ApiClient.put(QUESTIONS.BY_ID(id), data);
+      const payload = await ApiClient.patch(QUESTIONS.BY_ID(id), data);
       return ApiClient.unwrapItem(payload);
     },
     async delete(id) {

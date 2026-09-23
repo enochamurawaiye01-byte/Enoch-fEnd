@@ -12,7 +12,7 @@
       ]);
       classOptions = classes.map((c) => ({ value: c.id, label: c.name }));
       subjectOptions = subjects.map((s) => ({ value: s.id, label: s.name }));
-      teacherOptions = teachers.map((t) => ({ value: t.id, label: `${t.firstName || ''} ${t.lastName || ''}`.trim() || t.name }));
+      teacherOptions = teachers.map((t) => ({ value: t.id, label: `${t.firstName || t.user?.fullName || ''} ${t.lastName || ''}`.trim() || t.name }));
     } catch (e) { /* non-fatal */ }
 
     SimpleCrudPage.init({
@@ -30,11 +30,12 @@
         { key: 'className', label: 'Class', render: (r) => escapeHtml(r.className || r.class?.name || '—') },
       ],
       formFields: [
-        { name: 'teacherId', label: 'Teacher', type: 'select', required: true, options: teacherOptions },
+        { name: 'staffId', label: 'Teacher', type: 'select', required: true, options: teacherOptions },
         { name: 'subjectId', label: 'Subject', type: 'select', required: true, options: subjectOptions },
         { name: 'classId', label: 'Class', type: 'select', required: true, options: classOptions },
       ],
       deleteMessage: () => 'Remove this teacher assignment?',
+      buildRowActions: () => `<div class="row" style="gap:4px;justify-content:flex-end;"><button type="button" class="icon-link" data-action="delete" title="Remove">×</button></div>`,
     });
   });
 })();

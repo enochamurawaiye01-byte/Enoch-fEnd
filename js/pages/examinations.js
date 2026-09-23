@@ -3,16 +3,18 @@
   document.addEventListener('DOMContentLoaded', async () => {
     if (!window.CurrentUser) return;
 
-    let classOptions = [], subjectOptions = [], termOptions = [];
+    let classOptions = [], subjectOptions = [], termOptions = [], sessionOptions = [];
     try {
-      const [{ items: classes }, { items: subjects }, { items: terms }] = await Promise.all([
+      const [{ items: classes }, { items: subjects }, { items: terms }, { items: sessions }] = await Promise.all([
         ClassesService.list({ pageSize: 100 }),
         SubjectsService.list({ pageSize: 200 }),
         TermsService.list({ pageSize: 50 }),
+        AcademicSessionsService.list({ pageSize: 50 }),
       ]);
       classOptions = classes.map((c) => ({ value: c.id, label: c.name }));
       subjectOptions = subjects.map((s) => ({ value: s.id, label: s.name }));
       termOptions = terms.map((t) => ({ value: t.id, label: `${titleCaseFromEnum(t.name)} — ${t.academicSessionName || t.academicSession?.name || ''}`.trim() }));
+      sessionOptions = sessions.map((s) => ({ value: s.id, label: s.name }));
     } catch (e) { /* non-fatal */ }
 
     const filterClass = document.getElementById('filter-class');
@@ -42,11 +44,22 @@
         { name: 'title', label: 'Examination Title', required: true, placeholder: 'e.g. First Term Mathematics Exam' },
         { name: 'classId', label: 'Class', type: 'select', required: true, options: classOptions },
         { name: 'subjectId', label: 'Subject', type: 'select', required: true, options: subjectOptions },
+        { name: 'sessionId', label: 'Academic Session', type: 'select', required: true, options: sessionOptions },
         { name: 'termId', label: 'Term', type: 'select', required: true, options: termOptions },
-        { name: 'examDate', label: 'Exam Date', type: 'date', required: true },
+        { name: 'startTime', label: 'Start Date', type: 'date', required: true },
+        { name: 'endTime', label: 'End Date', type: 'date', required: true },
         { name: 'durationMinutes', label: 'Duration (minutes)', type: 'number' },
         { name: 'totalMarks', label: 'Total Marks', type: 'number', required: true },
+        { name: 'passMark', label: 'Pass Mark', type: 'number', required: true },
       ],
+      onFormValues: (values) => ({
+        ...values,
+        durationMinutes: Number(values.durationMinutes),
+        totalMarks: Number(values.totalMarks),
+        passMark: Number(values.passMark),
+        startTime: values.startTime ? `${values.startTime}T00:00:00.000Z` : null,
+        endTime: values.endTime ? `${values.endTime}T23:59:59.999Z` : null,
+      }),
       deleteMessage: (row) => `Delete examination "${row.title}"?`,
       extraFilters: () => ({ classId: filterClass ? filterClass.value : '' }),
     });

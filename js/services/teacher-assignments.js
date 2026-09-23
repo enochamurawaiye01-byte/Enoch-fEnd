@@ -15,8 +15,7 @@
       return ApiClient.unwrapItem(payload);
     },
     async update(id, data) {
-      const payload = await ApiClient.put(TEACHER_ASSIGNMENTS.BY_ID(id), data);
-      return ApiClient.unwrapItem(payload);
+      throw new Error('Teacher assignments can only be added or removed.');
     },
     async delete(id) {
       return ApiClient.delete(TEACHER_ASSIGNMENTS.BY_ID(id));

@@ -51,6 +51,7 @@
     TEACHERS: {
       BASE: '/teachers',
       BY_ID: (teacherId) => `/teachers/${teacherId}`,
+      MY_ASSIGNMENTS: '/teachers/me/assignments',
       ASSIGNMENTS: (teacherId) => `/teachers/${teacherId}/assignments`,
     },
 
@@ -161,6 +162,7 @@
 
     RESULTS: {
       BASE: '/results',
+      TEACHER: '/results/teacher',
       BY_ID: (id_) => `/results/${id_}`,
       STUDENT: (studentId) => `/results/student/${studentId}`,
       CLASS: (classId) => `/results/class/${classId}`,

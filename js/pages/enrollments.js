@@ -3,16 +3,18 @@
   document.addEventListener('DOMContentLoaded', async () => {
     if (!window.CurrentUser) return;
 
-    let studentOptions = [], classOptions = [], sessionOptions = [];
+    let studentOptions = [], classOptions = [], sessionOptions = [], termOptions = [];
     try {
-      const [{ items: students }, { items: classes }, { items: sessions }] = await Promise.all([
+      const [{ items: students }, { items: classes }, { items: sessions }, { items: terms }] = await Promise.all([
         StudentsService.list({ pageSize: 200 }),
         ClassesService.list({ pageSize: 100 }),
         AcademicSessionsService.list({ pageSize: 50 }),
+        TermsService.list({ pageSize: 100 }),
       ]);
       studentOptions = students.map((s) => ({ value: s.id, label: `${s.firstName || ''} ${s.lastName || ''} (${s.regNumber || 'no reg.'})`.trim() }));
       classOptions = classes.map((c) => ({ value: c.id, label: c.name }));
       sessionOptions = sessions.map((s) => ({ value: s.id, label: s.name }));
+      termOptions = terms.map((t) => ({ value: t.id, label: `${titleCaseFromEnum(t.name || t.type)} - ${t.session?.name || ''}` }));
     } catch (e) { /* non-fatal */ }
 
     const filterSession = document.getElementById('filter-session');
@@ -38,12 +40,13 @@
       formFields: [
         { name: 'studentId', label: 'Student', type: 'select', required: true, options: studentOptions },
         { name: 'classId', label: 'Class', type: 'select', required: true, options: classOptions },
-        { name: 'academicSessionId', label: 'Academic Session', type: 'select', required: true, options: sessionOptions },
+        { name: 'sessionId', label: 'Academic Session', type: 'select', required: true, options: sessionOptions },
+        { name: 'termId', label: 'Term', type: 'select', required: true, options: termOptions },
       ],
       deleteMessage: () => 'Remove this enrollment record?',
-      extraFilters: () => ({ academicSessionId: filterSession ? filterSession.value : '' }),
+      extraFilters: () => ({ sessionId: filterSession ? filterSession.value : '' }),
     });
 
-    if (filterSession) filterSession.addEventListener('change', () => table.setFilters({ academicSessionId: filterSession.value }));
+    if (filterSession) filterSession.addEventListener('change', () => table.setFilters({ sessionId: filterSession.value }));
   });
 })();

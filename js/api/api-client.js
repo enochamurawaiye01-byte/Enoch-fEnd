@@ -182,6 +182,10 @@
     if (payload.data && Array.isArray(payload.data.data)) {
       return { items: payload.data.data, meta: payload.data.meta || payload.data.pagination || payload.meta || null };
     }
+    if (payload.data && typeof payload.data === 'object') {
+      const listValue = Object.values(payload.data).find((value) => Array.isArray(value));
+      if (listValue) return { items: listValue, meta: payload.data.meta || payload.data.pagination || payload.meta || null };
+    }
     if (Array.isArray(payload.results)) return { items: payload.results, meta: payload.meta || payload.pagination || null };
     if (Array.isArray(payload.items)) return { items: payload.items, meta: payload.meta || payload.pagination || null };
     return { items: [], meta: null };

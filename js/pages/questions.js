@@ -32,17 +32,22 @@
       formFields: [
         { name: 'examinationId', label: 'Examination', type: 'select', required: true, options: examOptions },
         { name: 'questionText', label: 'Question Text', type: 'textarea', required: true },
-        { name: 'type', label: 'Question Type', type: 'select', required: true, options: [
-          { value: 'MCQ', label: 'Multiple Choice' },
-          { value: 'TRUE_FALSE', label: 'True / False' },
-          { value: 'ESSAY', label: 'Essay' },
-        ] },
-        { name: 'options', label: 'Options (one per line, MCQ only)', type: 'textarea', help: 'Leave blank for essay or true/false questions.' },
-        { name: 'correctAnswer', label: 'Correct Answer' },
+        { name: 'options', label: 'Options (prefix the correct option with *)', type: 'textarea', help: 'Example: *A. First answer\\nB. Second answer' },
         { name: 'marks', label: 'Marks', type: 'number', required: true },
       ],
       deleteMessage: () => 'Delete this question from the bank?',
       extraFilters: () => ({ examinationId: filterExam ? filterExam.value : '' }),
+      onFormValues: (values) => ({
+        examId: values.examinationId,
+        questionText: values.questionText,
+        marks: Number(values.marks),
+        options: String(values.options || '').split(/\r?\n/).map((line, index) => line.trim()).filter(Boolean).map((line, index) => {
+          const correct = line.startsWith('*');
+          const text = correct ? line.slice(1).trim() : line;
+          const separator = text.indexOf('.');
+          return { optionKey: separator > 0 ? text.slice(0, separator).trim() : String.fromCharCode(65 + index), optionText: separator > 0 ? text.slice(separator + 1).trim() : text, isCorrect: correct };
+        }),
+      }),
     });
 
     if (filterExam) filterExam.addEventListener('change', () => table.setFilters({ examinationId: filterExam.value }));

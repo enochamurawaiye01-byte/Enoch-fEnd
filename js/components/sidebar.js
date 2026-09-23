@@ -144,6 +144,7 @@
           { label: 'Attendance', href: 'attendance.html', icon: 'check-square' },
           { label: 'Assignments', href: 'assignments.html', icon: 'file-text' },
           { label: 'Examinations', href: 'examinations.html', icon: 'file-check' },
+          { label: 'Question Bank', href: 'questions.html', icon: 'help-circle' },
           { label: 'Results', href: 'results.html', icon: 'award' },
         ],
       },

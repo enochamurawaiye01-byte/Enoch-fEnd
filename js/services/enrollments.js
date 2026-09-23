@@ -15,7 +15,7 @@
       return ApiClient.unwrapItem(payload);
     },
     async update(id, data) {
-      const payload = await ApiClient.put(ENROLLMENTS.BY_ID(id), data);
+      const payload = await ApiClient.patch(ENROLLMENTS.BY_ID(id), data);
       return ApiClient.unwrapItem(payload);
     },
     async delete(id) {

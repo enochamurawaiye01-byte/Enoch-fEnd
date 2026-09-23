@@ -30,7 +30,7 @@
       return this.deactivate(id);
     },
     async assignments(id) {
-      const payload = await ApiClient.get(TEACHERS.ASSIGNMENTS(id));
+      const payload = await ApiClient.get(TEACHERS.MY_ASSIGNMENTS);
       return ApiClient.unwrapList(payload);
     },
   };

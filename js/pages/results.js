@@ -20,7 +20,7 @@
 
   document.addEventListener('DOMContentLoaded', async () => {
     if (!window.CurrentUser) return;
-    const canManage = Permissions.canAccessModule(window.CurrentUser.role, 'results');
+    const canManage = ['ADMIN', 'SUPER_ADMIN'].includes(window.CurrentUser.role) && Permissions.canAccessModule(window.CurrentUser.role, 'results');
 
     let studentOptions = [], subjectOptions = [], termOptions = [], classOptions = [];
     try {
@@ -45,7 +45,7 @@
       tbody: document.getElementById('results-tbody'),
       paginationEl: document.getElementById('results-pagination'),
       searchInput: document.getElementById('results-search'),
-      addBtn: document.getElementById('add-result-btn'),
+      addBtn: canManage ? document.getElementById('add-result-btn') : null,
       moduleKey: 'results',
       entityLabel: 'Result',
       service: ResultsService,

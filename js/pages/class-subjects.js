@@ -35,9 +35,9 @@
       formFields: [
         { name: 'classId', label: 'Class', type: 'select', required: true, options: classOptions },
         { name: 'subjectId', label: 'Subject', type: 'select', required: true, options: subjectOptions },
-        { name: 'isCompulsory', label: 'Compulsory Subject', type: 'checkbox', checkboxLabel: 'This subject is compulsory for the class' },
       ],
       deleteMessage: () => 'Remove this subject from the class?',
+      buildRowActions: () => `<div class="row" style="gap:4px;justify-content:flex-end;"><button type="button" class="icon-link" data-action="delete" title="Remove">×</button></div>`,
       extraFilters: () => ({ classId: filterClass ? filterClass.value : '' }),
     });
 

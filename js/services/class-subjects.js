@@ -15,8 +15,7 @@
       return ApiClient.unwrapItem(payload);
     },
     async update(id, data) {
-      const payload = await ApiClient.put(CLASS_SUBJECTS.BY_ID(id), data);
-      return ApiClient.unwrapItem(payload);
+      throw new Error('Class subjects can only be added or removed.');
     },
     async delete(id) {
       return ApiClient.delete(CLASS_SUBJECTS.BY_ID(id));

@@ -45,7 +45,8 @@
       </div>
 
       <div class="rbac-tabs">
-        <button type="button" class="rbac-tab-btn active" data-tab="user-access">User Permissions & Roles</button>
+        <button type="button" class="rbac-tab-btn active" data-tab="user-access">User Permissions & Accounts</button>
+        <button type="button" class="rbac-tab-btn" data-tab="matrix">Role Permission Matrix</button>
         <button type="button" class="rbac-tab-btn" data-tab="roles">Role Definitions</button>
         <button type="button" class="rbac-tab-btn" data-tab="permissions">Permissions Catalog</button>
       </div>
@@ -69,7 +70,38 @@
         </div>
       </div>
 
-      <!-- Tab 2: Role Definitions -->
+      <!-- Tab 2: Permission Matrix -->
+      <div id="tab-matrix" class="tab-pane" style="display: none;">
+        <div style="margin-bottom: 16px;" class="card">
+          <div style="display:flex; justify-value:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h3 style="margin:0 0 4px 0; font-size:16px;">Interactive Role Permission Matrix</h3>
+              <p style="margin:0; font-size:13px; color:var(--text-muted, #94a3b8);">Toggle permissions directly for each role. Changes update real-time access controls.</p>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="refresh-matrix-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              Refresh Matrix
+            </button>
+          </div>
+        </div>
+        <div class="table-wrap" id="matrix-wrap">
+          <div class="table-scroll">
+            <table class="data-table" id="matrix-table">
+              <thead>
+                <tr id="matrix-thead-row">
+                  <th>Module / Permission Key</th>
+                  <!-- Dynamic role headers will be injected here -->
+                </tr>
+              </thead>
+              <tbody id="matrix-tbody">
+                <tr><td colspan="10">Loading Permission Matrix...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Role Definitions -->
       <div id="tab-roles" class="tab-pane" style="display: none;">
         <div style="margin-bottom: 16px; text-align: right;">
           <button type="button" class="btn btn-primary" id="add-role-btn">
@@ -80,7 +112,7 @@
         <div class="permission-grid" id="roles-grid"></div>
       </div>
 
-      <!-- Tab 3: Permissions Catalog -->
+      <!-- Tab 4: Permissions Catalog -->
       <div id="tab-permissions" class="tab-pane" style="display: none;">
         <div style="margin-bottom: 16px; text-align: right;">
           <button type="button" class="btn btn-primary" id="add-permission-btn">

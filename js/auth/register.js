@@ -49,6 +49,15 @@
       submitButton.textContent = data.role === 'TEACHER' ? 'Submitting teacher application...' : 'Submitting student application...';
       try {
         await AuthService.register(data);
+        if (qs('#marketingConsent')?.checked) {
+          ApiClient.post('/klaviyo/subscribe', {
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            phoneNumber: data.phoneNumber,
+            consent: true,
+          }).catch(() => {});
+        }
         form.hidden = true;
         successBox.textContent = 'Application submitted. An administrator must approve your account before you can sign in.';
         successBox.hidden = false;

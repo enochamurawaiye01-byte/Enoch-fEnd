@@ -34,6 +34,15 @@
       submitButton.textContent = 'Submitting application...';
       try {
         await AuthService.register(Object.assign(data, { role: 'PARENT' }));
+        if (document.getElementById('marketingConsent')?.checked) {
+          ApiClient.post('/klaviyo/subscribe', {
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            phoneNumber: data.phoneNumber,
+            consent: true,
+          }).catch(() => {});
+        }
         form.hidden = true;
         successBox.textContent = 'Parent application submitted successfully. An administrator must approve it before you can sign in.';
         successBox.hidden = false;

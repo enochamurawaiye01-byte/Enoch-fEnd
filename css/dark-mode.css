@@ -1,64 +1,130 @@
 /* ==========================================================================
-   DARK MODE — restrained, professional. Deep charcoal surfaces, emerald
-  emerald accent retained. No neon, no gradients.
+   DARK MODE — Premium, User-Friendly Slate & Glassmorphism Theme.
    Activated via <html data-theme="dark">.
    ========================================================================== */
 
 html[data-theme='dark'] {
-  --color-white: #15181B;
-  --app-bg: #0E1012;
-  --surface-bg: #191C1F;
-  --surface-border: #2A2E32;
-  --color-bg-alt: #1F2226;
+  --color-white: #151e32;
+  --app-bg: #0b0f19;
+  --surface-bg: #151e32;
+  --surface-border: #26334d;
+  --color-bg-alt: #1b273f;
 
-  --text-primary: #EDEFF1;
-  --text-secondary: #B7BCC1;
-  --text-muted: #82888E;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
 
-  --color-border-strong: #383D42;
+  --color-border-strong: #334155;
 
-  --color-emerald-50: #10241C;
-  --color-success-bg: #10241C;
-  --color-warning-bg: #2A1F14;
-  --color-danger-bg: #2A1615;
-  --color-info-bg: #101E2E;
+  --color-emerald-50: #064e3b;
+  --color-success-bg: rgba(16, 185, 129, 0.15);
+  --color-warning-bg: rgba(245, 158, 11, 0.15);
+  --color-danger-bg: rgba(239, 68, 68, 0.15);
+  --color-info-bg: rgba(59, 130, 246, 0.15);
 
-  --sidebar-bg: #0B0D0F;
-  --sidebar-text: #A9AEB4;
-  --sidebar-active-bg: var(--color-emerald-700);
+  --sidebar-bg: #090d16;
+  --sidebar-text: #cbd5e1;
+  --sidebar-active-bg: #4338ca;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 2px 10px rgba(0, 0, 0, 0.45);
-  --shadow-pop: 0 10px 28px rgba(0, 0, 0, 0.55);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.6);
+  --shadow-pop: 0 16px 40px rgba(0, 0, 0, 0.7);
 }
 
-html[data-theme='dark'] body { background: var(--app-bg); }
-
-html[data-theme='dark'] .btn-secondary { background: var(--surface-bg); border-color: var(--color-border-strong); color: var(--text-primary); }
-html[data-theme='dark'] .btn-secondary:hover:not(:disabled) { background: var(--color-bg-alt); }
-
-html[data-theme='dark'] input,
-html[data-theme='dark'] select,
-html[data-theme='dark'] textarea {
-  background: var(--surface-bg);
-  border-color: var(--color-border-strong);
+html[data-theme='dark'] body {
+  background: var(--app-bg);
   color: var(--text-primary);
 }
 
-html[data-theme='dark'] .data-table thead th { background: var(--color-bg-alt); }
-html[data-theme='dark'] .data-table tbody tr:hover { background: rgba(16, 185, 129, 0.08); }
+/* Card & Containers */
+html[data-theme='dark'] .card,
+html[data-theme='dark'] .table-wrap,
+html[data-theme='dark'] .auth-card,
+html[data-theme='dark'] .perm-card {
+  background: var(--surface-bg);
+  border-color: var(--surface-border);
+  box-shadow: var(--shadow-md);
+}
 
+/* Buttons */
+html[data-theme='dark'] .btn-secondary {
+  background: var(--color-bg-alt);
+  border-color: var(--color-border-strong);
+  color: var(--text-primary);
+}
+html[data-theme='dark'] .btn-secondary:hover:not(:disabled) {
+  background: #26334d;
+  color: #ffffff;
+}
+
+html[data-theme='dark'] .btn-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  border: none;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+}
+
+/* Form Controls */
+html[data-theme='dark'] input,
+html[data-theme='dark'] select,
+html[data-theme='dark'] textarea {
+  background: var(--color-bg-alt);
+  border-color: var(--surface-border);
+  color: var(--text-primary);
+}
+
+html[data-theme='dark'] input::placeholder,
+html[data-theme='dark'] textarea::placeholder {
+  color: #64748b;
+}
+
+html[data-theme='dark'] input:focus,
+html[data-theme='dark'] select:focus,
+html[data-theme='dark'] textarea:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  background: #1b273f;
+}
+
+/* Tables */
+html[data-theme='dark'] .data-table thead th {
+  background: #0f172a;
+  color: #cbd5e1;
+  border-bottom: 2px solid var(--surface-border);
+}
+html[data-theme='dark'] .data-table td {
+  border-bottom-color: var(--surface-border);
+  color: var(--text-primary);
+}
+html[data-theme='dark'] .data-table tbody tr:hover {
+  background: rgba(99, 102, 241, 0.08);
+}
+
+/* Modals & Dropdowns */
 html[data-theme='dark'] .modal,
-html[data-theme='dark'] .dropdown-panel { background: var(--surface-bg); }
+html[data-theme='dark'] .modal__content,
+html[data-theme='dark'] .dropdown-panel {
+  background: #151e32;
+  border: 1px solid var(--surface-border);
+  color: var(--text-primary);
+}
 
-html[data-theme='dark'] .toast { background: var(--surface-bg); }
+/* Badges */
+html[data-theme='dark'] .badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+html[data-theme='dark'] .badge-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
+html[data-theme='dark'] .badge-warning { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+html[data-theme='dark'] .badge-primary { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid rgba(165, 180, 252, 0.3); }
+html[data-theme='dark'] .badge-outline { border-color: var(--surface-border); color: var(--text-secondary); }
 
+/* Toast & Alerts */
+html[data-theme='dark'] .toast { background: #1e293b; border: 1px solid var(--surface-border); color: #f8fafc; }
+html[data-theme='dark'] .alert-error { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #fca5a5; }
+html[data-theme='dark'] .alert-success { background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); color: #6ee7b7; }
+
+/* Skeletons & Loaders */
 html[data-theme='dark'] .skeleton {
-  background: linear-gradient(90deg, var(--color-bg-alt) 25%, #262A2E 37%, var(--color-bg-alt) 63%);
+  background: linear-gradient(90deg, #1b273f 25%, #26334d 37%, #1b273f 63%);
   background-size: 400% 100%;
 }
 
-html[data-theme='dark'] .full-screen-loader { background: rgba(14, 16, 18, 0.9); }
+html[data-theme='dark'] .full-screen-loader { background: rgba(11, 15, 25, 0.9); }
 
-/* Login/auth screens keep the brand card readable in dark mode. */
-html[data-theme='dark'] .auth-card { background: var(--surface-bg); border-color: var(--surface-border); }

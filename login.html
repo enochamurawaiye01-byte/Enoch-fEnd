@@ -15,6 +15,9 @@
 <body>
 
 <main class="auth-screen">
+  <button type="button" class="auth-theme-toggle" id="auth-theme-toggle">
+    <span id="theme-toggle-label">Dark Mode</span>
+  </button>
   <section class="auth-brand-panel">
     <div class="auth-brand-mark">EIC</div>
     <div class="auth-brand-copy">
@@ -33,7 +36,6 @@
     <div class="auth-card">
       <div class="auth-school-intro"><strong>Welcome to Enoch International College</strong><span>Sign in to continue to your learning, teaching or administration workspace.</span></div>
       <div class="auth-card-head">
-        <div class="auth-mobile-mark">EIC</div>
         <h1>Welcome back</h1>
         <p>Sign in to access your ERP workspace.</p>
       </div>
@@ -43,21 +45,21 @@
       <form id="login-form" class="auth-form" novalidate>
         <div class="form-group">
           <label for="email" class="form-label">Email address</label>
-          <input type="email" id="email" name="email" autocomplete="email" placeholder="you@enochcollege.edu.ng" />
+          <input type="email" id="email" name="email" autocomplete="email" placeholder="you@enochcollege.edu.ng" required />
           <span class="form-error" id="error-email"></span>
         </div>
 
         <div class="form-group">
           <label for="password" class="form-label">Password</label>
           <div class="input-group">
-            <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Enter your password" />
+            <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Enter your password" required />
             <button type="button" class="input-group__action" id="toggle-password" aria-label="Show password">Show</button>
           </div>
           <span class="form-error" id="error-password"></span>
         </div>
 
         <div class="auth-form-foot">
-          <label class="checkbox-field">
+          <label class="checkbox-field" style="display:flex; align-items:center; gap:6px; cursor:pointer;">
             <input type="checkbox" id="remember-me" />
             <span>Keep me signed in</span>
           </label>
@@ -66,13 +68,33 @@
 
         <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-submit">Sign In</button>
       </form>
-      <p class="auth-form-foot"><span>New student?</span><a href="register.html">Create an account</a></p>
-      <p class="auth-form-foot"><span>Parent or guardian?</span><a href="parent-register.html">Register as a parent</a></p>
+      <div class="auth-form-foot" style="margin-top:20px;"><span>New student or teacher?</span><a href="register.html">Apply for access</a></div>
+      <div class="auth-form-foot"><span>Parent or guardian?</span><a href="parent-register.html">Register as parent</a></div>
     </div>
   </section>
 </main>
 
-<script>document.getElementById('year-brand').textContent = new Date().getFullYear();</script>
+<script>
+  document.getElementById('year-brand').textContent = new Date().getFullYear();
+</script>
+<script src="js/utils/storage.js"></script>
+<script>
+  (function () {
+    const currentTheme = Storage.getTheme();
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    const themeBtn = document.getElementById('auth-theme-toggle');
+    const themeLabel = document.getElementById('theme-toggle-label');
+    if (themeBtn && themeLabel) {
+      themeLabel.textContent = currentTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+      themeBtn.addEventListener('click', () => {
+        const nextTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nextTheme);
+        Storage.setTheme(nextTheme);
+        themeLabel.textContent = nextTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+      });
+    }
+  })();
+</script>
 
 <script src="js/config/api.js?v=20260919"></script>
 <script src="js/config/endpoints.js?v=20260919"></script>

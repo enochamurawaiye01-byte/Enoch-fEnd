@@ -296,6 +296,27 @@
       OPERATIONAL: '/reports/operational',
     },
 
+    ROLES: {
+      BASE: '/roles',
+      BY_ID: (id_) => `/roles/${id_}`,
+      ASSIGN: '/roles/assign',
+      REVOKE: '/roles/revoke',
+      CHANGE_USER_ROLE: (userId) => `/roles/users/${userId}`,
+    },
+
+    PERMISSIONS: {
+      BASE: '/permissions',
+      BY_ID: (id_) => `/permissions/${id_}`,
+      ASSIGN: '/permissions/assign',
+      REVOKE: '/permissions/revoke',
+    },
+
+    ADMISSIONS: {
+      BASE: '/admissions',
+      BY_ID: (id_) => `/admissions/${id_}`,
+      CONVERT: (id_) => `/admissions/${id_}/convert`,
+    },
+
     AUDIT_LOGS: {
       BASE: '/audit-logs',
       BY_ID: (id_) => `/audit-logs/${id_}`,
@@ -316,3 +337,4 @@
     },
   };
 })(window);
+

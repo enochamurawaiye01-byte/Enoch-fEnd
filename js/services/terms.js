@@ -18,10 +18,14 @@
         const payload = await ApiClient.get(TERMS.BY_SESSION(sessionId));
         return ApiClient.unwrapList(payload);
       }
-      const sessions = await AcademicSessionsService.list({ pageSize: 100 });
-      const lists = await Promise.all(sessions.items.map((session) => ApiClient.get(TERMS.BY_SESSION(session.id))));
-      return { items: lists.flatMap((payload) => ApiClient.unwrapList(payload).items), meta: null };
+      const sessionsRes = await AcademicSessionsService.list({ pageSize: 100 }).catch(() => ({ items: [] }));
+      const sessionsList = Array.isArray(sessionsRes) ? sessionsRes : (sessionsRes.items || []);
+      if (!sessionsList.length) return { items: [], meta: null };
+      const lists = await Promise.all(sessionsList.map((session) => ApiClient.get(TERMS.BY_SESSION(session.id)).catch(() => ({ items: [] }))));
+      const items = lists.flatMap((payload) => ApiClient.unwrapList(payload).items || []);
+      return { items, meta: null };
     },
+
     async get(id) {
       const payload = await ApiClient.get(TERMS.BY_ID(id));
       return ApiClient.unwrapItem(payload);

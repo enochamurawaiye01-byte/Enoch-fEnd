@@ -5,17 +5,23 @@
 
     let classOptions = [], subjectOptions = [], termOptions = [], sessionOptions = [];
     try {
-      const [{ items: classes }, { items: subjects }, { items: terms }, { items: sessions }] = await Promise.all([
+      const [classesRes, subjectsRes, termsRes, sessionsRes] = await Promise.all([
         ClassesService.list({ pageSize: 100 }),
         SubjectsService.list({ pageSize: 200 }),
         TermsService.list({ pageSize: 50 }),
         AcademicSessionsService.list({ pageSize: 50 }),
       ]);
+      const classes = Array.isArray(classesRes) ? classesRes : (classesRes.items || []);
+      const subjects = Array.isArray(subjectsRes) ? subjectsRes : (subjectsRes.items || []);
+      const terms = Array.isArray(termsRes) ? termsRes : (termsRes.items || []);
+      const sessions = Array.isArray(sessionsRes) ? sessionsRes : (sessionsRes.items || []);
+
       classOptions = classes.map((c) => ({ value: c.id, label: c.name }));
       subjectOptions = subjects.map((s) => ({ value: s.id, label: s.name }));
-      termOptions = terms.map((t) => ({ value: t.id, label: `${titleCaseFromEnum(t.name)} — ${t.academicSessionName || t.academicSession?.name || ''}`.trim() }));
+      termOptions = terms.map((t) => ({ value: t.id, label: `${titleCaseFromEnum(t.name || t.type)} — ${t.session?.name || t.academicSessionName || ''}`.trim() }));
       sessionOptions = sessions.map((s) => ({ value: s.id, label: s.name }));
     } catch (e) { /* non-fatal */ }
+
 
     const filterClass = document.getElementById('filter-class');
     if (filterClass) {

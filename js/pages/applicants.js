@@ -4,37 +4,92 @@
   document.addEventListener('DOMContentLoaded', () => {
     if (!window.CurrentUser) return;
     let table;
+    let cachedRowsMap = new Map();
     const canManage = ['ADMIN', 'SUPER_ADMIN'].includes(window.CurrentUser.role);
+    const statusFilterEl = document.getElementById('applicants-status-filter');
 
     table = DataTable.create({
       tbody: document.getElementById('applicants-tbody'),
       paginationEl: document.getElementById('applicants-pagination'),
-      pageSize: 20,
+      pageSize: 25,
       columns: [
-        { key: 'fullName', label: 'Applicant', render: (row) => `<strong>${escapeHtml(row.fullName || `${row.firstName || ''} ${row.lastName || ''}` || 'Unnamed applicant')}</strong>` },
-        { key: 'role', label: 'Type / Role', render: (row) => `<span class="badge badge-outline">${escapeHtml(titleCaseFromEnum(row.role || row.desiredClass?.name || 'ADMISSION'))}</span>` },
-        { key: 'email', label: 'Email', render: (row) => escapeHtml(row.email || '-') },
-        { key: 'phoneNumber', label: 'Phone', render: (row) => escapeHtml(row.phoneNumber || '-') },
+        {
+          key: 'fullName',
+          label: 'Applicant Name',
+          render: (row) => `<a href="javascript:void(0)" class="view-user-details" data-id="${row.id}" style="color: #1b2a4a; font-weight: bold; text-decoration: underline;">${escapeHtml(row.fullName || `${row.firstName || ''} ${row.lastName || ''}` || 'Unnamed Applicant')}</a>`
+        },
+        {
+          key: 'role',
+          label: 'Role / Class',
+          render: (row) => `<span class="badge badge-outline" style="border-color:#1b2a4a; color:#1b2a4a;">${escapeHtml(titleCaseFromEnum(row.role || row.currentClass || row.desiredClass?.name || 'STUDENT'))}</span>`
+        },
+        { key: 'email', label: 'Email Address', render: (row) => escapeHtml(row.email || '-') },
+        { key: 'phoneNumber', label: 'Phone Number', render: (row) => escapeHtml(row.phoneNumber || row.parentPhone || '-') },
         { key: 'createdAt', label: 'Applied Date', render: (row) => formatDateTime(row.createdAt) },
-        { key: 'status', label: 'Status', render: (row) => `<span class="badge badge-warning">${escapeHtml(titleCaseFromEnum(row.status || 'INACTIVE'))}</span>` },
+        {
+          key: 'status',
+          label: 'Status',
+          render: (row) => {
+            const st = (row.status || 'INACTIVE').toUpperCase();
+            if (['ACTIVE', 'APPROVED', 'CONVERTED'].includes(st)) {
+              return `<span class="badge badge-success" style="background:#10b981; color:#fff;">Approved</span>`;
+            } else if (['REJECTED', 'DEACTIVATED', 'SUSPENDED'].includes(st)) {
+              return `<span class="badge badge-danger" style="background:#ef4444; color:#fff;">Rejected</span>`;
+            }
+            return `<span class="badge badge-warning" style="background:#f59e0b; color:#fff;">Pending Review</span>`;
+          }
+        },
       ],
-      rowActions: (row) => canManage ? `<button type="button" class="btn btn-primary btn-sm" data-action="approve" data-source="${row.source || 'user'}">Approve</button> <button type="button" class="btn btn-danger btn-sm" data-action="reject" data-source="${row.source || 'user'}">Reject</button>` : '',
+      rowActions: (row) => {
+        const st = (row.status || 'INACTIVE').toUpperCase();
+        if (['ACTIVE', 'APPROVED', 'CONVERTED'].includes(st)) {
+          return `<span class="text-success font-weight-bold" style="color:#10b981; font-weight:bold;"><i class="fas fa-check-circle"></i> Approved</span>`;
+        } else if (['REJECTED', 'DEACTIVATED', 'SUSPENDED'].includes(st)) {
+          return `<span class="text-danger font-weight-bold" style="color:#ef4444; font-weight:bold;"><i class="fas fa-times-circle"></i> Rejected</span>`;
+        }
+
+        if (!canManage) return '';
+        return `
+          <button type="button" class="btn btn-primary btn-sm" data-action="approve" data-source="${row.source || 'user'}" style="background-color:#10b981; border-color:#10b981;">Approve</button>
+          <button type="button" class="btn btn-danger btn-sm" data-action="reject" data-source="${row.source || 'user'}" style="background-color:#ef4444; border-color:#ef4444;">Reject</button>
+        `;
+      },
       fetchPage: async (page, filters) => {
         try {
+          const selectedStatus = statusFilterEl ? statusFilterEl.value : 'PENDING';
           const [usersRes, admissionsRes] = await Promise.all([
-            UsersService.list({ page, pageSize: 20, status: 'INACTIVE', search: filters.search || '' }),
-            window.AdmissionsService ? AdmissionsService.list({ status: 'APPLIED' }).catch(() => ({ items: [] })) : Promise.resolve({ items: [] }),
+            UsersService.list({ page: 1, pageSize: 100, search: filters.search || '' }).catch(() => ({ items: [] })),
+            window.AdmissionsService ? AdmissionsService.list({ search: filters.search || '' }).catch(() => ({ items: [] })) : Promise.resolve({ items: [] }),
           ]);
 
-          const userItems = (usersRes.items || []).map((u) => ({ ...u, source: 'user' }));
+          const userItems = (usersRes.items || []).map((u) => ({
+            ...u,
+            source: 'user',
+            status: u.status === 'INACTIVE' ? 'PENDING' : u.status
+          }));
+
           const admissionItems = (Array.isArray(admissionsRes) ? admissionsRes : admissionsRes.items || []).map((a) => ({
             ...a,
             fullName: `${a.firstName || ''} ${a.lastName || ''}`.trim(),
             role: 'ADMISSION_APP',
             source: 'admission',
+            status: a.status === 'APPLIED' || a.status === 'UNDER_REVIEW' ? 'PENDING' : a.status
           }));
 
-          const combined = [...userItems, ...admissionItems];
+          let combined = [...userItems, ...admissionItems];
+          cachedRowsMap.clear();
+          combined.forEach((item) => cachedRowsMap.set(String(item.id), item));
+
+          if (selectedStatus && selectedStatus !== 'ALL') {
+            combined = combined.filter((item) => {
+              const st = (item.status || 'PENDING').toUpperCase();
+              if (selectedStatus === 'PENDING') return ['PENDING', 'INACTIVE', 'APPLIED', 'UNDER_REVIEW'].includes(st);
+              if (selectedStatus === 'APPROVED') return ['APPROVED', 'ACTIVE', 'CONVERTED'].includes(st);
+              if (selectedStatus === 'REJECTED') return ['REJECTED', 'DEACTIVATED', 'SUSPENDED'].includes(st);
+              return true;
+            });
+          }
+
           return {
             items: combined,
             total: combined.length,
@@ -45,54 +100,78 @@
           return { items: [], total: 0 };
         }
       },
-      emptyMessage: 'There are currently no pending applications for review.',
+      emptyMessage: 'No applications found matching the selected filter criteria.',
     });
 
     table.load();
+
     const search = document.getElementById('applicants-search');
     if (search) {
       search.addEventListener('input', debounce(() => table.setFilters({ search: search.value.trim() }), 350));
     }
 
-    document.getElementById('applicants-tbody').addEventListener('click', (event) => {
+    if (statusFilterEl) {
+      statusFilterEl.addEventListener('change', () => table.reload());
+    }
+
+    const tbody = document.getElementById('applicants-tbody');
+
+    // Click handler for opening Full User Profile Modal
+    tbody.addEventListener('click', (event) => {
+      const nameLink = event.target.closest('.view-user-details');
+      if (nameLink) {
+        event.preventDefault();
+        const rowId = nameLink.dataset.id;
+        const rowData = cachedRowsMap.get(rowId);
+        if (rowData && window.UserDetailsModal) {
+          window.UserDetailsModal.open(rowData);
+        }
+        return;
+      }
+
+      // Action button handler
       const button = event.target.closest('[data-action]');
       const row = event.target.closest('tr[data-row-id]');
       if (!button || !row) return;
+
+      const rowId = row.dataset.rowId;
       const action = button.dataset.action;
       const source = button.dataset.source;
       const isApprove = action === 'approve';
+      const rowData = cachedRowsMap.get(rowId);
+      const targetName = rowData ? (rowData.fullName || `${rowData.firstName || ''} ${rowData.lastName || ''}`) : 'applicant';
 
       ConfirmDialog.open({
-        title: isApprove ? 'Approve Application' : 'Reject Application',
+        title: isApprove ? `Approve ${targetName}` : `Reject ${targetName}`,
         message: isApprove
-          ? 'Approving this application provisions an active account and generates the official registration number.'
-          : 'Rejecting this application will deny access to the applicant.',
-        confirmLabel: isApprove ? 'Approve Application' : 'Reject Application',
+          ? `Approving will activate ${targetName}'s account, generate their official registration number, and dispatch an official acceptance letter to their email.`
+          : `Rejecting will deny access to ${targetName} and send a polite notice of rejection to their email.`,
+        confirmLabel: isApprove ? 'Confirm Approval' : 'Confirm Rejection',
         tone: isApprove ? 'primary' : 'danger',
         onConfirm: async () => {
           try {
             if (source === 'admission') {
               if (isApprove) {
-                await AdmissionsService.update(row.dataset.rowId, { status: 'APPROVED' });
-                const converted = await AdmissionsService.convertToStudent(row.dataset.rowId);
-                Toast.success(`Admission approved! Student created with Reg No: ${converted.registrationNumber || 'N/A'}`);
+                await AdmissionsService.update(rowId, { status: 'APPROVED' });
+                const converted = await AdmissionsService.convertToStudent(rowId);
+                Toast.success(`Admission approved! Official Reg No: ${converted.registrationNumber || 'N/A'}. Approval email dispatched.`);
               } else {
-                await AdmissionsService.update(row.dataset.rowId, { status: 'REJECTED' });
-                Toast.success('Admission application rejected.');
+                await AdmissionsService.update(rowId, { status: 'REJECTED' });
+                Toast.success(`Admission application rejected. Rejection email dispatched.`);
               }
             } else {
               if (isApprove) {
-                const result = await UsersService.activate(row.dataset.rowId);
+                const result = await UsersService.activate(rowId);
                 const regNo = result.communication?.registrationNumber || result.registrationNumber || '';
-                Toast.success(`Application approved! ${regNo ? `Registration Number: ${regNo}` : 'Account activated.'}`);
+                Toast.success(`Application approved! ${regNo ? `Registration Number: ${regNo}.` : ''} Approval email dispatched.`);
               } else {
-                await UsersService.reject(row.dataset.rowId);
-                Toast.success('Application rejected.');
+                await UsersService.reject(rowId);
+                Toast.success(`Application rejected. Rejection email dispatched.`);
               }
             }
             table.reload();
           } catch (error) {
-            Toast.error(error.message || 'Unable to process this application action.');
+            Toast.error(error.message || 'Unable to update application status.');
           }
         },
       });

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sign In — Enoch International College ERP</title>
+<title>Sign In — Mercy T College Nursery and Primary School</title>
 <link rel="stylesheet" href="css/style.css" />
 <link rel="stylesheet" href="css/responsive.css" />
 <link rel="stylesheet" href="css/dark-mode.css" />
@@ -19,33 +19,37 @@
     <span id="theme-toggle-label">Dark Mode</span>
   </button>
   <section class="auth-brand-panel">
-    <div class="auth-brand-mark">EIC</div>
+    <div class="auth-brand-mark">MTC</div>
     <div class="auth-brand-copy">
-      <h2>Enoch International College</h2>
-      <p>Enterprise Resource Planning system for academic, financial and administrative management.</p>
+      <h2>Mercy T College</h2>
+      <p style="color:#c53030; font-weight:bold; margin-top:-6px;">NURSERY AND PRIMARY SCHOOL</p>
+      <p>School Management System for Nursery, Primary and Academic Administration.</p>
       <div class="auth-brand-highlights">
-        <div class="auth-brand-highlight">One connected place for students, teachers and administrators.</div>
-        <div class="auth-brand-highlight">Live classes, attendance, results and school operations.</div>
-        <div class="auth-brand-highlight">Secure access to the workspace built for your role.</div>
+        <div class="auth-brand-highlight">Nurturing Leaders with Character, Discipline & Excellence.</div>
+        <div class="auth-brand-highlight">Live class management, attendance, and instant report cards.</div>
+        <div class="auth-brand-highlight">Secure access for Teachers, Parents, Students and Admins.</div>
       </div>
     </div>
-    <div class="auth-brand-foot">&copy; <span id="year-brand"></span> Enoch International College. All rights reserved.</div>
+    <div class="auth-brand-foot">&copy; <span id="year-brand"></span> Mercy T College Nursery and Primary School. All rights reserved.</div>
   </section>
 
   <section class="auth-form-panel">
     <div class="auth-card">
-      <div class="auth-school-intro"><strong>Welcome to Enoch International College</strong><span>Sign in to continue to your learning, teaching or administration workspace.</span></div>
+      <div class="auth-school-intro">
+        <strong>Welcome to Mercy T College</strong>
+        <span>Sign in to access your teaching, student or administration workspace.</span>
+      </div>
       <div class="auth-card-head">
-        <h1>Welcome back</h1>
-        <p>Sign in to access your ERP workspace.</p>
+        <h1>Welcome Back</h1>
+        <p>Sign in with your registered email address and password.</p>
       </div>
 
       <div class="alert alert-error auth-alert" id="login-error" role="alert" hidden></div>
 
       <form id="login-form" class="auth-form" novalidate>
         <div class="form-group">
-          <label for="email" class="form-label">Email address</label>
-          <input type="email" id="email" name="email" autocomplete="email" placeholder="you@enochcollege.edu.ng" required />
+          <label for="email" class="form-label">Email Address</label>
+          <input type="email" id="email" name="email" autocomplete="email" placeholder="e.g. user@mercytcollege.edu.ng" required />
           <span class="form-error" id="error-email"></span>
         </div>
 
@@ -63,13 +67,13 @@
             <input type="checkbox" id="remember-me" />
             <span>Keep me signed in</span>
           </label>
-          <a href="forgot-password.html">Forgot password?</a>
+          <a href="forgot-password.html" style="color:#c53030;">Forgot password?</a>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-submit">Sign In</button>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-submit" style="background-color:#1b2a4a; border-color:#1b2a4a;">Sign In</button>
       </form>
-      <div class="auth-form-foot" style="margin-top:20px;"><span>New student or teacher?</span><a href="register.html">Apply for access</a></div>
-      <div class="auth-form-foot"><span>Parent or guardian?</span><a href="parent-register.html">Register as parent</a></div>
+      <div class="auth-form-foot" style="margin-top:20px;"><span>New student or teacher?</span><a href="register.html" style="color:#c53030; font-weight:bold;">Apply for access</a></div>
+      <div class="auth-form-foot"><span>Parent or guardian?</span><a href="parent-register.html" style="color:#1b2a4a; font-weight:bold;">Register as parent</a></div>
     </div>
   </section>
 </main>

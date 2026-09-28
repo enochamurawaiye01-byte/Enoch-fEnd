@@ -16,15 +16,14 @@ html[data-theme='dark'] {
 
   --color-border-strong: #334155;
 
-  --color-emerald-50: #064e3b;
   --color-success-bg: rgba(16, 185, 129, 0.15);
   --color-warning-bg: rgba(245, 158, 11, 0.15);
-  --color-danger-bg: rgba(239, 68, 68, 0.15);
-  --color-info-bg: rgba(59, 130, 246, 0.15);
+  --color-danger-bg: rgba(197, 48, 48, 0.2);
+  --color-info-bg: rgba(27, 42, 74, 0.4);
 
   --sidebar-bg: #090d16;
   --sidebar-text: #cbd5e1;
-  --sidebar-active-bg: #4338ca;
+  --sidebar-active-bg: #c53030;
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.6);

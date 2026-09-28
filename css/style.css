@@ -1,52 +1,50 @@
 /* ==========================================================================
-   ENOCH INTERNATIONAL COLLEGE — CORE STYLESHEET
-  Design language: institutional, flat, emerald + white + near-black
-   No gradients. No glassmorphism. No neon.
+   MERCY T COLLEGE NURSERY AND PRIMARY SCHOOL — CORE STYLESHEET
+   Design language: smooth, minimalist, navy + cream + white + crimson
+   No flashy AI gradients. Crisp typography and professional layout.
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,500&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 :root {
   /* ---- Brand palette ---- */
-  --color-emerald-900: #064E3B;
-  --color-emerald-800: #065F46;
-  --color-emerald-700: #047857;
-  --color-emerald-600: #059669;
-  --color-emerald-500: #10B981;
-  --color-emerald-50:  #ECFDF5;
+  --color-brand-navy: #1B2A4A;
+  --color-brand-navy-dark: #0F172A;
+  --color-brand-red:  #C53030;
+  --color-brand-cream:#FDFBF7;
+  --color-brand-cream-dark: #F5F2EB;
 
-
-  --color-ink:      #111111;
-  --color-ink-soft: #374151;
-  --color-ink-mute: #6B7280;
+  --color-ink:      #1E293B;
+  --color-ink-soft: #475569;
+  --color-ink-mute: #64748B;
 
   --color-white:    #FFFFFF;
-  --color-bg:       #F8FAFC;
-  --color-bg-alt:   #F3F4F6;
+  --color-bg:       #FDFBF7;
+  --color-bg-alt:   #F8F6F0;
   --color-surface:  #FFFFFF;
-  --color-border:   #E4E7EB;
-  --color-border-strong: #D1D5DB;
+  --color-border:   #E2E8F0;
+  --color-border-strong: #CBD5E1;
 
-  --color-success: #047857;
+  --color-success: #10B981;
   --color-success-bg: #ECFDF5;
-  --color-warning: #8A6500;
-  --color-warning-bg: #FFF8D6;
-  --color-danger:  #B42318;
-  --color-danger-bg: #FEF3F2;
-  --color-info:    #1D4ED8;
-  --color-info-bg: #EFF4FF;
+  --color-warning: #D97706;
+  --color-warning-bg: #FFFBEB;
+  --color-danger:  #C53030;
+  --color-danger-bg: #FEF2F2;
+  --color-info:    #1B2A4A;
+  --color-info-bg: #F0F4F8;
 
-  /* ---- Semantic tokens (theme-able) ---- */
+  /* ---- Semantic tokens ---- */
   --app-bg: var(--color-bg);
   --surface-bg: var(--color-surface);
   --surface-border: var(--color-border);
   --text-primary: var(--color-ink);
   --text-secondary: var(--color-ink-soft);
   --text-muted: var(--color-ink-mute);
-  --sidebar-bg: var(--color-ink);
-  --sidebar-text: #D6D9DD;
+  --sidebar-bg: var(--color-brand-navy);
+  --sidebar-text: #CBD5E1;
   --sidebar-text-active: var(--color-white);
-  --sidebar-active-bg: var(--color-emerald-800);
+  --sidebar-active-bg: var(--color-brand-red);
 
   /* ---- Typography ---- */
   --font-display: 'Newsreader', Georgia, 'Times New Roman', serif;

@@ -1,29 +1,71 @@
 (function () {
   'use strict';
+
   document.addEventListener('DOMContentLoaded', () => {
     if (!window.CurrentUser) return;
 
     const table = DataTable.create({
       tbody: document.getElementById('audit-logs-tbody'),
       paginationEl: document.getElementById('audit-logs-pagination'),
+      pageSize: 20,
       columns: [
-        { key: 'userName', label: 'User', render: (r) => escapeHtml(r.user?.fullName || 'System') },
-        { key: 'action', label: 'Action', render: (r) => `<span class="badge badge-outline">${escapeHtml(titleCaseFromEnum(r.action))}</span>` },
-        { key: 'module', label: 'Module', render: (r) => escapeHtml(titleCaseFromEnum(r.entity || '')) },
-        { key: 'details', label: 'Details', render: (r) => escapeHtml((r.description || '—').toString().slice(0, 80)) },
-        { key: 'createdAt', label: 'Timestamp', render: (r) => formatDateTime(r.createdAt) },
+        {
+          key: 'user',
+          label: 'Performed By',
+          render: (row) => `<strong>${escapeHtml(row.user?.fullName || row.user?.email || 'System / Auto')}</strong>`
+        },
+        {
+          key: 'role',
+          label: 'Role',
+          render: (row) => `<span class="badge badge-outline" style="border-color:#1b2a4a; color:#1b2a4a;">${escapeHtml(titleCaseFromEnum(row.user?.role || 'SYSTEM'))}</span>`
+        },
+        {
+          key: 'action',
+          label: 'Action',
+          render: (row) => {
+            const act = (row.action || '').toUpperCase();
+            const tone = act.includes('APPROVE') ? 'success' : act.includes('REJECT') ? 'danger' : act.includes('DELETE') ? 'danger' : 'info';
+            return `<span class="badge badge-${tone}">${escapeHtml(row.action || 'ACTION')}</span>`;
+          }
+        },
+        {
+          key: 'entity',
+          label: 'Entity / Module',
+          render: (row) => `<span style="font-weight:600; color:#1b2a4a;">${escapeHtml(row.entity || '-')}</span>`
+        },
+        {
+          key: 'description',
+          label: 'Description',
+          render: (row) => escapeHtml(row.description || '-')
+        },
+        {
+          key: 'createdAt',
+          label: 'Timestamp',
+          render: (row) => `<span style="color:#64748b; font-size:13px;">${formatDateTime(row.createdAt)}</span>`
+        },
       ],
-      fetchPage: (page, filters) => AuditLogsService.list({ page, pageSize: 25, ...filters }),
-      emptyMessage: 'No audit log entries found.',
+      fetchPage: async (page, filters) => {
+        try {
+          const res = await ApiClient.get(`/audit-logs?page=${page}&pageSize=20${filters.search ? `&search=${encodeURIComponent(filters.search)}` : ''}`);
+          const data = res.data || res;
+          return {
+            items: data.data || data.items || [],
+            total: data.pagination?.total || (data.data || []).length,
+            page: data.pagination?.page || page,
+            pageSize: data.pagination?.pageSize || 20,
+          };
+        } catch (err) {
+          return { items: [], total: 0 };
+        }
+      },
+      emptyMessage: 'No audit log entries recorded yet.',
     });
+
     table.load();
 
-    const searchInput = document.getElementById('audit-search');
-    const filterModule = document.getElementById('filter-module');
-    const applyFilters = debounce(() => {
-      table.setFilters({ search: searchInput.value.trim(), module: filterModule.value });
-    }, 350);
-    searchInput.addEventListener('input', applyFilters);
-    filterModule.addEventListener('change', applyFilters);
+    const search = document.getElementById('audit-logs-search');
+    if (search) {
+      search.addEventListener('input', debounce(() => table.setFilters({ search: search.value.trim() }), 350));
+    }
   });
 })();

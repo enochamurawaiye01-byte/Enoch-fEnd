@@ -1,11 +1,7 @@
 /**
  * Sidebar component — builds role-aware navigation and handles
  * collapse/expand + active-link highlighting + mobile toggle.
- * Matches css/components/sidebar.css (.sidebar, .sidebar__*, .active,
- * .app-shell.sidebar-collapsed, .app-shell.mobile-nav-open, .sidebar-overlay).
- *
- * Expects <div id="app-sidebar"></div> placeholder in the page shell,
- * which this module replaces with the full <aside class="sidebar">.
+ * Rebranded for Mercy T College Nursery and Primary School.
  */
 (function (global) {
   'use strict';
@@ -14,16 +10,15 @@
     admin: [
       { group: 'Overview', items: [{ label: 'Dashboard', href: 'dashboard.html', icon: 'grid' }] },
       {
-        group: 'People',
+        group: 'People Management',
         items: [
           { label: 'Users', href: 'users.html', icon: 'user-cog' },
           { label: 'Access Control', href: 'access-control.html', icon: 'shield' },
           { label: 'Applicants', href: 'applicants.html', icon: 'user-plus' },
           { label: 'Students', href: 'students.html', icon: 'graduation' },
           { label: 'Parents', href: 'parents.html', icon: 'users' },
-          { label: 'Teachers', href: 'teachers.html', icon: 'chalkboard' },
+          { label: 'Teachers / Staff', href: 'teachers.html', icon: 'chalkboard' },
         ],
-
       },
       {
         group: 'Academics',
@@ -40,7 +35,7 @@
         ],
       },
       {
-        group: 'Teaching & Learning',
+        group: 'Teaching & Attendance',
         items: [
           { label: 'Attendance', href: 'attendance.html', icon: 'check-square' },
           { label: 'Timetable', href: 'timetable.html', icon: 'clock' },
@@ -59,9 +54,9 @@
         ],
       },
       {
-        group: 'Finance',
+        group: 'Finance & Fees',
         items: [
-          { label: 'Fees', href: 'fees.html', icon: 'tag' },
+          { label: 'Fees Structure', href: 'fees.html', icon: 'tag' },
           { label: 'Fee Accounts', href: 'fee-accounts.html', icon: 'wallet' },
           { label: 'Invoices', href: 'invoices.html', icon: 'file-invoice' },
           { label: 'Payments', href: 'payments.html', icon: 'credit-card' },
@@ -70,7 +65,7 @@
         ],
       },
       {
-        group: 'Facilities',
+        group: 'School Facilities',
         items: [
           { label: 'Library', href: 'library.html', icon: 'library' },
           { label: 'Inventory', href: 'inventory.html', icon: 'box' },
@@ -93,7 +88,7 @@
         ],
       },
       {
-        group: 'System',
+        group: 'System & Audit',
         items: [
           { label: 'Reports', href: 'reports.html', icon: 'trending-up' },
           { label: 'Audit Logs', href: 'audit-logs.html', icon: 'shield' },
@@ -117,6 +112,7 @@
           { label: 'Results', href: 'results.html', icon: 'award' },
           { label: 'Finance', href: 'finance.html', icon: 'bar-chart' },
           { label: 'Reports', href: 'reports.html', icon: 'trending-up' },
+          { label: 'Audit Logs', href: 'audit-logs.html', icon: 'shield' },
         ],
       },
       {
@@ -141,7 +137,7 @@
         ],
       },
       {
-        group: 'Assessment',
+        group: 'Assessment & Grading',
         items: [
           { label: 'Attendance', href: 'attendance.html', icon: 'check-square' },
           { label: 'Assignments', href: 'assignments.html', icon: 'file-text' },
@@ -166,7 +162,7 @@
         ],
       },
       {
-        group: 'More',
+        group: 'School Life',
         items: [
           { label: 'Fees', href: 'fees.html', icon: 'wallet' },
           { label: 'Library', href: 'library.html', icon: 'library' },
@@ -266,7 +262,37 @@
   function render(containerId, workspace, roleLabel) {
     const placeholder = document.getElementById(containerId);
     if (!placeholder) return;
-    const groups = NAV[workspace] || NAV.student;
+    
+    let groups = NAV[workspace] || NAV.student;
+
+    // Dynamic Module Access Override for Teachers / Staff
+    if (workspace === 'teacher' && window.CurrentUser) {
+      const grantedModules = window.CurrentUser.grantedModules || [];
+      if (Array.isArray(grantedModules) && grantedModules.length > 0) {
+        const adminGroups = NAV.admin;
+        const extraItems = [];
+        
+        adminGroups.forEach(g => {
+          g.items.forEach(item => {
+            const moduleKey = item.label.toLowerCase().replace(/\s+/g, '_');
+            if (grantedModules.includes(moduleKey) || grantedModules.includes(item.label.toLowerCase())) {
+              if (!extraItems.some(ex => ex.href === item.href)) {
+                extraItems.push(item);
+              }
+            }
+          });
+        });
+
+        if (extraItems.length > 0) {
+          groups = JSON.parse(JSON.stringify(groups));
+          groups.push({
+            group: 'Granted Admin Modules',
+            items: extraItems
+          });
+        }
+      }
+    }
+
     const active = currentFileName();
 
     const groupsHtml = groups
@@ -277,7 +303,7 @@
           ${g.items
             .map(
               (item) => `
-            <a class="sidebar__link ${item.href === active ? 'active' : ''}" href="${item.href}">
+            <a class="sidebar__link ${item.href === active ? 'active' : ''}" href="${item.href}" title="${escapeHtml(item.label)}">
               ${icon(item.icon)}
               <span>${escapeHtml(item.label)}</span>
             </a>`
@@ -292,15 +318,15 @@
     aside.id = containerId;
     aside.innerHTML = `
       <div class="sidebar__brand">
-        <span class="sidebar__mark">EIC</span>
-        <span class="sidebar__name">Enoch International<small>College ERP</small></span>
+        <span class="sidebar__mark" style="background: #c53030; color: #ffffff;">MTC</span>
+        <span class="sidebar__name">Mercy T College<small style="color:#c53030; font-weight:bold;">Nursery & Primary</small></span>
       </div>
       <button type="button" class="sidebar__collapse-btn" id="sidebar-collapse-btn" aria-label="Collapse sidebar">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>
       </button>
       <div class="sidebar__scroll">${groupsHtml}</div>
       <div class="sidebar__footer">
-        <div class="role-pill" style="margin-bottom:10px;color:#D6D9DD;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;">${escapeHtml(roleLabel || '')}</div>
+        <div class="role-pill" style="margin-bottom:10px;color:#cbd5e1;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;">${escapeHtml(roleLabel || '')}</div>
         <button type="button" class="sidebar__logout" data-action="logout">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
           <span>Sign Out</span>

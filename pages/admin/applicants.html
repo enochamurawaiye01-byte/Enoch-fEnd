@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Applicants - Enoch International College ERP</title>
+<title>Applicants — Mercy T College Nursery and Primary School</title>
 <link rel="stylesheet" href="../../css/style.css" />
 <link rel="stylesheet" href="../../css/responsive.css" />
 <link rel="stylesheet" href="../../css/dark-mode.css" />
@@ -23,17 +23,47 @@
   <div class="app-main">
     <div id="app-navbar"></div>
     <main class="app-content">
-      <div class="page-head"><div class="page-head__title"><h1>New Applicants</h1><span class="page-head__desc">Review and approve pending student, teacher, and parent applications.</span></div></div>
+      <div class="page-head">
+        <div class="page-head__title">
+          <h1 style="color:#1b2a4a;">School Applicants</h1>
+          <span class="page-head__desc">Review student, teacher, and parent applications. Click on any applicant's name to view their full profile and medical data.</span>
+        </div>
+      </div>
       <div class="table-wrap">
-        <div class="table-toolbar"><div class="search-field"><input type="search" id="applicants-search" placeholder="Search applicants..." /></div></div>
-        <div class="table-scroll"><table class="data-table"><thead><tr><th>Applicant</th><th>Role</th><th>Email</th><th>Phone</th><th>Applied</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead><tbody id="applicants-tbody"></tbody></table></div>
+        <div class="table-toolbar">
+          <div class="search-field"><input type="search" id="applicants-search" placeholder="Search by name, email, or application number..." /></div>
+          <div class="filter-field">
+            <select id="applicants-status-filter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--surface-border, #cbd5e1); font-size: 14px; background: var(--surface-bg, #ffffff);">
+              <option value="ALL">All Statuses</option>
+              <option value="PENDING" selected>Pending Review</option>
+              <option value="APPROVED">Approved</option>
+              <option value="REJECTED">Rejected</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Applicant Name</th>
+                <th>Role / Class</th>
+                <th>Email Address</th>
+                <th>Phone</th>
+                <th>Applied Date</th>
+                <th>Status</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="applicants-tbody"></tbody>
+          </table>
+        </div>
         <div id="applicants-pagination"></div>
       </div>
     </main>
-    <div class="app-footer-note">Enoch International College ERP</div>
+    <div class="app-footer-note">&copy; Mercy T College Nursery and Primary School</div>
   </div>
 </div>
 <script src="../../js/config/api.js"></script><script src="../../js/config/endpoints.js"></script><script src="../../js/utils/storage.js"></script><script src="../../js/utils/format-date.js"></script><script src="../../js/utils/helpers.js"></script><script src="../../js/utils/permissions.js"></script><script src="../../js/utils/validators.js"></script><script src="../../js/api/api-client.js"></script><script src="../../js/services/users.js"></script><script src="../../js/services/admissions.js"></script><script src="../../js/services/auth.js"></script>
-<script src="../../js/components/toast.js"></script><script src="../../js/components/loader.js"></script><script src="../../js/components/confirm-dialog.js"></script><script src="../../js/components/pagination.js"></script><script src="../../js/components/dropdown.js"></script><script src="../../js/components/notification.js"></script><script src="../../js/components/table.js"></script><script src="../../js/components/sidebar.js"></script><script src="../../js/components/navbar.js"></script><script src="../../js/auth/auth-guard.js"></script><script src="../../js/main.js"></script><script src="../../js/pages/applicants.js"></script>
+<script src="../../js/components/toast.js"></script><script src="../../js/components/loader.js"></script><script src="../../js/components/confirm-dialog.js"></script><script src="../../js/components/pagination.js"></script><script src="../../js/components/dropdown.js"></script><script src="../../js/components/notification.js"></script><script src="../../js/components/table.js"></script><script src="../../js/components/sidebar.js"></script><script src="../../js/components/navbar.js"></script><script src="../../js/components/user-details-modal.js"></script><script src="../../js/auth/auth-guard.js"></script><script src="../../js/main.js"></script><script src="../../js/pages/applicants.js"></script>
 </body>
 </html>

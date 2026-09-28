@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Register — Mercy T College Nursery and Primary School ERP</title>
+<title>Register — Mercy T College Nursery and Primary School</title>
 <link rel="stylesheet" href="css/style.css" />
 <link rel="stylesheet" href="css/responsive.css" />
 <link rel="stylesheet" href="css/dark-mode.css" />
@@ -18,11 +18,14 @@
     <span id="theme-toggle-label">Dark Mode</span>
   </button>
   <section class="auth-brand-panel">
-    <div class="auth-brand-mark">MTC</div>
+    <div class="auth-brand-mark">
+      <img src="logo.png" alt="Mercy T College Logo" class="auth-brand-logo-img" />
+    </div>
     <div class="auth-brand-copy">
       <h2>Mercy T College</h2>
-      <p style="color:#c53030; font-weight:bold; margin-top:-6px;">NURSERY AND PRIMARY SCHOOL</p>
-      <p>Apply for a student or teacher account. School administration will review and process your application.</p>
+      <p style="color:#B02032; font-weight:800; margin-top:-4px; text-transform:uppercase; font-size:14px;">Nursery and Primary School</p>
+      <div class="auth-brand-motto">MOTTO: "Knowledge is Light"</div>
+      <p>Apply for a student, teacher, or parent account. School administration will review and process your application.</p>
       <div class="auth-brand-highlights">
         <div class="auth-brand-highlight">Nurturing Leaders with Character, Discipline & Excellence.</div>
         <div class="auth-brand-highlight">Student and teacher workspaces tailored to class levels.</div>
@@ -33,12 +36,15 @@
   </section>
   <section class="auth-form-panel">
     <div class="auth-card" style="max-width: 580px;">
-      <div class="auth-school-intro">
-        <strong>Mercy T College Admission Portal</strong>
-        <span>Complete the application form below. All fields are processed securely.</span>
+      <div class="auth-school-intro" style="display:flex; align-items:center; gap:12px;">
+        <img src="logo.png" alt="MTC Logo" style="width:48px; height:48px; object-fit:contain;" />
+        <div>
+          <strong style="color:#041664;">Mercy T College Admission Portal</strong>
+          <div style="font-size:12px; color:#B02032; font-style:italic; font-weight:bold;">"Knowledge is Light"</div>
+        </div>
       </div>
       <div class="auth-card-head">
-        <h1>Apply for Registration</h1>
+        <h1 style="color:#041664;">Apply for Registration</h1>
         <p>Choose your role and fill in your academic & medical details.</p>
       </div>
       <div class="alert alert-error auth-alert" id="register-error" role="alert" hidden></div>
@@ -56,35 +62,35 @@
         
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="firstName">First name <span class="text-danger">*</span></label>
+            <label class="form-label" for="firstName">First name <span style="color:#B02032;">*</span></label>
             <input id="firstName" name="firstName" required placeholder="e.g. Samuel" />
           </div>
           <div class="form-group">
-            <label class="form-label" for="lastName">Last name <span class="text-danger">*</span></label>
+            <label class="form-label" for="lastName">Last name <span style="color:#B02032;">*</span></label>
             <input id="lastName" name="lastName" required placeholder="e.g. Adebayo" />
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="email">Email address <span class="text-danger">*</span></label>
+          <label class="form-label" for="email">Email address <span style="color:#B02032;">*</span></label>
           <input type="email" id="email" name="email" autocomplete="email" required placeholder="e.g. student@gmail.com" />
         </div>
 
         <div class="form-row">
           <div class="form-group" style="position:relative;">
-            <label class="form-label" for="password">Password <span class="text-danger">*</span></label>
+            <label class="form-label" for="password">Password <span style="color:#B02032;">*</span></label>
             <input type="password" id="password" name="password" autocomplete="new-password" required />
             <button type="button" class="btn-toggle-pw" data-target="password" style="position:absolute; right:10px; top:36px; background:none; border:none; cursor:pointer; color:#64748b;">👁️</button>
           </div>
           <div class="form-group" style="position:relative;">
-            <label class="form-label" for="confirmPassword">Confirm password <span class="text-danger">*</span></label>
+            <label class="form-label" for="confirmPassword">Confirm password <span style="color:#B02032;">*</span></label>
             <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required />
             <button type="button" class="btn-toggle-pw" data-target="confirmPassword" style="position:absolute; right:10px; top:36px; background:none; border:none; cursor:pointer; color:#64748b;">👁️</button>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="phoneNumber">Phone number <span class="text-danger">*</span></label>
+          <label class="form-label" for="phoneNumber">Phone number <span style="color:#B02032;">*</span></label>
           <input type="tel" id="phoneNumber" name="phoneNumber" required placeholder="e.g. 08012345678" />
         </div>
 
@@ -105,8 +111,8 @@
         </div>
 
         <!-- Academic Class & Term Progress Fields -->
-        <div id="student-academic-fields" style="background: rgba(27, 42, 74, 0.04); padding: 14px; border-radius: 8px; margin: 12px 0; border: 1px solid rgba(27, 42, 74, 0.1);">
-          <h4 style="margin: 0 0 10px 0; color: #1b2a4a; font-size: 14px; font-weight: bold;">Academic Class & Term Details</h4>
+        <div id="student-academic-fields" style="background: rgba(4, 22, 100, 0.04); padding: 14px; border-radius: 8px; margin: 12px 0; border: 1px solid rgba(4, 22, 100, 0.15);">
+          <h4 style="margin: 0 0 10px 0; color: #041664; font-size: 14px; font-weight: bold;">Academic Class & Term Details</h4>
           
           <div class="form-row">
             <div class="form-group">
@@ -162,8 +168,8 @@
         </div>
 
         <!-- Medical Information Questions -->
-        <div id="medical-info-fields" style="background: rgba(197, 48, 48, 0.03); padding: 14px; border-radius: 8px; margin: 12px 0; border: 1px solid rgba(197, 48, 48, 0.15);">
-          <h4 style="margin: 0 0 10px 0; color: #c53030; font-size: 14px; font-weight: bold;">Medical & Health Record</h4>
+        <div id="medical-info-fields" style="background: rgba(176, 32, 50, 0.04); padding: 14px; border-radius: 8px; margin: 12px 0; border: 1px solid rgba(176, 32, 50, 0.2);">
+          <h4 style="margin: 0 0 10px 0; color: #B02032; font-size: 14px; font-weight: bold;">Medical & Health Record</h4>
           
           <div class="form-row">
             <div class="form-group">
@@ -214,7 +220,7 @@
           <input type="file" id="profilePhotoInput" accept="image/*" style="padding: 6px;" />
           <input type="hidden" id="profileImageUrl" name="profileImageUrl" />
           <div id="photo-preview-box" style="margin-top: 6px; display: none; align-items: center; gap: 10px;">
-            <img id="photo-preview-img" src="" alt="Passport Preview" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #1b2a4a;" />
+            <img id="photo-preview-img" src="" alt="Passport Preview" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #041664;" />
             <span style="font-size: 12px; color: #10b981; font-weight: bold;">✓ Passport photo loaded</span>
           </div>
         </div>
@@ -251,10 +257,10 @@
           <label for="marketingConsent" style="font-size:13px; color:#64748b; margin:0; cursor:pointer;">Send admission notifications and updates to my email address.</label>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block btn-lg" id="register-submit" style="background-color: #1b2a4a; border-color: #1b2a4a;">Submit Student Application</button>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="register-submit" style="background-color: #052F9A; border-color: #052F9A;">Submit Student Application</button>
       </form>
 
-      <p class="auth-form-foot"><span>Already registered?</span> <a href="login.html" style="color: #c53030; font-weight: bold;">Sign in here</a></p>
+      <p class="auth-form-foot"><span>Already registered?</span> <a href="login.html" style="color: #B02032; font-weight: bold;">Sign in here</a></p>
     </div>
   </section>
 </main>
@@ -277,7 +283,6 @@
       });
     }
 
-    // Password visibility toggle
     document.querySelectorAll('.btn-toggle-pw').forEach(btn => {
       btn.addEventListener('click', () => {
         const input = document.getElementById(btn.dataset.target);
@@ -287,7 +292,6 @@
       });
     });
 
-    // Passport photo base64 preview generator
     const photoInput = document.getElementById('profilePhotoInput');
     const photoUrlInput = document.getElementById('profileImageUrl');
     const previewBox = document.getElementById('photo-preview-box');

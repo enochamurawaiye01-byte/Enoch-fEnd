@@ -1,38 +1,38 @@
 /* ==========================================================================
    MERCY T COLLEGE NURSERY AND PRIMARY SCHOOL — CORE STYLESHEET
-   Design language: smooth, minimalist, navy + cream + white + crimson
-   No flashy AI gradients. Crisp typography and professional layout.
+   Motto: "Knowledge is Light"
+   Palette: Ivory White (#EBEBED), Deep Navy (#041664), Royal Blue (#052F9A), Azure Blue (#04A1D0), Red (#B02032)
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 :root {
   /* ---- Brand palette ---- */
-  --color-brand-navy: #1B2A4A;
-  --color-brand-navy-dark: #0F172A;
-  --color-brand-red:  #C53030;
-  --color-brand-cream:#FDFBF7;
-  --color-brand-cream-dark: #F5F2EB;
+  --color-ivory:       #EBEBED;
+  --color-deep-navy:  #041664;
+  --color-royal-blue: #052F9A;
+  --color-azure-blue: #04A1D0;
+  --color-brand-red:  #B02032;
 
-  --color-ink:      #1E293B;
-  --color-ink-soft: #475569;
+  --color-ink:      #041664;
+  --color-ink-soft: #334155;
   --color-ink-mute: #64748B;
 
   --color-white:    #FFFFFF;
-  --color-bg:       #FDFBF7;
-  --color-bg-alt:   #F8F6F0;
+  --color-bg:       #EBEBED;
+  --color-bg-alt:   #E2E2E6;
   --color-surface:  #FFFFFF;
-  --color-border:   #E2E8F0;
-  --color-border-strong: #CBD5E1;
+  --color-border:   #CBD5E1;
+  --color-border-strong: #94A3B8;
 
   --color-success: #10B981;
   --color-success-bg: #ECFDF5;
   --color-warning: #D97706;
   --color-warning-bg: #FFFBEB;
-  --color-danger:  #C53030;
+  --color-danger:  #B02032;
   --color-danger-bg: #FEF2F2;
-  --color-info:    #1B2A4A;
-  --color-info-bg: #F0F4F8;
+  --color-info:    #04A1D0;
+  --color-info-bg: #E0F2FE;
 
   /* ---- Semantic tokens ---- */
   --app-bg: var(--color-bg);
@@ -41,7 +41,7 @@
   --text-primary: var(--color-ink);
   --text-secondary: var(--color-ink-soft);
   --text-muted: var(--color-ink-mute);
-  --sidebar-bg: var(--color-brand-navy);
+  --sidebar-bg: var(--color-deep-navy);
   --sidebar-text: #CBD5E1;
   --sidebar-text-active: var(--color-white);
   --sidebar-active-bg: var(--color-brand-red);

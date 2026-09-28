@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Access Control & RBAC — Enoch International College ERP</title>
+<title>Access Control & RBAC — Mercy T College Nursery and Primary School</title>
 <link rel="stylesheet" href="../../css/style.css" />
 <link rel="stylesheet" href="../../css/responsive.css" />
 <link rel="stylesheet" href="../../css/dark-mode.css" />
@@ -18,13 +18,22 @@
 <link rel="stylesheet" href="../../css/components/pagination.css" />
 <link rel="stylesheet" href="../../css/components/loader.css" />
 <style>
-  .rbac-tabs { display: flex; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.1)); padding-bottom: 8px; }
-  .rbac-tab-btn { padding: 10px 18px; border-radius: 8px; background: transparent; color: var(--text-muted, #94a3b8); border: none; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s ease; }
-  .rbac-tab-btn.active { background: rgba(99, 102, 241, 0.15); color: #818cf8; border-bottom: 2px solid #6366f1; }
+  .rbac-tabs { display: flex; gap: 12px; margin-bottom: 20px; border-bottom: 2px solid var(--border-color, #cbd5e1); padding-bottom: 8px; flex-wrap: wrap; }
+  .rbac-tab-btn { padding: 10px 18px; border-radius: 8px; background: transparent; color: #64748b; border: none; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s ease; }
+  .rbac-tab-btn.active { background: #052F9A; color: #ffffff; box-shadow: 0 2px 6px rgba(5, 47, 154, 0.2); }
+  
+  .role-category-tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .role-cat-btn { padding: 8px 14px; border-radius: 20px; background: var(--surface-bg, #ffffff); color: #041664; border: 1px solid #cbd5e1; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .role-cat-btn.active { background: #041664; color: #ffffff; border-color: #041664; }
+
+  .status-sub-filter { display: flex; gap: 6px; margin-bottom: 14px; align-items: center; background: rgba(4, 22, 100, 0.04); padding: 8px 12px; border-radius: 8px; }
+  .status-sub-btn { padding: 6px 12px; border-radius: 6px; background: transparent; border: 1px solid transparent; font-size: 12px; font-weight: bold; cursor: pointer; color: #64748b; }
+  .status-sub-btn.active { background: #ffffff; color: #041664; border-color: #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
   .permission-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
-  .perm-card { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 16px; backdrop-filter: blur(10px); }
-  .perm-card__header { font-weight: 700; font-size: 15px; margin-bottom: 8px; color: #f8fafc; display: flex; align-items: center; justify-content: space-between; }
-  .perm-card__desc { font-size: 13px; color: #94a3b8; margin-bottom: 12px; }
+  .perm-card { background: var(--surface-bg, #ffffff); border: 1px solid var(--surface-border, #cbd5e1); border-radius: 12px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+  .perm-card__header { font-weight: 700; font-size: 15px; margin-bottom: 8px; color: #041664; display: flex; align-items: center; justify-content: space-between; }
+  .perm-card__desc { font-size: 13px; color: #64748b; margin-bottom: 12px; }
 </style>
 </head>
 <body data-page-title="Access Control" data-workspace="admin">
@@ -39,30 +48,55 @@
     <main class="app-content">
       <div class="page-head">
         <div class="page-head__title">
-          <h1>Access Control & RBAC Management</h1>
-          <span class="page-head__desc">Grant, revoke, and manage dynamic permissions for managers, staff, teachers, and system roles.</span>
+          <h1 style="color:#041664;">Access Control & User Management</h1>
+          <span class="page-head__desc">Categorized account management, Active/Inactive status controls, user deletion, and full 56-module Role Permission Matrix.</span>
         </div>
       </div>
 
       <div class="rbac-tabs">
-        <button type="button" class="rbac-tab-btn active" data-tab="user-access">User Permissions & Accounts</button>
-        <button type="button" class="rbac-tab-btn" data-tab="matrix">Role Permission Matrix</button>
+        <button type="button" class="rbac-tab-btn active" data-tab="user-access">User Accounts & Roles</button>
+        <button type="button" class="rbac-tab-btn" data-tab="matrix">Role Permission Matrix (All Modules)</button>
         <button type="button" class="rbac-tab-btn" data-tab="roles">Role Definitions</button>
         <button type="button" class="rbac-tab-btn" data-tab="permissions">Permissions Catalog</button>
       </div>
 
-      <!-- Tab 1: User Access -->
+      <!-- Tab 1: Categorized User Access -->
       <div id="tab-user-access" class="tab-pane">
+        <!-- Category Selection Tabs -->
+        <div class="role-category-tabs" id="role-category-tabs">
+          <button type="button" class="role-cat-btn active" data-role-group="ALL">All Users</button>
+          <button type="button" class="role-cat-btn" data-role-group="TEACHER">Teachers & Academic Staff</button>
+          <button type="button" class="role-cat-btn" data-role-group="STUDENT">Students</button>
+          <button type="button" class="role-cat-btn" data-role-group="PARENT">Parents</button>
+          <button type="button" class="role-cat-btn" data-role-group="ADMIN">Admins & Management</button>
+        </div>
+
+        <!-- Status Sub-Filters -->
+        <div class="status-sub-filter">
+          <span style="font-size:12px; font-weight:bold; color:#041664; margin-right:8px;">Status Filter:</span>
+          <button type="button" class="status-sub-btn active" data-status-filter="ALL">All Statuses</button>
+          <button type="button" class="status-sub-btn" data-status-filter="ACTIVE" style="color:#10b981;">✓ Active Users</button>
+          <button type="button" class="status-sub-btn" data-status-filter="INACTIVE" style="color:#B02032;">✗ Inactive / Pending</button>
+        </div>
+
         <div class="table-wrap">
           <div class="table-toolbar">
             <div class="search-field">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-              <input type="search" id="access-user-search" placeholder="Search users by name, email, or role..." />
+              <input type="search" id="access-user-search" placeholder="Search user name, email, or phone..." />
             </div>
           </div>
           <div class="table-scroll">
             <table class="data-table">
-              <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th style="text-align:right;">Actions</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>User Name</th>
+                  <th>Email Address</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th style="text-align:right;">Actions</th>
+                </tr>
+              </thead>
               <tbody id="access-users-tbody"></tbody>
             </table>
           </div>
@@ -70,15 +104,15 @@
         </div>
       </div>
 
-      <!-- Tab 2: Permission Matrix -->
+      <!-- Tab 2: Full Permission Matrix (All Modules) -->
       <div id="tab-matrix" class="tab-pane" style="display: none;">
         <div style="margin-bottom: 16px;" class="card">
-          <div style="display:flex; justify-value:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
             <div>
-              <h3 style="margin:0 0 4px 0; font-size:16px;">Interactive Role Permission Matrix</h3>
-              <p style="margin:0; font-size:13px; color:var(--text-muted, #94a3b8);">Toggle permissions directly for each role. Changes update real-time access controls.</p>
+              <h3 style="margin:0 0 4px 0; font-size:16px; color:#041664;">Comprehensive Role Permission Matrix</h3>
+              <p style="margin:0; font-size:13px; color:#64748b;">Grant or revoke access across all 56 backend modules for any system role. Changes apply immediately.</p>
             </div>
-            <button type="button" class="btn btn-secondary btn-sm" id="refresh-matrix-btn">
+            <button type="button" class="btn btn-secondary btn-sm" id="refresh-matrix-btn" style="background:#052F9A; color:#fff; border-color:#052F9A;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
               Refresh Matrix
             </button>
@@ -89,12 +123,12 @@
             <table class="data-table" id="matrix-table">
               <thead>
                 <tr id="matrix-thead-row">
-                  <th>Module / Permission Key</th>
+                  <th>Module Name</th>
                   <!-- Dynamic role headers will be injected here -->
                 </tr>
               </thead>
               <tbody id="matrix-tbody">
-                <tr><td colspan="10">Loading Permission Matrix...</td></tr>
+                <tr><td colspan="12">Loading Permission Matrix...</td></tr>
               </tbody>
             </table>
           </div>
@@ -104,7 +138,7 @@
       <!-- Tab 3: Role Definitions -->
       <div id="tab-roles" class="tab-pane" style="display: none;">
         <div style="margin-bottom: 16px; text-align: right;">
-          <button type="button" class="btn btn-primary" id="add-role-btn">
+          <button type="button" class="btn btn-primary" id="add-role-btn" style="background:#052F9A; border-color:#052F9A;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
             Create Role
           </button>
@@ -115,7 +149,7 @@
       <!-- Tab 4: Permissions Catalog -->
       <div id="tab-permissions" class="tab-pane" style="display: none;">
         <div style="margin-bottom: 16px; text-align: right;">
-          <button type="button" class="btn btn-primary" id="add-permission-btn">
+          <button type="button" class="btn btn-primary" id="add-permission-btn" style="background:#052F9A; border-color:#052F9A;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
             Create Permission Key
           </button>
@@ -131,7 +165,7 @@
       </div>
     </main>
 
-    <div class="app-footer-note">Enoch International College ERP — Access Control System</div>
+    <div class="app-footer-note">&copy; Mercy T College Nursery and Primary School — Motto: "Knowledge is Light"</div>
   </div>
 </div>
 
@@ -155,6 +189,7 @@
 <script src="../../js/components/table.js"></script>
 <script src="../../js/components/sidebar.js"></script>
 <script src="../../js/components/navbar.js"></script>
+<script src="../../js/components/user-details-modal.js"></script>
 <script src="../../js/auth/auth-guard.js"></script>
 <script src="../../js/main.js"></script>
 <script src="../../js/pages/access-control.js"></script>

@@ -1,9 +1,7 @@
 /**
  * Top navigation bar — matches css/components/navbar.css
- * (.topbar, .topbar__left/__right, .topbar__icon-btn .dot,
- *  .topbar__profile, .dropdown-panel, .notif-panel).
- * Expects <div id="app-navbar"></div> placeholder, which is replaced
- * with the full <header class="topbar">.
+ * Rebranded for Mercy T College Nursery and Primary School
+ * Motto: "Knowledge is Light"
  */
 (function (global) {
   'use strict';
@@ -24,8 +22,8 @@
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </button>
         <div class="topbar__crumbs">
-          <h1>${escapeHtml(pageTitle || '')}</h1>
-          ${breadcrumb ? `<span class="topbar__breadcrumb">${breadcrumb}</span>` : ''}
+          <h1 style="color:#041664;">${escapeHtml(pageTitle || '')}</h1>
+          <span class="topbar__breadcrumb" style="font-size:12px; color:#B02032; font-weight:bold; font-style:italic;">Mercy T College — Motto: "Knowledge is Light"</span>
         </div>
       </div>
 
@@ -41,8 +39,8 @@
           </button>
           <div class="dropdown-panel notif-panel" data-dropdown-panel>
             <div class="notif-panel__head">
-              <strong class="text-small">Notifications</strong>
-              <button type="button" class="link-btn" id="mark-all-read-btn" style="background:none;border:none;color:var(--color-emerald-700);font-size:12px;font-weight:600;cursor:pointer;">Mark all read</button>
+              <strong class="text-small" style="color:#041664;">Notifications</strong>
+              <button type="button" class="link-btn" id="mark-all-read-btn" style="background:none;border:none;color:#052F9A;font-size:12px;font-weight:600;cursor:pointer;">Mark all read</button>
             </div>
             <div id="notif-list"></div>
           </div>
@@ -50,10 +48,10 @@
 
         <div class="dropdown" data-dropdown style="position:relative;">
           <div class="topbar__profile" data-dropdown-trigger>
-            <span class="avatar">${escapeHtml(initials(displayName))}</span>
+            <span class="avatar" style="background:#041664; color:#ffffff;">${escapeHtml(initials(displayName))}</span>
             <div class="topbar__profile-meta">
               <span class="name">${escapeHtml(displayName)}</span>
-              <span class="role">${escapeHtml(roleLabel)}</span>
+              <span class="role" style="color:#B02032; font-weight:bold;">${escapeHtml(roleLabel)}</span>
             </div>
           </div>
           <div class="dropdown-panel" data-dropdown-panel>
@@ -62,7 +60,7 @@
               Profile Settings
             </a>
             <div class="dropdown-panel__divider"></div>
-            <a href="#" class="dropdown-panel__item danger" data-action="logout">
+            <a href="#" class="dropdown-panel__item danger" data-action="logout" style="color:#B02032;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
               Sign Out
             </a>

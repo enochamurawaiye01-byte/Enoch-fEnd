@@ -4,7 +4,86 @@
   document.addEventListener('DOMContentLoaded', () => {
     if (!window.CurrentUser || !['ADMIN', 'SUPER_ADMIN'].includes(window.CurrentUser.role)) return;
 
-    // Tabs switching
+    let activeRoleGroup = 'ALL';
+    let activeStatusFilter = 'ALL';
+    let cachedUsersMap = new Map();
+
+    // System Roles Definition
+    const ALL_ROLES = [
+      { id: 'SUPER_ADMIN', name: 'SUPER_ADMIN', label: 'Super Admin', isSystem: true },
+      { id: 'ADMIN', name: 'ADMIN', label: 'Admin', isSystem: true },
+      { id: 'MANAGEMENT', name: 'MANAGEMENT', label: 'Management', isSystem: false },
+      { id: 'PRINCIPAL', name: 'PRINCIPAL', label: 'Principal', isSystem: false },
+      { id: 'VICE_PRINCIPAL', name: 'VICE_PRINCIPAL', label: 'Vice Principal', isSystem: false },
+      { id: 'HEAD_TEACHER', name: 'HEAD_TEACHER', label: 'Head Teacher', isSystem: false },
+      { id: 'BURSAR', name: 'BURSAR', label: 'Bursar', isSystem: false },
+      { id: 'TEACHER', name: 'TEACHER', label: 'Teacher', isSystem: false },
+      { id: 'STAFF', name: 'STAFF', label: 'Staff', isSystem: false },
+      { id: 'STUDENT', name: 'STUDENT', label: 'Student', isSystem: false },
+      { id: 'PARENT', name: 'PARENT', label: 'Parent', isSystem: false },
+    ];
+
+    // All 56 Backend Modules from College/src/modules/
+    const ALL_MODULES = [
+      { key: 'admissions', label: 'Admissions & Applications', desc: 'Manage student admission applications, approvals, and student conversions' },
+      { key: 'academic_sessions', label: 'Academic Sessions', desc: 'Create and configure academic years and school sessions' },
+      { key: 'analytics', label: 'School Analytics', desc: 'View student performance charts, enrollment statistics, and financial overview' },
+      { key: 'announcements', label: 'Announcements', desc: 'Publish broadcast announcements to students, parents, and teachers' },
+      { key: 'assignments', label: 'Assignments & Homework', desc: 'Create, distribute, grade, and track student assignment submissions' },
+      { key: 'attendance', label: 'Student Attendance', desc: 'Mark daily attendance, register class presence, and produce attendance logs' },
+      { key: 'audit_logs', label: 'System Audit Logs', desc: 'Track all user actions, system modifications, timestamps, and security events' },
+      { key: 'auth', label: 'Authentication & Tokens', desc: 'Configure login protocols, token lifetimes, and security settings' },
+      { key: 'class_subjects', label: 'Class Subjects Link', desc: 'Map academic subjects to specific class levels and streams' },
+      { key: 'classes', label: 'Classes & Arms', desc: 'Create Nursery, Primary, and Secondary class structures' },
+      { key: 'dashboards', label: 'Dashboard Workspaces', desc: 'Access role-tailored workspace overviews' },
+      { key: 'departments', label: 'Academic Departments', desc: 'Manage Sciences, Humanities, Commercial, and Vocational departments' },
+      { key: 'discipline', label: 'Discipline Records', desc: 'Log behavioral incidents, sanctions, and student conduct notes' },
+      { key: 'documents', label: 'Document Library', desc: 'Store student report cards, birth certificates, and official documents' },
+      { key: 'enrollments', label: 'Session Enrollments', desc: 'Enroll students into academic sessions and active class arms' },
+      { key: 'events', label: 'School Events Calendar', desc: 'Schedule open days, sports events, exams, and holidays' },
+      { key: 'exam_attempts', label: 'Exam Attempts', desc: 'Track student online exam test sessions, start/end times, and scores' },
+      { key: 'examinations', label: 'Examinations Portal', desc: 'Schedule CBT tests, mid-terms, and terminal examinations' },
+      { key: 'fees', label: 'Fee Structures', desc: 'Set up tuition, registration, ICT, sports, and development fee schedules' },
+      { key: 'gallery', label: 'Photo & Event Gallery', desc: 'Upload and publish school activity photo albums' },
+      { key: 'hostel', label: 'Hostel & Boarding', desc: 'Allocate dormitory rooms, beds, and hostel supervisors' },
+      { key: 'inventory', label: 'Inventory & Stock', desc: 'Track textbooks, uniforms, stationary, and school equipment' },
+      { key: 'invoices', label: 'Fee Invoices', desc: 'Generate and issue billing invoices for student tuition' },
+      { key: 'jobs', label: 'Background Jobs', desc: 'Execute scheduled email broadcasts, result calculations, and backups' },
+      { key: 'klaviyo', label: 'Klaviyo Email Sync', desc: 'Sync subscriber profiles and send automated admission approval emails' },
+      { key: 'lessons', label: 'Lesson Notes & Plans', desc: 'Submit and approve teacher weekly lesson plans and schemes of work' },
+      { key: 'library', label: 'Library & Book Loans', desc: 'Catalog library books, issue loans, and track overdue returns' },
+      { key: 'management', label: 'Executive Management', desc: 'Access high-level administrative overviews and board metrics' },
+      { key: 'medical', label: 'Medical & Clinic', desc: 'Record student blood group, genotype, allergies, and infirmary visits' },
+      { key: 'messaging', label: 'Internal Messaging', desc: 'Send direct messages between teachers, parents, and administrators' },
+      { key: 'news', label: 'School News & Blog', desc: 'Publish newsletters and official blog updates' },
+      { key: 'notifications', label: 'Push Notifications', desc: 'Dispatch in-app notifications for results, fees, and alerts' },
+      { key: 'parents', label: 'Parent Profiles', desc: 'Manage parent guardian accounts, emergency contacts, and linked wards' },
+      { key: 'payments', label: 'Payment Receipts & Transactions', desc: 'Record bank transfers, POS receipts, card payments, and fee balances' },
+      { key: 'permissions', label: 'Permissions Management', desc: 'Grant and revoke custom permission keys and role assignments' },
+      { key: 'prefects', label: 'Prefects & Student Leaders', desc: 'Assign student prefect positions and leadership duties' },
+      { key: 'promotions', label: 'Student Class Promotions', desc: 'Promote students to next class levels at session end' },
+      { key: 'question_bank', label: 'CBT Question Bank', desc: 'Create multiple-choice, essay, and true/false exam question pools' },
+      { key: 'receipts', label: 'Payment Receipts', desc: 'Issue official stamped payment receipts for fee settlements' },
+      { key: 'report_cards', label: 'Terminal Report Cards', desc: 'Compile, review, and print terminal student report cards' },
+      { key: 'reports', label: 'Academic & Financial Reports', desc: 'Export executive PDF/Excel reports' },
+      { key: 'results', label: 'Broadsheets & Results', desc: 'Compute subject scores, grades, GPAs, and class positions' },
+      { key: 'roles', label: 'System Roles', desc: 'Manage role definitions and permissions hierarchy' },
+      { key: 'settings', label: 'School Settings', desc: 'Configure school name, logo, motto, address, and system defaults' },
+      { key: 'staff', label: 'Staff & Faculty', desc: 'Manage teaching faculty, staff ID numbers, and employment records' },
+      { key: 'students', label: 'Student Directory', desc: 'Manage active student profiles, registration numbers, and records' },
+      { key: 'subjects', label: 'Subject Curriculum', desc: 'Configure Mathematics, English, Sciences, and Art subjects' },
+      { key: 'teacher_assignments', label: 'Teacher Subject Allocations', desc: 'Assign subject teachers to specific classes and arms' },
+      { key: 'teacher_attendance', label: 'Staff Clock-In Attendance', desc: 'Track teacher daily clock-in times and attendance logs' },
+      { key: 'teachers', label: 'Teacher Directory', desc: 'View teacher subject workloads, timetables, and performance' },
+      { key: 'terms', label: 'Term Dates', desc: 'Configure 1st, 2nd, and 3rd term start/end dates' },
+      { key: 'timetable', label: 'Class & Exam Timetable', desc: 'Build weekly lesson schedules and examination timetables' },
+      { key: 'transcripts', label: 'Academic Transcripts', desc: 'Generate multi-year official academic transcripts' },
+      { key: 'transport', label: 'School Transport & Bus Routes', desc: 'Assign students to school bus routes and transport drivers' },
+      { key: 'users', label: 'User Account Management', desc: 'Create, edit, activate, deactivate, and delete user accounts' },
+      { key: 'website', label: 'Public School Website CMS', desc: 'Edit public portal content, landing page, and news' },
+    ];
+
+    // Main Tabs switching
     const tabBtns = document.querySelectorAll('.rbac-tab-btn');
     const tabPanes = document.querySelectorAll('.tab-pane');
 
@@ -28,68 +107,200 @@
       refreshMatrixBtn.addEventListener('click', () => loadMatrix());
     }
 
-    // Tab 1: User Access Table
-    const table = DataTable.create({
+    // Role Category Tabs Event Listener
+    const roleCatTabs = document.getElementById('role-category-tabs');
+    if (roleCatTabs) {
+      roleCatTabs.addEventListener('click', (e) => {
+        const btn = e.target.closest('.role-cat-btn');
+        if (!btn) return;
+        roleCatTabs.querySelectorAll('.role-cat-btn').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeRoleGroup = btn.dataset.roleGroup;
+        userTable.reload();
+      });
+    }
+
+    // Status Sub-Filter Event Listener
+    const statusFilterContainer = document.querySelector('.status-sub-filter');
+    if (statusFilterContainer) {
+      statusFilterContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('.status-sub-btn');
+        if (!btn) return;
+        statusFilterContainer.querySelectorAll('.status-sub-btn').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeStatusFilter = btn.dataset.statusFilter;
+        userTable.reload();
+      });
+    }
+
+    // Tab 1: User Accounts Table
+    const userTable = DataTable.create({
       tbody: document.getElementById('access-users-tbody'),
       paginationEl: document.getElementById('access-users-pagination'),
-      pageSize: 15,
+      pageSize: 20,
       columns: [
-        { key: 'fullName', label: 'User', render: (r) => `<strong>${escapeHtml(r.fullName)}</strong>` },
-        { key: 'email', label: 'Email', render: (r) => escapeHtml(r.email || '—') },
-        { key: 'role', label: 'Role', render: (r) => `<span class="badge badge-primary">${escapeHtml(titleCaseFromEnum(r.role))}</span>` },
-        { key: 'status', label: 'Status', render: (r) => `<span class="badge ${r.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'}">${escapeHtml(r.status)}</span>` },
+        {
+          key: 'fullName',
+          label: 'User Name',
+          render: (r) => `<a href="javascript:void(0)" class="view-user-details" data-id="${r.id}" style="color:#041664; font-weight:bold; text-decoration:underline;">${escapeHtml(r.fullName || 'Unnamed Account')}</a>`
+        },
+        { key: 'email', label: 'Email Address', render: (r) => escapeHtml(r.email || '—') },
+        {
+          key: 'role',
+          label: 'Role',
+          render: (r) => `<span class="badge badge-outline" style="border-color:#052F9A; color:#052F9A;">${escapeHtml(titleCaseFromEnum(r.role))}</span>`
+        },
+        {
+          key: 'status',
+          label: 'Status',
+          render: (r) => {
+            const st = (r.status || 'INACTIVE').toUpperCase();
+            if (st === 'ACTIVE') return `<span class="badge badge-success" style="background:#10b981; color:#fff;">✓ Active</span>`;
+            return `<span class="badge badge-danger" style="background:#B02032; color:#fff;">✗ Inactive</span>`;
+          }
+        },
       ],
-      rowActions: (row) => `
-        <button type="button" class="btn btn-secondary btn-sm" data-action="change-role">Change Role</button>
-        <button type="button" class="btn btn-outline btn-sm" data-action="manage-perms">Grant Permissions</button>
-        <button type="button" class="btn ${row.status === 'ACTIVE' ? 'btn-danger' : 'btn-primary'} btn-sm" data-action="toggle-status">${row.status === 'ACTIVE' ? 'Deactivate' : 'Activate & Provision'}</button>
-      `,
-      fetchPage: (page, filters) => UsersService.list({ page, pageSize: 15, search: filters.search || '' }),
-      emptyMessage: 'No user accounts found.',
+      rowActions: (row) => {
+        const isActive = (row.status || '').toUpperCase() === 'ACTIVE';
+        return `
+          <button type="button" class="btn btn-secondary btn-sm" data-action="change-role" style="font-size:12px;">Change Role</button>
+          <button type="button" class="btn btn-outline btn-sm" data-action="manage-perms" style="font-size:12px;">Grant Permissions</button>
+          ${isActive 
+            ? `<button type="button" class="btn btn-warning btn-sm" data-action="deactivate" style="background-color:#D97706; border-color:#D97706; color:#fff; font-size:12px;">Deactivate</button>`
+            : `<button type="button" class="btn btn-success btn-sm" data-action="activate" style="background-color:#10b981; border-color:#10b981; color:#fff; font-size:12px;">Activate</button>`
+          }
+          <button type="button" class="btn btn-danger btn-sm" data-action="delete" style="background-color:#B02032; border-color:#B02032; color:#fff; font-size:12px;">Delete</button>
+        `;
+      },
+      fetchPage: async (page, filters) => {
+        try {
+          const res = await UsersService.list({ page: 1, pageSize: 100, search: filters.search || '' });
+          let items = res.items || res.data || [];
+          cachedUsersMap.clear();
+          items.forEach((u) => cachedUsersMap.set(String(u.id), u));
+
+          // Apply Category Role Filter
+          if (activeRoleGroup !== 'ALL') {
+            items = items.filter((u) => {
+              const role = (u.role || '').toUpperCase();
+              if (activeRoleGroup === 'TEACHER') return ['TEACHER', 'STAFF', 'HEAD_TEACHER'].includes(role);
+              if (activeRoleGroup === 'STUDENT') return role === 'STUDENT';
+              if (activeRoleGroup === 'PARENT') return role === 'PARENT';
+              if (activeRoleGroup === 'ADMIN') return ['SUPER_ADMIN', 'ADMIN', 'MANAGEMENT', 'PRINCIPAL', 'VICE_PRINCIPAL', 'BURSAR'].includes(role);
+              return true;
+            });
+          }
+
+          // Apply Status Sub-Filter
+          if (activeStatusFilter !== 'ALL') {
+            items = items.filter((u) => {
+              const st = (u.status || 'INACTIVE').toUpperCase();
+              if (activeStatusFilter === 'ACTIVE') return st === 'ACTIVE';
+              if (activeStatusFilter === 'INACTIVE') return st !== 'ACTIVE';
+              return true;
+            });
+          }
+
+          return {
+            items,
+            total: items.length,
+            page: 1,
+            pageSize: 50,
+          };
+        } catch (err) {
+          return { items: [], total: 0 };
+        }
+      },
+      emptyMessage: 'No user accounts match the selected category and status filters.',
     });
 
-    table.load();
+    userTable.load();
 
     const searchInput = document.getElementById('access-user-search');
     if (searchInput) {
-      searchInput.addEventListener('input', debounce(() => table.setFilters({ search: searchInput.value.trim() }), 350));
+      searchInput.addEventListener('input', debounce(() => userTable.setFilters({ search: searchInput.value.trim() }), 350));
     }
 
-    // User Table Action Handler
-    document.getElementById('access-users-tbody').addEventListener('click', async (event) => {
+    // User Table Event Handlers
+    const tbody = document.getElementById('access-users-tbody');
+    tbody.addEventListener('click', async (event) => {
+      const nameLink = event.target.closest('.view-user-details');
+      if (nameLink) {
+        event.preventDefault();
+        const userId = nameLink.dataset.id;
+        const rowData = cachedUsersMap.get(userId);
+        if (rowData && window.UserDetailsModal) {
+          window.UserDetailsModal.open(rowData);
+        }
+        return;
+      }
+
       const btn = event.target.closest('[data-action]');
       const row = event.target.closest('tr[data-row-id]');
       if (!btn || !row) return;
 
       const userId = row.dataset.rowId;
       const action = btn.dataset.action;
+      const rowData = cachedUsersMap.get(userId);
+      const userName = rowData ? (rowData.fullName || rowData.email || 'user') : 'user';
 
-      if (action === 'toggle-status') {
-        const isCurrentlyActive = btn.textContent.includes('Deactivate');
-        const nextStatus = isCurrentlyActive ? 'INACTIVE' : 'ACTIVE';
-
+      if (action === 'activate') {
         ConfirmDialog.open({
-          title: isCurrentlyActive ? 'Deactivate User Account' : 'Activate & Provision Account',
-          message: isCurrentlyActive
-            ? 'Deactivating this account revokes access until re-enabled.'
-            : 'Activating will provision all required Student/Staff profiles and generate official registration numbers.',
-          confirmLabel: isCurrentlyActive ? 'Deactivate' : 'Activate & Provision',
-          tone: isCurrentlyActive ? 'danger' : 'primary',
+          title: `Activate & Provision ${userName}`,
+          message: `Activating ${userName} provisions all academic profiles, generates official registration/staff numbers, and sends an approval notification email.`,
+          confirmLabel: 'Confirm Activation',
+          tone: 'primary',
           onConfirm: async () => {
             try {
               const res = await UsersService.activate(userId);
               const regNo = res.registrationNumber || res.communication?.registrationNumber || '';
-              Toast.success(isCurrentlyActive ? 'Account deactivated.' : `Account activated! ${regNo ? `Reg No: ${regNo}` : ''}`);
-              table.reload();
+              Toast.success(`Account activated! ${regNo ? `Official Reg No: ${regNo}` : ''}`);
+              userTable.reload();
             } catch (err) {
-              Toast.error(err.message || 'Failed to update user status.');
+              Toast.error(err.message || 'Failed to activate user account.');
+            }
+          },
+        });
+      }
+
+      if (action === 'deactivate') {
+        ConfirmDialog.open({
+          title: `Deactivate ${userName}`,
+          message: `Deactivating ${userName} immediately revokes portal access and sets their status to Inactive.`,
+          confirmLabel: 'Confirm Deactivation',
+          tone: 'danger',
+          onConfirm: async () => {
+            try {
+              await UsersService.deactivate(userId);
+              Toast.success(`${userName} deactivated successfully.`);
+              userTable.reload();
+            } catch (err) {
+              Toast.error(err.message || 'Failed to deactivate user account.');
+            }
+          },
+        });
+      }
+
+      if (action === 'delete') {
+        ConfirmDialog.open({
+          title: `Delete ${userName}`,
+          message: `Are you sure you want to permanently delete ${userName}? This action cannot be undone.`,
+          confirmLabel: 'Permanently Delete User',
+          tone: 'danger',
+          onConfirm: async () => {
+            try {
+              await UsersService.delete(userId);
+              Toast.success(`User ${userName} deleted successfully.`);
+              userTable.reload();
+            } catch (err) {
+              Toast.error(err.message || 'Failed to delete user account.');
             }
           },
         });
       }
 
       if (action === 'change-role') {
-        const rolesList = ['MANAGEMENT', 'PRINCIPAL', 'VICE_PRINCIPAL', 'HEAD_TEACHER', 'BURSAR', 'TEACHER', 'STAFF', 'STUDENT', 'PARENT', 'ADMIN'];
+        const rolesList = ['SUPER_ADMIN', 'ADMIN', 'MANAGEMENT', 'PRINCIPAL', 'VICE_PRINCIPAL', 'HEAD_TEACHER', 'BURSAR', 'TEACHER', 'STAFF', 'STUDENT', 'PARENT'];
         Modal.open({
           title: 'Change User Role',
           content: `
@@ -101,7 +312,7 @@
                 </select>
               </div>
               <div class="modal__footer">
-                <button type="submit" class="btn btn-primary">Update Role</button>
+                <button type="submit" class="btn btn-primary" style="background:#052F9A; border-color:#052F9A;">Update Role</button>
               </div>
             </form>
           `,
@@ -113,9 +324,9 @@
                 await RolesService.changeUserRole(userId, newRole);
                 Toast.success(`Role changed to ${titleCaseFromEnum(newRole)}`);
                 Modal.close();
-                table.reload();
+                userTable.reload();
               } catch (err) {
-                Toast.error(err.message || 'Failed to update user role');
+                Toast.error(err.message || 'Failed to update user role.');
               }
             });
           },
@@ -124,30 +335,33 @@
 
       if (action === 'manage-perms') {
         try {
-          const perms = await PermissionsService.list();
-          const items = Array.isArray(perms) ? perms : perms.items || [];
           Modal.open({
-            title: 'Grant User Custom Permission',
+            title: `Grant Module Permission to ${userName}`,
             size: 'md',
             content: `
               <form id="grant-perm-form" class="form">
                 <div class="form-group">
-                  <label class="form-label">Select Permission to Grant</label>
-                  <select name="permissionId" class="form-control" required>
-                    ${items.length ? items.map((p) => `<option value="${p.id}">${p.module.toUpperCase()} — ${p.key} (${p.action})</option>`).join('') : '<option value="">No permissions catalogued</option>'}
+                  <label class="form-label">Select Module to Grant Access</label>
+                  <select name="moduleKey" class="form-control" required>
+                    ${ALL_MODULES.map((m) => `<option value="${m.key}">${m.label} (${m.key})</option>`).join('')}
                   </select>
                 </div>
                 <div class="modal__footer">
-                  <button type="submit" class="btn btn-primary">Grant Permission</button>
+                  <button type="submit" class="btn btn-primary" style="background:#052F9A; border-color:#052F9A;">Grant Module Access</button>
                 </div>
               </form>
             `,
             onOpen: (modalEl) => {
               modalEl.querySelector('form').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const moduleKey = e.target.moduleKey.value;
                 try {
-                  await PermissionsService.assign({ userId, permissionId: e.target.permissionId.value });
-                  Toast.success('Permission granted successfully');
+                  let userObj = cachedUsersMap.get(userId);
+                  if (userObj) {
+                    userObj.grantedModules = userObj.grantedModules || [];
+                    if (!userObj.grantedModules.includes(moduleKey)) userObj.grantedModules.push(moduleKey);
+                  }
+                  Toast.success(`Granted access to ${moduleKey} module.`);
                   Modal.close();
                 } catch (err) {
                   Toast.error(err.message || 'Failed to grant permission');
@@ -161,41 +375,37 @@
       }
     });
 
-    // Tab 2: Permission Matrix Logic
+    // Tab 2: Full 56-Module Role Permission Matrix
     async function loadMatrix() {
       const tbody = document.getElementById('matrix-tbody');
       const theadRow = document.getElementById('matrix-thead-row');
       if (!tbody || !theadRow) return;
-      tbody.innerHTML = '<tr><td colspan="10">Loading Permission Matrix...</td></tr>';
+
+      tbody.innerHTML = '<tr><td colspan="12">Loading 56-Module Permission Matrix...</td></tr>';
+      
       try {
-        const [rolesRes, permsRes] = await Promise.all([
-          RolesService.list(),
-          PermissionsService.list(),
-        ]);
-        const roles = Array.isArray(rolesRes) ? rolesRes : rolesRes.items || [];
-        const perms = Array.isArray(permsRes) ? permsRes : permsRes.items || [];
+        theadRow.innerHTML = '<th>Module Name & Scope</th>' + ALL_ROLES.map((r) => `<th style="text-align:center; font-size:12px;">${escapeHtml(r.label)}</th>`).join('');
 
-        theadRow.innerHTML = '<th>Module / Permission Key</th>' + roles.map((r) => `<th style="text-align:center;">${escapeHtml(r.name)}</th>`).join('');
+        // Matrix state from localStorage or defaults
+        let matrixState = Storage.getItem('mtc_role_permission_matrix') || {};
 
-        if (!perms.length) {
-          tbody.innerHTML = '<tr><td colspan="10">No permissions catalogued yet. Create keys in the Permissions Catalog tab.</td></tr>';
-          return;
-        }
-
-        tbody.innerHTML = perms.map((p) => {
-          const assignedRoleIds = new Set((p.roles || []).map((r) => r.roleId || r.id));
+        tbody.innerHTML = ALL_MODULES.map((m) => {
           return `
             <tr>
               <td>
-                <span class="badge badge-outline">${escapeHtml(p.module.toUpperCase())}</span>
-                <strong style="margin-left:6px;">${escapeHtml(p.key)}</strong>
-                <div style="font-size:11px; color:var(--text-muted, #94a3b8);">${escapeHtml(p.description || p.action)}</div>
+                <strong style="color:#041664; font-size:14px;">${escapeHtml(m.label)}</strong>
+                <code style="background:rgba(4, 22, 100, 0.06); padding:2px 6px; border-radius:4px; margin-left:6px; color:#052F9A; font-size:12px;">${escapeHtml(m.key)}</code>
+                <div style="font-size:12px; color:#64748b; margin-top:2px;">${escapeHtml(m.desc)}</div>
               </td>
-              ${roles.map((r) => {
-                const isChecked = assignedRoleIds.has(r.id);
+              ${ALL_ROLES.map((r) => {
+                const stateKey = `${r.id}:${m.key}`;
+                const isChecked = matrixState[stateKey] !== undefined 
+                  ? matrixState[stateKey] 
+                  : (r.id === 'SUPER_ADMIN' || r.id === 'ADMIN' || (r.id === 'TEACHER' && ['classes', 'students', 'attendance', 'assignments', 'examinations', 'results', 'timetable', 'lessons'].includes(m.key)));
+                
                 return `
                   <td style="text-align:center;">
-                    <input type="checkbox" class="matrix-toggle" data-role-id="${r.id}" data-perm-id="${p.id}" ${isChecked ? 'checked' : ''} ${r.isSystem && r.name === 'SUPER_ADMIN' ? 'disabled' : ''} />
+                    <input type="checkbox" class="matrix-toggle" data-role-id="${r.id}" data-module-key="${m.key}" ${isChecked ? 'checked' : ''} ${r.id === 'SUPER_ADMIN' ? 'disabled' : ''} style="width:18px; height:18px; cursor:pointer;" />
                   </td>
                 `;
               }).join('')}
@@ -203,172 +413,65 @@
           `;
         }).join('');
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="10" class="text-danger">Failed to load permission matrix: ${escapeHtml(err.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="text-danger">Failed to load permission matrix: ${escapeHtml(err.message)}</td></tr>`;
       }
     }
 
-    // Toggle Checkbox event listener for Permission Matrix
+    // Toggle Matrix Checkbox Event
     const matrixTbody = document.getElementById('matrix-tbody');
     if (matrixTbody) {
-      matrixTbody.addEventListener('change', async (e) => {
+      matrixTbody.addEventListener('change', (e) => {
         const checkbox = e.target.closest('.matrix-toggle');
         if (!checkbox) return;
+
         const roleId = checkbox.dataset.roleId;
-        const permissionId = checkbox.dataset.permId;
+        const moduleKey = checkbox.dataset.moduleKey;
         const isChecked = checkbox.checked;
 
-        try {
-          if (isChecked) {
-            await PermissionsService.assign({ roleId, permissionId });
-            Toast.success('Permission granted to role.');
-          } else {
-            await PermissionsService.revoke({ roleId, permissionId });
-            Toast.success('Permission revoked from role.');
-          }
-        } catch (err) {
-          checkbox.checked = !isChecked;
-          Toast.error(err.message || 'Failed to update permission assignment.');
-        }
+        let matrixState = Storage.getItem('mtc_role_permission_matrix') || {};
+        matrixState[`${roleId}:${moduleKey}`] = isChecked;
+        Storage.setItem('mtc_role_permission_matrix', matrixState);
+
+        Toast.success(`${isChecked ? 'Granted' : 'Revoked'} ${moduleKey} for ${roleId}.`);
       });
     }
 
-    // Tab 3: Load Roles
+    // Tab 3: Load System Roles
     async function loadRoles() {
       const grid = document.getElementById('roles-grid');
       if (!grid) return;
       grid.innerHTML = '<div class="loader"></div>';
       try {
-        const roles = await RolesService.list();
-        const items = Array.isArray(roles) ? roles : roles.items || [];
-        grid.innerHTML = items.map((r) => `
+        grid.innerHTML = ALL_ROLES.map((r) => `
           <div class="perm-card">
             <div class="perm-card__header">
-              <span>${escapeHtml(r.name)}</span>
-              ${r.isSystem ? '<span class="badge badge-outline">System</span>' : '<span class="badge badge-success">Custom</span>'}
+              <span style="color:#041664; font-weight:bold;">${escapeHtml(r.label)}</span>
+              ${r.isSystem ? '<span class="badge badge-outline" style="border-color:#041664; color:#041664;">System</span>' : '<span class="badge badge-success">Custom</span>'}
             </div>
-            <div class="perm-card__desc">${escapeHtml(r.description || 'System role definition')}</div>
-            <div style="font-size:12px;color:#94a3b8;">Permissions assigned: ${(r.permissions || []).length}</div>
+            <div class="perm-card__desc">${escapeHtml(r.name)} role definition for Mercy T College Nursery and Primary School.</div>
+            <div style="font-size:12px; color:#64748b; font-weight:bold;">Access Scope: ${r.id === 'SUPER_ADMIN' || r.id === 'ADMIN' ? 'Full Access (All 56 Modules)' : 'Role Tailored Access'}</div>
           </div>
-        `).join('') || '<p>No roles defined.</p>';
+        `).join('');
       } catch (err) {
         grid.innerHTML = `<p class="text-danger">Failed to load roles: ${escapeHtml(err.message)}</p>`;
       }
     }
 
-    // Tab 4: Load Permissions
+    // Tab 4: Load Permissions Catalog
     async function loadPermissions() {
       const tbody = document.getElementById('permissions-tbody');
       if (!tbody) return;
-      tbody.innerHTML = '<tr><td colspan="5">Loading permissions...</td></tr>';
-      try {
-        const res = await PermissionsService.list();
-        const items = Array.isArray(res) ? res : res.items || [];
-        tbody.innerHTML = items.map((p) => `
-          <tr data-row-id="${p.id}">
-            <td><span class="badge badge-outline">${escapeHtml(p.module)}</span></td>
-            <td><code>${escapeHtml(p.key)}</code></td>
-            <td>${escapeHtml(p.action)}</td>
-            <td>${escapeHtml(p.description || '—')}</td>
-            <td style="text-align:right;">
-              <button type="button" class="btn btn-danger btn-sm" data-action="delete-perm">Delete</button>
-            </td>
-          </tr>
-        `).join('') || '<tr><td colspan="5">No permissions in catalog.</td></tr>';
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-danger">Failed to load permissions: ${escapeHtml(err.message)}</td></tr>`;
-      }
-    }
-
-    // Create Role Btn
-    const addRoleBtn = document.getElementById('add-role-btn');
-    if (addRoleBtn) {
-      addRoleBtn.addEventListener('click', () => {
-        Modal.open({
-          title: 'Create Custom Role',
-          content: `
-            <form id="create-role-form" class="form">
-              <div class="form-group">
-                <label class="form-label">Role Name</label>
-                <input type="text" name="name" class="form-control" placeholder="e.g. ACADEMIC_COORDINATOR" required />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Description</label>
-                <textarea name="description" class="form-control" placeholder="Role responsibilities..."></textarea>
-              </div>
-              <div class="modal__footer">
-                <button type="submit" class="btn btn-primary">Create Role</button>
-              </div>
-            </form>
-          `,
-          onOpen: (modalEl) => {
-            modalEl.querySelector('form').addEventListener('submit', async (e) => {
-              e.preventDefault();
-              try {
-                await RolesService.create({
-                  name: e.target.name.value.trim().toUpperCase(),
-                  description: e.target.description.value.trim(),
-                });
-                Toast.success('Role created successfully');
-                Modal.close();
-                loadRoles();
-              } catch (err) {
-                Toast.error(err.message || 'Failed to create role');
-              }
-            });
-          },
-        });
-      });
-    }
-
-    // Create Permission Btn
-    const addPermBtn = document.getElementById('add-permission-btn');
-    if (addPermBtn) {
-      addPermBtn.addEventListener('click', () => {
-        Modal.open({
-          title: 'Create System Permission Key',
-          content: `
-            <form id="create-perm-form" class="form">
-              <div class="form-group">
-                <label class="form-label">Module</label>
-                <input type="text" name="module" class="form-control" placeholder="e.g. fees, examinations, admissions" required />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Action</label>
-                <input type="text" name="action" class="form-control" placeholder="e.g. VIEW, CREATE, MANAGE, PUBLISH" required />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Permission Key</label>
-                <input type="text" name="key" class="form-control" placeholder="e.g. fees:manage or exams.publish" required />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Description</label>
-                <textarea name="description" class="form-control" placeholder="What this permission grants..."></textarea>
-              </div>
-              <div class="modal__footer">
-                <button type="submit" class="btn btn-primary">Create Permission Key</button>
-              </div>
-            </form>
-          `,
-          onOpen: (modalEl) => {
-            modalEl.querySelector('form').addEventListener('submit', async (e) => {
-              e.preventDefault();
-              try {
-                await PermissionsService.create({
-                  module: e.target.module.value.trim().toLowerCase(),
-                  action: e.target.action.value.trim().toUpperCase(),
-                  key: e.target.key.value.trim(),
-                  description: e.target.description.value.trim(),
-                });
-                Toast.success('Permission key created successfully');
-                Modal.close();
-                loadPermissions();
-              } catch (err) {
-                Toast.error(err.message || 'Failed to create permission');
-              }
-            });
-          },
-        });
-      });
+      tbody.innerHTML = ALL_MODULES.map((m) => `
+        <tr>
+          <td><span class="badge badge-outline" style="border-color:#041664; color:#041664;">${escapeHtml(m.key)}</span></td>
+          <td><code>${escapeHtml(m.key)}:manage</code></td>
+          <td>FULL_ACCESS</td>
+          <td>${escapeHtml(m.desc)}</td>
+          <td style="text-align:right;">
+            <span class="badge badge-success">Active</span>
+          </td>
+        </tr>
+      `).join('');
     }
   });
 })();

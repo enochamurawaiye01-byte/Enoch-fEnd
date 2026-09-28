@@ -318,8 +318,8 @@
     aside.id = containerId;
     aside.innerHTML = `
       <div class="sidebar__brand">
-        <span class="sidebar__mark" style="background: #c53030; color: #ffffff;">MTC</span>
-        <span class="sidebar__name">Mercy T College<small style="color:#c53030; font-weight:bold;">Nursery & Primary</small></span>
+        <img src="${rootPrefix()}logo.png" alt="MTC Logo" style="width:36px; height:36px; object-fit:contain; flex-shrink:0;" />
+        <span class="sidebar__name">Mercy T College<small style="color:#B02032; font-weight:bold; font-style:italic;">Knowledge is Light</small></span>
       </div>
       <button type="button" class="sidebar__collapse-btn" id="sidebar-collapse-btn" aria-label="Collapse sidebar">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>

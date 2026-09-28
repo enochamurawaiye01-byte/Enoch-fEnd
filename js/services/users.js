@@ -31,7 +31,8 @@
       return ApiClient.unwrapItem(payload);
     },
     async delete(id) {
-      return ApiClient.patch(USERS.STATUS(id), { status: 'DEACTIVATED' });
+      const payload = await ApiClient.delete(USERS.BY_ID(id));
+      return ApiClient.unwrapItem(payload);
     },
   };
 })(window);

@@ -23,6 +23,27 @@
       { id: 'PARENT', name: 'PARENT', label: 'Parent', isSystem: false },
     ];
 
+    const ROLE_MODULE_MAP = {
+      SUPER_ADMIN: ['All 56 Backend Modules', 'Full Control', 'Audit Logs', 'Matrix Config'],
+      ADMIN: ['55 Operational Modules', 'User Management', 'School Settings', 'Academic Control'],
+      MANAGEMENT: ['analytics', 'reports', 'financial_reports', 'management', 'students', 'staff'],
+      PRINCIPAL: ['teachers', 'students', 'classes', 'report_cards', 'discipline', 'academic_sessions'],
+      VICE_PRINCIPAL: ['teachers', 'students', 'classes', 'discipline', 'timetable', 'events'],
+      HEAD_TEACHER: ['teachers', 'students', 'classes', 'lessons', 'assignments', 'examinations'],
+      BURSAR: ['fees', 'invoices', 'payments', 'receipts', 'reports', 'inventory'],
+      TEACHER: ['classes', 'students', 'attendance', 'assignments', 'examinations', 'results', 'timetable', 'lessons'],
+      STAFF: ['announcements', 'events', 'documents', 'messaging', 'notifications'],
+      STUDENT: ['dashboards', 'assignments', 'examinations', 'report_cards', 'attendance', 'timetable'],
+      PARENT: ['parents', 'students', 'report_cards', 'invoices', 'payments', 'messaging'],
+    };
+
+    function formatRoleName(roleStr) {
+      if (!roleStr) return 'Unassigned';
+      const found = ALL_ROLES.find((r) => r.id === roleStr || r.name === roleStr);
+      if (found) return found.label;
+      return roleStr.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    }
+
     // All 56 Backend Modules from College/src/modules/
     const ALL_MODULES = [
       { key: 'admissions', label: 'Admissions & Applications', desc: 'Manage student admission applications, approvals, and student conversions' },
@@ -316,29 +337,103 @@
       }
 
       if (action === 'change-role') {
-        const rolesList = ['SUPER_ADMIN', 'ADMIN', 'MANAGEMENT', 'PRINCIPAL', 'VICE_PRINCIPAL', 'HEAD_TEACHER', 'BURSAR', 'TEACHER', 'STAFF', 'STUDENT', 'PARENT'];
+        const currentRole = (rowData?.role || 'STAFF').toUpperCase();
         Modal.open({
-          title: 'Change User Role',
+          title: `Change & Edit User Role — ${userName}`,
+          size: 'md',
           content: `
-            <form id="change-role-form" class="form">
-              <div class="form-group">
-                <label class="form-label">Select New Role</label>
-                <select name="role" class="form-control" required>
-                  ${rolesList.map((r) => `<option value="${r}">${titleCaseFromEnum(r)}</option>`).join('')}
-                </select>
+            <div class="user-role-modal-wrap" style="padding: 4px 0;">
+              <div class="active-role-banner" style="background:#041664; color:#ffffff; padding:14px 18px; border-radius:8px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 6px rgba(4,22,100,0.15);">
+                <div>
+                  <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; opacity:0.85;">Current Active Role</div>
+                  <div style="font-size:18px; font-weight:bold; margin-top:2px; color:#ffffff;">${escapeHtml(formatRoleName(currentRole))} <span style="font-size:13px; font-weight:normal; opacity:0.85;">(${currentRole})</span></div>
+                </div>
+                <span class="badge" style="background:#04A1D0; color:#fff; font-size:12px; padding:6px 12px; font-weight:bold; border-radius:20px;">✓ Active</span>
               </div>
-              <div class="modal__footer">
-                <button type="submit" class="btn btn-primary" style="background:#052F9A; border-color:#052F9A;">Update Role</button>
+
+              <div class="edit-role-controls" style="margin-bottom: 16px;">
+                <label style="font-weight:bold; color:#041664; display:block; margin-bottom:8px; font-size:14px;">Edit Role Action</label>
+                <div style="display:flex; gap:10px;">
+                  <button type="button" class="btn btn-primary role-toggle-btn active" id="btn-action-add" style="flex:1; background:#052F9A; border-color:#052F9A; font-weight:bold; font-size:13px;">Assign / Add Role</button>
+                  <button type="button" class="btn btn-outline role-toggle-btn" id="btn-action-remove" style="flex:1; border-color:#B02032; color:#B02032; font-weight:bold; font-size:13px;">Remove Role (Reset)</button>
+                </div>
               </div>
-            </form>
+
+              <form id="change-role-form" class="form">
+                <div id="role-select-box">
+                  <label class="form-label" style="font-weight:bold; color:#041664; font-size:13px;">Select Target Role from Defined System Roles</label>
+                  <div class="roles-grid-select" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap:10px; max-height:280px; overflow-y:auto; padding:4px;">
+                    ${ALL_ROLES.map((r) => {
+                      const isSelected = r.id === currentRole;
+                      return `
+                        <label class="role-card-opt ${isSelected ? 'active-opt' : ''}" style="border:2px solid ${isSelected ? '#052F9A' : '#e2e8f0'}; background:${isSelected ? 'rgba(5, 47, 154, 0.06)' : '#ffffff'}; padding:10px 12px; border-radius:8px; cursor:pointer; display:block; transition:all 0.2s ease;">
+                          <div style="display:flex; align-items:center; justify-content:space-between;">
+                            <strong style="color:#041664; font-size:14px;">${escapeHtml(r.label)}</strong>
+                            <input type="radio" name="role" value="${r.id}" ${isSelected ? 'checked' : ''} style="width:16px; height:16px; cursor:pointer;" />
+                          </div>
+                          <div style="font-size:11px; color:#64748b; margin-top:4px;">Code: <code>${r.id}</code></div>
+                        </label>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+
+                <div id="role-remove-warning" style="display:none; background:#fff5f5; border:1px solid #fecaca; padding:14px; border-radius:8px; margin-top:10px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="color:#B02032; font-size:18px;">⚠️</span>
+                    <strong style="color:#B02032; font-size:14px;">Remove Active Role Override</strong>
+                  </div>
+                  <p style="color:#64748b; margin:6px 0 0 0; font-size:13px; line-height:1.5;">
+                    Removing the active role override will reset this user account to default basic <strong>STAFF</strong> profile and revoke custom administrative privileges.
+                  </p>
+                </div>
+
+                <div class="modal__footer" style="margin-top:20px; text-align:right;">
+                  <button type="submit" class="btn btn-primary" id="submit-role-btn" style="background:#052F9A; border-color:#052F9A; font-weight:bold; padding:8px 20px;">Save Role Changes</button>
+                </div>
+              </form>
+            </div>
           `,
           onOpen: (modalEl) => {
-            modalEl.querySelector('form').addEventListener('submit', async (e) => {
+            const btnAdd = modalEl.querySelector('#btn-action-add');
+            const btnRemove = modalEl.querySelector('#btn-action-remove');
+            const roleSelectBox = modalEl.querySelector('#role-select-box');
+            const roleRemoveWarning = modalEl.querySelector('#role-remove-warning');
+            const form = modalEl.querySelector('#change-role-form');
+            let isRemoveMode = false;
+
+            if (btnAdd && btnRemove) {
+              btnAdd.addEventListener('click', () => {
+                isRemoveMode = false;
+                btnAdd.classList.add('active');
+                btnAdd.style.background = '#052F9A';
+                btnAdd.style.color = '#ffffff';
+                btnRemove.classList.remove('active');
+                btnRemove.style.background = 'transparent';
+                btnRemove.style.color = '#B02032';
+                roleSelectBox.style.display = 'block';
+                roleRemoveWarning.style.display = 'none';
+              });
+
+              btnRemove.addEventListener('click', () => {
+                isRemoveMode = true;
+                btnRemove.classList.add('active');
+                btnRemove.style.background = '#B02032';
+                btnRemove.style.color = '#ffffff';
+                btnAdd.classList.remove('active');
+                btnAdd.style.background = 'transparent';
+                btnAdd.style.color = '#052F9A';
+                roleSelectBox.style.display = 'none';
+                roleRemoveWarning.style.display = 'block';
+              });
+            }
+
+            form.addEventListener('submit', async (e) => {
               e.preventDefault();
-              const newRole = e.target.role.value;
+              const targetRole = isRemoveMode ? 'STAFF' : form.role.value;
               try {
-                await RolesService.changeUserRole(userId, newRole);
-                Toast.success(`Role changed to ${titleCaseFromEnum(newRole)}`);
+                await RolesService.changeUserRole(userId, targetRole);
+                Toast.success(`Role updated to ${formatRoleName(targetRole)}. Profile & modules provisioned!`);
                 Modal.close();
                 userTable.reload();
               } catch (err) {
@@ -349,26 +444,90 @@
         });
       }
 
-      if (action === 'manage-perms') {
-        try {
-          Modal.open({
-            title: `Grant Module Permission to ${userName}`,
-            size: 'md',
-            content: `
-              <form id="grant-perm-form" class="form">
-                <div class="form-group">
-                  <label class="form-label">Select Module to Grant Access</label>
-                  <select name="moduleKey" class="form-control" required>
-                    ${ALL_MODULES.map((m) => `<option value="${m.key}">${m.label} (${m.key})</option>`).join('')}
-                  </select>
+      if (action === 'grant-access' || action === 'manage-perms') {
+        const currentRole = (rowData?.role || 'STAFF').toUpperCase();
+        Modal.open({
+          title: `Grant Access & Role Entitlements — ${userName}`,
+          size: 'lg',
+          content: `
+            <div class="grant-access-modal-wrap" style="padding: 4px 0;">
+              <div class="user-header-banner" style="background:#041664; color:#ffffff; padding:14px 18px; border-radius:8px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; opacity:0.85;">User Account Profile</div>
+                  <div style="font-size:18px; font-weight:bold; margin-top:2px; color:#ffffff;">${escapeHtml(userName)}</div>
+                  <div style="font-size:12px; opacity:0.85;">${escapeHtml(rowData ? rowData.email : '')}</div>
                 </div>
-                <div class="modal__footer">
-                  <button type="submit" class="btn btn-primary" style="background:#052F9A; border-color:#052F9A;">Grant Module Access</button>
+                <div>
+                  <span class="badge" style="background:#052F9A; color:#fff; font-size:13px; padding:6px 14px; font-weight:bold; border:1px solid rgba(255,255,255,0.3);">
+                    Active Role: ${escapeHtml(formatRoleName(currentRole))}
+                  </span>
                 </div>
-              </form>
-            `,
-            onOpen: (modalEl) => {
-              modalEl.querySelector('form').addEventListener('submit', async (e) => {
+              </div>
+
+              <p style="color:#475569; font-size:13px; margin-bottom:14px; line-height:1.5;">
+                Select any defined role below to grant total module access under that role to <strong>${escapeHtml(userName)}</strong>. Granting a role provisions linked Student/Staff/Parent profile records, generates identification numbers, and opens workspace permissions.
+              </p>
+
+              <div class="defined-roles-list" style="display:flex; flex-direction:column; gap:10px; max-height:340px; overflow-y:auto; padding-right:4px;">
+                ${ALL_ROLES.map((r) => {
+                  const modules = ROLE_MODULE_MAP[r.id] || [];
+                  const isCurrent = r.id === currentRole;
+                  return `
+                    <div class="role-def-card" style="border: 1px solid ${isCurrent ? '#052F9A' : '#cbd5e1'}; background: ${isCurrent ? 'rgba(5, 47, 154, 0.04)' : '#ffffff'}; border-radius:8px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; transition:all 0.2s ease;">
+                      <div style="flex:1; padding-right:15px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                          <h4 style="margin:0; color:#041664; font-size:15px; font-weight:bold;">${escapeHtml(r.label)}</h4>
+                          <code style="background:rgba(4, 22, 100, 0.08); color:#052F9A; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold;">${r.id}</code>
+                          ${isCurrent ? '<span class="badge badge-success" style="font-size:11px; padding:2px 8px;">Active Role</span>' : ''}
+                        </div>
+                        <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:4px;">
+                          ${modules.map((m) => `<span style="background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; border-radius:4px; padding:2px 6px; font-size:11px;">${m}</span>`).join('')}
+                        </div>
+                      </div>
+                      <div>
+                        <button type="button" class="btn ${isCurrent ? 'btn-secondary' : 'btn-primary'} btn-grant-role-action" data-role-id="${r.id}" data-role-label="${escapeHtml(r.label)}" style="${isCurrent ? '' : 'background:#052F9A; border-color:#052F9A;'} font-size:12px; font-weight:bold; padding:8px 14px;">
+                          ${isCurrent ? 'Current Role' : 'Grant This Role & Modules'}
+                        </button>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+
+              <div style="margin-top:16px; padding-top:14px; border-top:1px dashed #cbd5e1;">
+                <details style="cursor:pointer;">
+                  <summary style="font-weight:bold; color:#041664; font-size:13px;">Or Grant Single Module Permission Override</summary>
+                  <form id="grant-single-module-form" class="form" style="margin-top:10px;">
+                    <div class="form-group" style="display:flex; gap:10px; margin-bottom:0;">
+                      <select name="moduleKey" class="form-control" style="flex:1;" required>
+                        ${ALL_MODULES.map((m) => `<option value="${m.key}">${m.label} (${m.key})</option>`).join('')}
+                      </select>
+                      <button type="submit" class="btn btn-outline" style="border-color:#052F9A; color:#052F9A; font-weight:bold;">Grant Single Module</button>
+                    </div>
+                  </form>
+                </details>
+              </div>
+            </div>
+          `,
+          onOpen: (modalEl) => {
+            modalEl.querySelectorAll('.btn-grant-role-action').forEach((btn) => {
+              btn.addEventListener('click', async () => {
+                const targetRoleId = btn.dataset.roleId;
+                const targetRoleLabel = btn.dataset.roleLabel;
+                try {
+                  await RolesService.changeUserRole(userId, targetRoleId);
+                  Toast.success(`Granted ${targetRoleLabel} access to ${userName}. All role modules provisioned!`);
+                  Modal.close();
+                  userTable.reload();
+                } catch (err) {
+                  Toast.error(err.message || 'Failed to grant role permissions.');
+                }
+              });
+            });
+
+            const singleForm = modalEl.querySelector('#grant-single-module-form');
+            if (singleForm) {
+              singleForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const moduleKey = e.target.moduleKey.value;
                 try {
@@ -380,14 +539,12 @@
                   Toast.success(`Granted access to ${moduleKey} module.`);
                   Modal.close();
                 } catch (err) {
-                  Toast.error(err.message || 'Failed to grant permission');
+                  Toast.error(err.message || 'Failed to grant module access.');
                 }
               });
-            },
-          });
-        } catch (err) {
-          Toast.error(err.message || 'Failed to load permissions');
-        }
+            }
+          },
+        });
       }
     });
 

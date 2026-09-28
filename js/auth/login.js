@@ -28,25 +28,52 @@
       showError('Your session has expired. Please log in again.');
     }
 
-    togglePasswordBtn.addEventListener('click', () => {
-      const isPassword = passwordInput.type === 'password';
-      passwordInput.type = isPassword ? 'text' : 'password';
-      togglePasswordBtn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
-      togglePasswordBtn.textContent = isPassword ? 'Hide' : 'Show';
-    });
+    if (togglePasswordBtn && passwordInput) {
+      togglePasswordBtn.addEventListener('click', () => {
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+        togglePasswordBtn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+        togglePasswordBtn.textContent = isPassword ? 'Hide' : 'Show';
+      });
+    }
 
     function showError(message) {
-      errorBox.textContent = message;
-      errorBox.hidden = false;
+      if (errorBox) {
+        errorBox.textContent = message;
+        errorBox.hidden = false;
+        errorBox.style.color = '#B02032';
+        errorBox.style.background = '#fff5f5';
+        errorBox.style.border = '1px solid #fecaca';
+      }
     }
 
     function clearErrors() {
-      errorBox.hidden = true;
-      errorBox.textContent = '';
-      fieldErrorEmail.textContent = '';
-      fieldErrorPassword.textContent = '';
-      emailInput.classList.remove('input-error');
-      passwordInput.classList.remove('input-error');
+      if (errorBox) {
+        errorBox.hidden = true;
+        errorBox.textContent = '';
+      }
+      if (fieldErrorEmail) {
+        fieldErrorEmail.textContent = '';
+        fieldErrorEmail.style.display = 'none';
+      }
+      if (fieldErrorPassword) {
+        fieldErrorPassword.textContent = '';
+        fieldErrorPassword.style.display = 'none';
+      }
+      if (emailInput) emailInput.classList.remove('input-error');
+      if (passwordInput) passwordInput.classList.remove('input-error');
+    }
+
+    function setFieldError(el, errSpan, msg) {
+      if (errSpan) {
+        errSpan.textContent = msg;
+        errSpan.style.display = 'block';
+        errSpan.style.color = '#B02032';
+        errSpan.style.fontWeight = 'bold';
+        errSpan.style.fontSize = '12px';
+        errSpan.style.marginTop = '4px';
+      }
+      if (el) el.classList.add('input-error');
     }
 
     function setLoading(isLoading) {
@@ -71,14 +98,9 @@
       );
 
       if (!valid) {
-        if (errors.email) {
-          fieldErrorEmail.textContent = errors.email;
-          emailInput.classList.add('input-error');
-        }
-        if (errors.password) {
-          fieldErrorPassword.textContent = errors.password;
-          passwordInput.classList.add('input-error');
-        }
+        if (errors.email) setFieldError(emailInput, fieldErrorEmail, errors.email);
+        if (errors.password) setFieldError(passwordInput, fieldErrorPassword, errors.password);
+        showError('Please fix the highlighted errors before signing in.');
         return;
       }
 

@@ -17,23 +17,27 @@
   <button type="button" class="auth-theme-toggle" id="auth-theme-toggle">
     <span id="theme-toggle-label">Dark Mode</span>
   </button>
+  
+  <!-- Left-Side Brand Panel -->
   <section class="auth-brand-panel">
     <div class="auth-brand-mark">
       <img src="logo.png" alt="Mercy T College Logo" class="auth-brand-logo-img" />
     </div>
-    <div class="auth-brand-copy">
-      <h2>Mercy T College</h2>
-      <p style="color:#B02032; font-weight:800; margin-top:-4px; text-transform:uppercase; font-size:14px;">Nursery and Primary School</p>
-      <div class="auth-brand-motto">MOTTO: "Knowledge is Light"</div>
-      <p>Apply for a student, teacher, or parent account. School administration will review and process your application.</p>
-      <div class="auth-brand-highlights">
+    <div class="auth-brand-copy" style="text-align: left;">
+      <h2 style="text-align: left;">Mercy T College</h2>
+      <p style="color:#B02032; font-weight:800; margin-top:-4px; text-transform:uppercase; font-size:14px; text-align: left;">Nursery and Primary School</p>
+      <div class="auth-brand-motto" style="text-align: left;">MOTTO: "Knowledge is Light"</div>
+      <p style="text-align: left;">Apply for a student, teacher, or parent account. School administration will review and process your application.</p>
+      <div class="auth-brand-highlights" style="text-align: left;">
         <div class="auth-brand-highlight">Nurturing Leaders with Character, Discipline & Excellence.</div>
         <div class="auth-brand-highlight">Student and teacher workspaces tailored to class levels.</div>
         <div class="auth-brand-highlight">Complete medical and academic record tracking from day one.</div>
       </div>
     </div>
-    <div class="auth-brand-foot">&copy; <span id="year-brand"></span> Mercy T College Nursery and Primary School.</div>
+    <div class="auth-brand-foot" style="text-align: left;">&copy; <span id="year-brand"></span> Mercy T College Nursery and Primary School. All rights reserved.</div>
   </section>
+
+  <!-- Right-Side Form Panel -->
   <section class="auth-form-panel">
     <div class="auth-card" style="max-width: 580px;">
       <div class="auth-school-intro" style="display:flex; align-items:center; gap:12px;">
@@ -43,11 +47,12 @@
           <div style="font-size:12px; color:#B02032; font-style:italic; font-weight:bold;">"Knowledge is Light"</div>
         </div>
       </div>
+
       <div class="auth-card-head">
         <h1 style="color:#041664;">Apply for Registration</h1>
-        <p>Choose your role and fill in your academic & medical details.</p>
+        <p>Fill in your essential details to submit your registration application.</p>
       </div>
-      <div class="alert alert-error auth-alert" id="register-error" role="alert" hidden></div>
+
       <div class="alert alert-success auth-alert" id="register-success" role="status" hidden></div>
       
       <form id="register-form" class="auth-form" novalidate>
@@ -64,58 +69,61 @@
           <div class="form-group">
             <label class="form-label" for="firstName">First name <span style="color:#B02032;">*</span></label>
             <input id="firstName" name="firstName" required placeholder="e.g. Samuel" />
+            <span class="form-error" id="error-firstName"></span>
           </div>
           <div class="form-group">
             <label class="form-label" for="lastName">Last name <span style="color:#B02032;">*</span></label>
             <input id="lastName" name="lastName" required placeholder="e.g. Adebayo" />
+            <span class="form-error" id="error-lastName"></span>
           </div>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="email">Email address <span style="color:#B02032;">*</span></label>
-          <input type="email" id="email" name="email" autocomplete="email" required placeholder="e.g. student@gmail.com" />
-        </div>
-
-        <div class="form-row">
-          <div class="form-group" style="position:relative;">
-            <label class="form-label" for="password">Password <span style="color:#B02032;">*</span></label>
-            <input type="password" id="password" name="password" autocomplete="new-password" required />
-            <button type="button" class="btn-toggle-pw" data-target="password" style="position:absolute; right:10px; top:36px; background:none; border:none; cursor:pointer; color:#64748b;">👁️</button>
-          </div>
-          <div class="form-group" style="position:relative;">
-            <label class="form-label" for="confirmPassword">Confirm password <span style="color:#B02032;">*</span></label>
-            <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required />
-            <button type="button" class="btn-toggle-pw" data-target="confirmPassword" style="position:absolute; right:10px; top:36px; background:none; border:none; cursor:pointer; color:#64748b;">👁️</button>
-          </div>
+          <input type="email" id="email" name="email" autocomplete="email" required placeholder="e.g. user@gmail.com" />
+          <span class="form-error" id="error-email"></span>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="phoneNumber">Phone number <span style="color:#B02032;">*</span></label>
-          <input type="tel" id="phoneNumber" name="phoneNumber" required placeholder="e.g. 08012345678" />
+          <input type="tel" id="phoneNumber" name="phoneNumber" required placeholder="e.g. +2348012345678" />
+          <span class="form-error" id="error-phoneNumber"></span>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="dateOfBirth">Date of birth</label>
-            <input type="date" id="dateOfBirth" name="dateOfBirth" />
+            <label class="form-label" for="password">Password <span style="color:#B02032;">*</span></label>
+            <div class="input-group">
+              <input type="password" id="password" name="password" autocomplete="new-password" required placeholder="Create password" />
+              <button type="button" class="input-group__action toggle-pw-btn" data-target="password" aria-label="Show password">Show</button>
+            </div>
+            <!-- Password Strength Tracker -->
+            <div id="pw-strength-container" style="margin-top:6px; display:none;">
+              <div style="height:4px; background:#e2e8f0; border-radius:2px; overflow:hidden;">
+                <div id="pw-strength-bar" style="width:0%; height:100%; transition:all 0.3s ease; background:#ef4444;"></div>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; font-size:11px;">
+                <span style="color:#64748b;">Password Strength:</span>
+                <strong id="pw-strength-text" style="color:#ef4444;">Weak</strong>
+              </div>
+            </div>
+            <span class="form-error" id="error-password"></span>
           </div>
+
           <div class="form-group">
-            <label class="form-label" for="gender">Gender</label>
-            <select id="gender" name="gender">
-              <option value="">Select gender</option>
-              <option value="MALE">Male</option>
-              <option value="FEMALE">Female</option>
-              <option value="OTHER">Other</option>
-            </select>
+            <label class="form-label" for="confirmPassword">Confirm password <span style="color:#B02032;">*</span></label>
+            <div class="input-group">
+              <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required placeholder="Re-enter password" />
+              <button type="button" class="input-group__action toggle-pw-btn" data-target="confirmPassword" aria-label="Show password">Show</button>
+            </div>
+            <span class="form-error" id="error-confirmPassword"></span>
           </div>
         </div>
 
-        <!-- Academic Class & Term Progress Fields -->
-        <div id="student-academic-fields" style="background: rgba(4, 22, 100, 0.04); padding: 14px; border-radius: 8px; margin: 12px 0; border: 1px solid rgba(4, 22, 100, 0.15);">
-          <h4 style="margin: 0 0 10px 0; color: #041664; font-size: 14px; font-weight: bold;">Academic Class & Term Details</h4>
-          
-          <div class="form-row">
-            <div class="form-group">
+        <!-- Essential Student Academic Class Section -->
+        <div id="student-academic-fields" style="background: rgba(4, 22, 100, 0.03); padding: 12px 14px; border-radius: 8px; margin: 10px 0; border: 1px solid rgba(4, 22, 100, 0.12);">
+          <div class="form-row" style="margin-bottom:0;">
+            <div class="form-group" style="margin-bottom:0;">
               <label class="form-label" for="currentClass">Current Class</label>
               <select id="currentClass" name="currentClass">
                 <option value="">Select Current Class</option>
@@ -129,7 +137,7 @@
                 <option value="Primary 6">Primary 6</option>
               </select>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom:0;">
               <label class="form-label" for="currentTerm">Current Term</label>
               <select id="currentTerm" name="currentTerm">
                 <option value="">Select Current Term</option>
@@ -139,128 +147,102 @@
               </select>
             </div>
           </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="targetClass">Class Going To (Target Class)</label>
-              <select id="targetClass" name="targetClass">
-                <option value="">Select Target Class</option>
-                <option value="Nursery 1">Nursery 1</option>
-                <option value="Nursery 2">Nursery 2</option>
-                <option value="Primary 1">Primary 1</option>
-                <option value="Primary 2">Primary 2</option>
-                <option value="Primary 3">Primary 3</option>
-                <option value="Primary 4">Primary 4</option>
-                <option value="Primary 5">Primary 5</option>
-                <option value="Primary 6">Primary 6</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="targetTerm">Term Going To (Target Term)</label>
-              <select id="targetTerm" name="targetTerm">
-                <option value="">Select Target Term</option>
-                <option value="First Term">First Term</option>
-                <option value="Second Term">Second Term</option>
-                <option value="Third Term">Third Term</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Medical Information Questions -->
-        <div id="medical-info-fields" style="background: rgba(176, 32, 50, 0.04); padding: 14px; border-radius: 8px; margin: 12px 0; border: 1px solid rgba(176, 32, 50, 0.2);">
-          <h4 style="margin: 0 0 10px 0; color: #B02032; font-size: 14px; font-weight: bold;">Medical & Health Record</h4>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="bloodGroup">Blood Group</label>
-              <select id="bloodGroup" name="bloodGroup">
-                <option value="">Select Blood Group</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="genotype">Genotype</label>
-              <select id="genotype" name="genotype">
-                <option value="">Select Genotype</option>
-                <option value="AA">AA</option>
-                <option value="AS">AS</option>
-                <option value="SS">SS</option>
-                <option value="AC">AC</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="allergies">Known Allergies (if any)</label>
-            <input id="allergies" name="allergies" placeholder="e.g. Peanuts, Penicillin, Dust, Asthma, None" />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="emergencyContact">Emergency Contact (Name & Phone)</label>
-            <input id="emergencyContact" name="emergencyContact" placeholder="e.g. Mrs. Adebayo - 08098765432" />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="medicalNotes">Additional Medical / Special Care Notes</label>
-            <textarea id="medicalNotes" name="medicalNotes" rows="2" placeholder="Provide any special instructions for teachers or school nurse..."></textarea>
-          </div>
-        </div>
-
-        <!-- Passport / Profile Photo Upload -->
-        <div class="form-group" style="margin: 12px 0;">
-          <label class="form-label" for="profilePhotoInput">Passport Photo / Profile Picture</label>
-          <input type="file" id="profilePhotoInput" accept="image/*" style="padding: 6px;" />
-          <input type="hidden" id="profileImageUrl" name="profileImageUrl" />
-          <div id="photo-preview-box" style="margin-top: 6px; display: none; align-items: center; gap: 10px;">
-            <img id="photo-preview-img" src="" alt="Passport Preview" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #041664;" />
-            <span style="font-size: 12px; color: #10b981; font-weight: bold;">✓ Passport photo loaded</span>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="address">Address</label>
-          <textarea id="address" name="address" rows="2" placeholder="Home address"></textarea>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="nationality">Nationality</label>
-            <input id="nationality" name="nationality" value="Nigerian" />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="stateOfOrigin">State of Origin</label>
-            <input id="stateOfOrigin" name="stateOfOrigin" placeholder="e.g. Lagos" />
-          </div>
         </div>
 
         <div id="teacher-fields" hidden>
-          <div class="form-group"><label class="form-label" for="staffNumber">Staff Number</label><input id="staffNumber" name="staffNumber" /></div>
+          <div class="form-group"><label class="form-label" for="staffNumber">Staff Identification Number <span style="color:#B02032;">*</span></label><input id="staffNumber" name="staffNumber" placeholder="e.g. MTC/STF/1024" /><span class="form-error" id="error-staffNumber"></span></div>
           <div class="form-group"><label class="form-label" for="jobTitle">Job Title</label><input id="jobTitle" name="jobTitle" value="Teacher" /></div>
           <div class="form-group"><label class="form-label" for="qualification">Qualification</label><input id="qualification" name="qualification" placeholder="e.g. B.Ed / NCE" /></div>
         </div>
 
         <div id="parent-fields" hidden>
-          <div class="form-group"><label class="form-label" for="childRegistrationNumber">Child Registration Number</label><input id="childRegistrationNumber" name="childRegistrationNumber" /></div>
+          <div class="form-group"><label class="form-label" for="childRegistrationNumber">Child Registration Number <span style="color:#B02032;">*</span></label><input id="childRegistrationNumber" name="childRegistrationNumber" placeholder="e.g. 2026-102-MTC" /><span class="form-error" id="error-childRegistrationNumber"></span></div>
           <div class="form-group"><label class="form-label" for="relationship">Relationship to Child</label><input id="relationship" name="relationship" placeholder="Father, Mother, Guardian" /></div>
         </div>
+
+        <!-- Optional Collapsible Details Section -->
+        <details id="optional-details-accordion" style="margin: 12px 0; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 14px; background: rgba(248, 250, 252, 0.6);">
+          <summary style="font-weight: bold; color: #041664; cursor: pointer; font-size: 13px;">Optional Profile Details (Medical, Address & Passport Photo)</summary>
+          <div style="margin-top: 12px;">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="dateOfBirth">Date of Birth</label>
+                <input type="date" id="dateOfBirth" name="dateOfBirth" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="gender">Gender</label>
+                <select id="gender" name="gender">
+                  <option value="">Select gender</option>
+                  <option value="MALE">Male</option>
+                  <option value="FEMALE">Female</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="bloodGroup">Blood Group</label>
+                <select id="bloodGroup" name="bloodGroup">
+                  <option value="">Select Blood Group</option>
+                  <option value="A+">A+</option><option value="A-">A-</option>
+                  <option value="B+">B+</option><option value="B-">B-</option>
+                  <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                  <option value="O+">O+</option><option value="O-">O-</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="genotype">Genotype</label>
+                <select id="genotype" name="genotype">
+                  <option value="">Select Genotype</option>
+                  <option value="AA">AA</option><option value="AS">AS</option>
+                  <option value="SS">SS</option><option value="AC">AC</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="allergies">Known Allergies (if any)</label>
+              <input id="allergies" name="allergies" placeholder="e.g. Peanuts, Dust, Asthma, None" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="emergencyContact">Emergency Contact (Name & Phone)</label>
+              <input id="emergencyContact" name="emergencyContact" placeholder="e.g. Mrs. Adebayo - 08098765432" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="address">Home Address</label>
+              <textarea id="address" name="address" rows="2" placeholder="Residential address"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="profilePhotoInput">Passport Photo</label>
+              <input type="file" id="profilePhotoInput" accept="image/*" style="padding: 6px;" />
+              <input type="hidden" id="profileImageUrl" name="profileImageUrl" />
+              <div id="photo-preview-box" style="margin-top: 6px; display: none; align-items: center; gap: 10px;">
+                <img id="photo-preview-img" src="" alt="Passport Preview" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #041664;" />
+                <span style="font-size: 12px; color: #10b981; font-weight: bold;">✓ Photo selected</span>
+              </div>
+            </div>
+          </div>
+        </details>
 
         <div class="form-group" style="display:flex; align-items:center; gap:8px; margin:14px 0;">
           <input type="checkbox" id="marketingConsent" name="marketingConsent" checked style="width:16px; height:16px; cursor:pointer;" />
           <label for="marketingConsent" style="font-size:13px; color:#64748b; margin:0; cursor:pointer;">Send admission notifications and updates to my email address.</label>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block btn-lg" id="register-submit" style="background-color: #052F9A; border-color: #052F9A;">Submit Student Application</button>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="register-submit" style="background-color: #052F9A; border-color: #052F9A; font-weight: bold; height: 46px;">Submit Application</button>
+
+        <!-- Error Container Placed Directly Under Submit Button -->
+        <div class="alert alert-error auth-alert" id="submit-error-box" role="alert" style="margin-top:14px; border-radius:8px; padding:10px 14px; font-weight:bold; font-size:13px;" hidden></div>
       </form>
 
-      <p class="auth-form-foot"><span>Already registered?</span> <a href="login.html" style="color: #B02032; font-weight: bold;">Sign in here</a></p>
+      <div class="auth-card-footer" style="margin-top:20px; padding-top:14px; border-top:1px solid #EBEBED; display:flex; justify-content:space-between; align-items:center; font-size:13px; color:#475569;">
+        <span>Already registered?</span>
+        <a href="login.html" style="color: #B02032; font-weight: bold; text-decoration: none;">Sign in here &rarr;</a>
+      </div>
     </div>
   </section>
 </main>
@@ -283,11 +265,16 @@
       });
     }
 
-    document.querySelectorAll('.btn-toggle-pw').forEach(btn => {
+    // Word Toggle for Password Inputs ("Show" / "Hide")
+    document.querySelectorAll('.toggle-pw-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const input = document.getElementById(btn.dataset.target);
+        const targetId = btn.dataset.target;
+        const input = document.getElementById(targetId);
         if (input) {
-          input.type = input.type === 'password' ? 'text' : 'password';
+          const isPassword = input.type === 'password';
+          input.type = isPassword ? 'text' : 'password';
+          btn.textContent = isPassword ? 'Hide' : 'Show';
+          btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
         }
       });
     });

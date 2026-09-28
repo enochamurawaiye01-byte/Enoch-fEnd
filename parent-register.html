@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Parent Registration — Enoch International College</title>
+<title>Parent Registration — Mercy T College Nursery and Primary School</title>
 <link rel="stylesheet" href="css/style.css" />
 <link rel="stylesheet" href="css/responsive.css" />
 <link rel="stylesheet" href="css/dark-mode.css" />
@@ -17,32 +17,143 @@
   <button type="button" class="auth-theme-toggle" id="auth-theme-toggle">
     <span id="theme-toggle-label">Dark Mode</span>
   </button>
+  
+  <!-- Left-Side Brand Panel -->
+  <section class="auth-brand-panel">
+    <div class="auth-brand-mark">
+      <img src="logo.png" alt="Mercy T College Logo" class="auth-brand-logo-img" />
+    </div>
+    <div class="auth-brand-copy" style="text-align: left;">
+      <h2 style="text-align: left;">Mercy T College</h2>
+      <p style="color:#B02032; font-weight:800; margin-top:-4px; text-transform:uppercase; font-size:14px; text-align: left;">Nursery and Primary School</p>
+      <div class="auth-brand-motto" style="text-align: left;">MOTTO: "Knowledge is Light"</div>
+      <p style="text-align: left;">Connect your parent guardian account to your ward's verified school academic record.</p>
+      <div class="auth-brand-highlights" style="text-align: left;">
+        <div class="auth-brand-highlight">Nurturing Leaders with Character, Discipline & Excellence.</div>
+        <div class="auth-brand-highlight">Direct access to report cards, attendance logs, and fee receipts.</div>
+        <div class="auth-brand-highlight">Instant messaging with class teachers and administration.</div>
+      </div>
+    </div>
+    <div class="auth-brand-foot" style="text-align: left;">&copy; <span id="year-brand"></span> Mercy T College Nursery and Primary School. All rights reserved.</div>
+  </section>
+
+  <!-- Right-Side Form Panel -->
   <section class="auth-form-panel">
-    <div class="auth-card">
-      <div class="auth-school-intro"><strong>Enoch International College</strong><span>Connect your parent account to your child's verified school record.</span></div>
-      <div class="auth-card-head"><h1>Parent registration</h1><p>Applications require administrator approval before sign-in.</p></div>
-      <div class="alert alert-error auth-alert" id="parent-register-error" role="alert" hidden></div>
+    <div class="auth-card" style="max-width: 580px;">
+      <div class="auth-school-intro" style="display:flex; align-items:center; gap:12px;">
+        <img src="logo.png" alt="MTC Logo" style="width:48px; height:48px; object-fit:contain;" />
+        <div>
+          <strong style="color:#041664;">Mercy T College Parent Portal</strong>
+          <div style="font-size:12px; color:#B02032; font-style:italic; font-weight:bold;">"Knowledge is Light"</div>
+        </div>
+      </div>
+
+      <div class="auth-card-head">
+        <h1 style="color:#041664;">Parent Registration</h1>
+        <p>Register your parent account linked to your child's student registration number.</p>
+      </div>
+
       <div class="alert alert-success auth-alert" id="parent-register-success" role="status" hidden></div>
+
       <form id="parent-register-form" class="auth-form" novalidate>
-        <div class="form-group"><label class="form-label" for="childRegistrationNumber">Child registration number</label><input id="childRegistrationNumber" name="childRegistrationNumber" placeholder="EIC-2026-00001" required /></div>
-        <div class="form-row"><div class="form-group"><label class="form-label" for="firstName">First name</label><input id="firstName" name="firstName" required /></div><div class="form-group"><label class="form-label" for="lastName">Last name</label><input id="lastName" name="lastName" required /></div></div>
-        <div class="form-group"><label class="form-label" for="relationship">Relationship to child</label><input id="relationship" name="relationship" placeholder="Parent or guardian" required /></div>
-        <div class="form-group"><label class="form-label" for="occupation">Occupation</label><input id="occupation" name="occupation" /></div>
-        <div class="form-group"><label class="form-label" for="email">Email address</label><input type="email" id="email" name="email" autocomplete="email" required /></div>
-        <div class="form-group"><label class="form-label" for="password">Password</label><input type="password" id="password" name="password" autocomplete="new-password" required /></div>
-        <div class="form-group"><label class="form-label" for="confirmPassword">Confirm password</label><input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required /></div>
-          <div class="form-group"><label for="phoneNumber" class="form-label">Phone number</label><input type="tel" id="phoneNumber" name="phoneNumber" required /></div>
-          <div class="form-group"><label for="address" class="form-label">Address</label><textarea id="address" name="address" rows="2"></textarea></div>
+        <div class="form-group">
+          <label class="form-label" for="childRegistrationNumber">Child Registration Number <span style="color:#B02032;">*</span></label>
+          <input id="childRegistrationNumber" name="childRegistrationNumber" placeholder="e.g. 2026-102-MTC" required />
+          <span class="form-error" id="error-childRegistrationNumber"></span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="firstName">First name <span style="color:#B02032;">*</span></label>
+            <input id="firstName" name="firstName" required placeholder="e.g. David" />
+            <span class="form-error" id="error-firstName"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="lastName">Last name <span style="color:#B02032;">*</span></label>
+            <input id="lastName" name="lastName" required placeholder="e.g. Adebayo" />
+            <span class="form-error" id="error-lastName"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email address <span style="color:#B02032;">*</span></label>
+          <input type="email" id="email" name="email" autocomplete="email" required placeholder="e.g. parent@gmail.com" />
+          <span class="form-error" id="error-email"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="phoneNumber" class="form-label">Phone number <span style="color:#B02032;">*</span></label>
+          <input type="tel" id="phoneNumber" name="phoneNumber" required placeholder="e.g. +2348012345678" />
+          <span class="form-error" id="error-phoneNumber"></span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="password">Password <span style="color:#B02032;">*</span></label>
+            <div class="input-group">
+              <input type="password" id="password" name="password" autocomplete="new-password" required placeholder="Create password" />
+              <button type="button" class="input-group__action toggle-pw-btn" data-target="password" aria-label="Show password">Show</button>
+            </div>
+            <!-- Password Strength Tracker -->
+            <div id="pw-strength-container" style="margin-top:6px; display:none;">
+              <div style="height:4px; background:#e2e8f0; border-radius:2px; overflow:hidden;">
+                <div id="pw-strength-bar" style="width:0%; height:100%; transition:all 0.3s ease; background:#ef4444;"></div>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; font-size:11px;">
+                <span style="color:#64748b;">Password Strength:</span>
+                <strong id="pw-strength-text" style="color:#ef4444;">Weak</strong>
+              </div>
+            </div>
+            <span class="form-error" id="error-password"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="confirmPassword">Confirm password <span style="color:#B02032;">*</span></label>
+            <div class="input-group">
+              <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required placeholder="Re-enter password" />
+              <button type="button" class="input-group__action toggle-pw-btn" data-target="confirmPassword" aria-label="Show password">Show</button>
+            </div>
+            <span class="form-error" id="error-confirmPassword"></span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="relationship">Relationship to child <span style="color:#B02032;">*</span></label>
+            <input id="relationship" name="relationship" placeholder="Father, Mother, Guardian" required />
+            <span class="form-error" id="error-relationship"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="occupation">Occupation</label>
+            <input id="occupation" name="occupation" placeholder="e.g. Engineer, Business" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="address" class="form-label">Home Address</label>
+          <textarea id="address" name="address" rows="2" placeholder="Residential address"></textarea>
+        </div>
+
         <div class="form-group" style="display:flex; align-items:center; gap:8px; margin:14px 0;">
           <input type="checkbox" id="marketingConsent" name="marketingConsent" checked style="width:16px; height:16px; cursor:pointer;" />
-          <label for="marketingConsent" style="font-size:13px; color:#94a3b8; margin:0; cursor:pointer;">Keep me updated with Enoch International College admission news and updates.</label>
+          <label for="marketingConsent" style="font-size:13px; color:#64748b; margin:0; cursor:pointer;">Keep me updated with Mercy T College admission news and updates.</label>
         </div>
-        <button type="submit" class="btn btn-primary btn-block btn-lg" id="parent-register-submit">Submit parent application</button>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="parent-register-submit" style="background-color:#052F9A; border-color:#052F9A; font-weight:bold; height:46px;">Submit Parent Application</button>
+
+        <!-- Error Box Placed Directly Under Submit Button -->
+        <div class="alert alert-error auth-alert" id="parent-register-error" role="alert" style="margin-top:14px; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:bold;" hidden></div>
       </form>
-      <p class="auth-form-foot"><span>Already approved?</span><a href="login.html">Sign in</a></p>
+
+      <div class="auth-card-footer" style="margin-top:20px; padding-top:14px; border-top:1px solid #EBEBED; display:flex; justify-content:space-between; align-items:center; font-size:13px; color:#475569;">
+        <span>Already registered?</span>
+        <a href="login.html" style="color: #B02032; font-weight: bold; text-decoration: none;">Sign in here &rarr;</a>
+      </div>
     </div>
   </section>
 </main>
+
+<script>document.getElementById('year-brand').textContent = new Date().getFullYear();</script>
 <script src="js/utils/storage.js"></script>
 <script>
   (function () {
@@ -59,6 +170,20 @@
         themeLabel.textContent = nextTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
       });
     }
+
+    // Word Toggle for Password Inputs ("Show" / "Hide")
+    document.querySelectorAll('.toggle-pw-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        const input = document.getElementById(targetId);
+        if (input) {
+          const isPassword = input.type === 'password';
+          input.type = isPassword ? 'text' : 'password';
+          btn.textContent = isPassword ? 'Hide' : 'Show';
+          btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+        }
+      });
+    });
   })();
 </script>
 <script src="js/config/api.js"></script>

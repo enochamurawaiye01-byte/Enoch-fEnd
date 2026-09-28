@@ -107,6 +107,22 @@
       refreshMatrixBtn.addEventListener('click', () => loadMatrix());
     }
 
+    // Save Matrix button
+    const saveMatrixBtn = document.getElementById('save-matrix-btn');
+    if (saveMatrixBtn) {
+      saveMatrixBtn.addEventListener('click', () => {
+        const checkboxes = document.querySelectorAll('.matrix-toggle');
+        let matrixState = {};
+        checkboxes.forEach((cb) => {
+          const roleId = cb.dataset.roleId;
+          const moduleKey = cb.dataset.moduleKey;
+          matrixState[`${roleId}:${moduleKey}`] = cb.checked;
+        });
+        Storage.setItem('mtc_role_permission_matrix', matrixState);
+        Toast.success('Role Permission Matrix configuration saved successfully!');
+      });
+    }
+
     // Role Category Tabs Event Listener
     const roleCatTabs = document.getElementById('role-category-tabs');
     if (roleCatTabs) {

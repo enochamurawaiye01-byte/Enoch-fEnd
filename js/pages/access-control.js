@@ -8,40 +8,58 @@
     let activeStatusFilter = 'ALL';
     let cachedUsersMap = new Map();
 
-    // System 26 Roles Definition (Categorized)
+    // Complete System Roles Taxonomy (Categorized)
     const ALL_ROLES = [
       // Category 1: Executive & Administrative Leadership
       { id: 'SUPER_ADMIN', name: 'SUPER_ADMIN', label: 'Super Admin', category: 'Executive & Admin', isSystem: true },
       { id: 'ADMIN', name: 'ADMIN', label: 'School Admin', category: 'Executive & Admin', isSystem: true },
+      { id: 'SCHOOL_ADMINISTRATOR', name: 'SCHOOL_ADMINISTRATOR', label: 'School Administrator', category: 'Executive & Admin', isSystem: false },
+      { id: 'ADMIN_MANAGER', name: 'ADMIN_MANAGER', label: 'Admin Manager', category: 'Executive & Admin', isSystem: false },
+      { id: 'HR_MANAGER', name: 'HR_MANAGER', label: 'HR Manager', category: 'Executive & Admin', isSystem: false },
       { id: 'MANAGEMENT', name: 'MANAGEMENT', label: 'Executive Management', category: 'Executive & Admin', isSystem: false },
       { id: 'GOVERNING_BOARD', name: 'GOVERNING_BOARD', label: 'Board of Governors', category: 'Executive & Admin', isSystem: false },
 
-      // Category 2: Academic Leadership
+      // Category 2: Academic Leadership & Supervision
       { id: 'PRINCIPAL', name: 'PRINCIPAL', label: 'School Principal', category: 'Academic Leadership', isSystem: false },
+      { id: 'VICE_PRINCIPAL', name: 'VICE_PRINCIPAL', label: 'Vice Principal', category: 'Academic Leadership', isSystem: false },
       { id: 'VICE_PRINCIPAL_ACADEMICS', name: 'VICE_PRINCIPAL_ACADEMICS', label: 'VP (Academics)', category: 'Academic Leadership', isSystem: false },
       { id: 'VICE_PRINCIPAL_ADMIN', name: 'VICE_PRINCIPAL_ADMIN', label: 'VP (Administration)', category: 'Academic Leadership', isSystem: false },
       { id: 'HEAD_TEACHER', name: 'HEAD_TEACHER', label: 'Head Teacher', category: 'Academic Leadership', isSystem: false },
+      { id: 'DEPUTY_HEAD_TEACHER', name: 'DEPUTY_HEAD_TEACHER', label: 'Deputy Head Teacher', category: 'Academic Leadership', isSystem: false },
       { id: 'DEAN_OF_STUDENTS', name: 'DEAN_OF_STUDENTS', label: 'Dean of Students', category: 'Academic Leadership', isSystem: false },
+      { id: 'ACADEMIC_COORDINATOR', name: 'ACADEMIC_COORDINATOR', label: 'Academic Coordinator', category: 'Academic Leadership', isSystem: false },
       { id: 'HEAD_OF_DEPARTMENT', name: 'HEAD_OF_DEPARTMENT', label: 'Head of Department (HOD)', category: 'Academic Leadership', isSystem: false },
+      { id: 'SUBJECT_COORDINATOR', name: 'SUBJECT_COORDINATOR', label: 'Subject Coordinator', category: 'Academic Leadership', isSystem: false },
+      { id: 'EXAMINATION_OFFICER', name: 'EXAMINATION_OFFICER', label: 'Examination Officer', category: 'Academic Leadership', isSystem: false },
       { id: 'EXAM_OFFICER', name: 'EXAM_OFFICER', label: 'Controller of Examinations', category: 'Academic Leadership', isSystem: false },
+      { id: 'REGISTRAR', name: 'REGISTRAR', label: 'School Registrar', category: 'Academic Leadership', isSystem: false },
+      { id: 'ADMISSIONS_OFFICER', name: 'ADMISSIONS_OFFICER', label: 'Admissions Officer', category: 'Academic Leadership', isSystem: false },
 
       // Category 3: Teaching Faculty
       { id: 'SENIOR_TEACHER', name: 'SENIOR_TEACHER', label: 'Senior Subject Teacher', category: 'Teaching Faculty', isSystem: false },
       { id: 'CLASS_TEACHER', name: 'CLASS_TEACHER', label: 'Class Form Teacher', category: 'Teaching Faculty', isSystem: false },
       { id: 'SUBJECT_TEACHER', name: 'SUBJECT_TEACHER', label: 'Subject Specialist Teacher', category: 'Teaching Faculty', isSystem: false },
       { id: 'TEACHER', name: 'TEACHER', label: 'General Teacher', category: 'Teaching Faculty', isSystem: false },
+      { id: 'SCHOOL_COUNSELOR', name: 'SCHOOL_COUNSELOR', label: 'School Counselor', category: 'Teaching Faculty', isSystem: false },
 
       // Category 4: Financial & Bursary Department
       { id: 'BURSAR', name: 'BURSAR', label: 'Chief Bursar', category: 'Financial & Bursary', isSystem: false },
       { id: 'ACCOUNTANT', name: 'ACCOUNTANT', label: 'School Accountant', category: 'Financial & Bursary', isSystem: false },
+      { id: 'FINANCE_OFFICER', name: 'FINANCE_OFFICER', label: 'Finance Officer', category: 'Financial & Bursary', isSystem: false },
+      { id: 'PROCUREMENT_OFFICER', name: 'PROCUREMENT_OFFICER', label: 'Procurement Officer', category: 'Financial & Bursary', isSystem: false },
 
-      // Category 5: Facilities & Student Services
-      { id: 'LIBRARIAN', name: 'LIBRARIAN', label: 'Head Librarian', category: 'Facilities & Services', isSystem: false },
-      { id: 'LAB_ATTENDANT', name: 'LAB_ATTENDANT', label: 'Science & ICT Lab Officer', category: 'Facilities & Services', isSystem: false },
-      { id: 'HEALTH_OFFICER', name: 'HEALTH_OFFICER', label: 'School Nurse / Health Officer', category: 'Facilities & Services', isSystem: false },
-      { id: 'TRANSPORT_MANAGER', name: 'TRANSPORT_MANAGER', label: 'Transport & Logistics Manager', category: 'Facilities & Services', isSystem: false },
-      { id: 'HOSTEL_WARDEN', name: 'HOSTEL_WARDEN', label: 'Hostel Warden', category: 'Facilities & Services', isSystem: false },
-      { id: 'INVENTORY_OFFICER', name: 'INVENTORY_OFFICER', label: 'Inventory / Storekeeper', category: 'Facilities & Services', isSystem: false },
+      // Category 5: Operations & Facilities
+      { id: 'STOREKEEPER', name: 'STOREKEEPER', label: 'Storekeeper', category: 'Operations & Services', isSystem: false },
+      { id: 'INVENTORY_OFFICER', name: 'INVENTORY_OFFICER', label: 'Inventory Officer', category: 'Operations & Services', isSystem: false },
+      { id: 'LIBRARIAN', name: 'LIBRARIAN', label: 'Head Librarian', category: 'Operations & Services', isSystem: false },
+      { id: 'ICT_ADMINISTRATOR', name: 'ICT_ADMINISTRATOR', label: 'ICT Administrator', category: 'Operations & Services', isSystem: false },
+      { id: 'LAB_ATTENDANT', name: 'LAB_ATTENDANT', label: 'Science & ICT Lab Officer', category: 'Operations & Services', isSystem: false },
+      { id: 'HEALTH_OFFICER', name: 'HEALTH_OFFICER', label: 'School Nurse / Health Officer', category: 'Operations & Services', isSystem: false },
+      { id: 'TRANSPORT_MANAGER', name: 'TRANSPORT_MANAGER', label: 'Transport & Logistics Manager', category: 'Operations & Services', isSystem: false },
+      { id: 'DRIVER', name: 'DRIVER', label: 'School Bus Driver', category: 'Operations & Services', isSystem: false },
+      { id: 'HOSTEL_WARDEN', name: 'HOSTEL_WARDEN', label: 'Hostel Warden', category: 'Operations & Services', isSystem: false },
+      { id: 'RECEPTIONIST', name: 'RECEPTIONIST', label: 'Front Desk Receptionist', category: 'Operations & Services', isSystem: false },
+      { id: 'DATA_ENTRY_OFFICER', name: 'DATA_ENTRY_OFFICER', label: 'Data Entry Officer', category: 'Operations & Services', isSystem: false },
 
       // Category 6: Support & Operational Staff
       { id: 'SECURITY_CHIEF', name: 'SECURITY_CHIEF', label: 'Chief Security Officer', category: 'Support Staff', isSystem: false },

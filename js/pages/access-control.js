@@ -8,31 +8,82 @@
     let activeStatusFilter = 'ALL';
     let cachedUsersMap = new Map();
 
-    // System Roles Definition
+    // System 26 Roles Definition (Categorized)
     const ALL_ROLES = [
-      { id: 'SUPER_ADMIN', name: 'SUPER_ADMIN', label: 'Super Admin', isSystem: true },
-      { id: 'ADMIN', name: 'ADMIN', label: 'Admin', isSystem: true },
-      { id: 'MANAGEMENT', name: 'MANAGEMENT', label: 'Management', isSystem: false },
-      { id: 'PRINCIPAL', name: 'PRINCIPAL', label: 'Principal', isSystem: false },
-      { id: 'VICE_PRINCIPAL', name: 'VICE_PRINCIPAL', label: 'Vice Principal', isSystem: false },
-      { id: 'HEAD_TEACHER', name: 'HEAD_TEACHER', label: 'Head Teacher', isSystem: false },
-      { id: 'BURSAR', name: 'BURSAR', label: 'Bursar', isSystem: false },
-      { id: 'TEACHER', name: 'TEACHER', label: 'Teacher', isSystem: false },
-      { id: 'STAFF', name: 'STAFF', label: 'Staff', isSystem: false },
-      { id: 'STUDENT', name: 'STUDENT', label: 'Student', isSystem: false },
-      { id: 'PARENT', name: 'PARENT', label: 'Parent', isSystem: false },
+      // Category 1: Executive & Administrative Leadership
+      { id: 'SUPER_ADMIN', name: 'SUPER_ADMIN', label: 'Super Admin', category: 'Executive & Admin', isSystem: true },
+      { id: 'ADMIN', name: 'ADMIN', label: 'School Admin', category: 'Executive & Admin', isSystem: true },
+      { id: 'MANAGEMENT', name: 'MANAGEMENT', label: 'Executive Management', category: 'Executive & Admin', isSystem: false },
+      { id: 'GOVERNING_BOARD', name: 'GOVERNING_BOARD', label: 'Board of Governors', category: 'Executive & Admin', isSystem: false },
+
+      // Category 2: Academic Leadership
+      { id: 'PRINCIPAL', name: 'PRINCIPAL', label: 'School Principal', category: 'Academic Leadership', isSystem: false },
+      { id: 'VICE_PRINCIPAL_ACADEMICS', name: 'VICE_PRINCIPAL_ACADEMICS', label: 'VP (Academics)', category: 'Academic Leadership', isSystem: false },
+      { id: 'VICE_PRINCIPAL_ADMIN', name: 'VICE_PRINCIPAL_ADMIN', label: 'VP (Administration)', category: 'Academic Leadership', isSystem: false },
+      { id: 'HEAD_TEACHER', name: 'HEAD_TEACHER', label: 'Head Teacher', category: 'Academic Leadership', isSystem: false },
+      { id: 'DEAN_OF_STUDENTS', name: 'DEAN_OF_STUDENTS', label: 'Dean of Students', category: 'Academic Leadership', isSystem: false },
+      { id: 'HEAD_OF_DEPARTMENT', name: 'HEAD_OF_DEPARTMENT', label: 'Head of Department (HOD)', category: 'Academic Leadership', isSystem: false },
+      { id: 'EXAM_OFFICER', name: 'EXAM_OFFICER', label: 'Controller of Examinations', category: 'Academic Leadership', isSystem: false },
+
+      // Category 3: Teaching Faculty
+      { id: 'SENIOR_TEACHER', name: 'SENIOR_TEACHER', label: 'Senior Subject Teacher', category: 'Teaching Faculty', isSystem: false },
+      { id: 'CLASS_TEACHER', name: 'CLASS_TEACHER', label: 'Class Form Teacher', category: 'Teaching Faculty', isSystem: false },
+      { id: 'SUBJECT_TEACHER', name: 'SUBJECT_TEACHER', label: 'Subject Specialist Teacher', category: 'Teaching Faculty', isSystem: false },
+      { id: 'TEACHER', name: 'TEACHER', label: 'General Teacher', category: 'Teaching Faculty', isSystem: false },
+
+      // Category 4: Financial & Bursary Department
+      { id: 'BURSAR', name: 'BURSAR', label: 'Chief Bursar', category: 'Financial & Bursary', isSystem: false },
+      { id: 'ACCOUNTANT', name: 'ACCOUNTANT', label: 'School Accountant', category: 'Financial & Bursary', isSystem: false },
+
+      // Category 5: Facilities & Student Services
+      { id: 'LIBRARIAN', name: 'LIBRARIAN', label: 'Head Librarian', category: 'Facilities & Services', isSystem: false },
+      { id: 'LAB_ATTENDANT', name: 'LAB_ATTENDANT', label: 'Science & ICT Lab Officer', category: 'Facilities & Services', isSystem: false },
+      { id: 'HEALTH_OFFICER', name: 'HEALTH_OFFICER', label: 'School Nurse / Health Officer', category: 'Facilities & Services', isSystem: false },
+      { id: 'TRANSPORT_MANAGER', name: 'TRANSPORT_MANAGER', label: 'Transport & Logistics Manager', category: 'Facilities & Services', isSystem: false },
+      { id: 'HOSTEL_WARDEN', name: 'HOSTEL_WARDEN', label: 'Hostel Warden', category: 'Facilities & Services', isSystem: false },
+      { id: 'INVENTORY_OFFICER', name: 'INVENTORY_OFFICER', label: 'Inventory / Storekeeper', category: 'Facilities & Services', isSystem: false },
+
+      // Category 6: Support & Operational Staff
+      { id: 'SECURITY_CHIEF', name: 'SECURITY_CHIEF', label: 'Chief Security Officer', category: 'Support Staff', isSystem: false },
+      { id: 'STAFF', name: 'STAFF', label: 'General Administrative Staff', category: 'Support Staff', isSystem: false },
+
+      // Category 7: Students & Guardians
+      { id: 'STUDENT', name: 'STUDENT', label: 'Enrolled Student', category: 'Students & Parents', isSystem: false },
+      { id: 'PARENT', name: 'PARENT', label: 'Parent / Guardian', category: 'Students & Parents', isSystem: false },
     ];
 
     const ROLE_MODULE_MAP = {
       SUPER_ADMIN: ['All 56 Backend Modules', 'Full Control', 'Audit Logs', 'Matrix Config'],
       ADMIN: ['55 Operational Modules', 'User Management', 'School Settings', 'Academic Control'],
       MANAGEMENT: ['analytics', 'reports', 'financial_reports', 'management', 'students', 'staff'],
-      PRINCIPAL: ['teachers', 'students', 'classes', 'report_cards', 'discipline', 'academic_sessions'],
-      VICE_PRINCIPAL: ['teachers', 'students', 'classes', 'discipline', 'timetable', 'events'],
-      HEAD_TEACHER: ['teachers', 'students', 'classes', 'lessons', 'assignments', 'examinations'],
-      BURSAR: ['fees', 'invoices', 'payments', 'receipts', 'reports', 'inventory'],
+      GOVERNING_BOARD: ['analytics', 'reports', 'financial_reports', 'management'],
+
+      PRINCIPAL: ['teachers', 'students', 'classes', 'report_cards', 'discipline', 'academic_sessions', 'announcements'],
+      VICE_PRINCIPAL_ACADEMICS: ['teachers', 'classes', 'subjects', 'examinations', 'lessons', 'timetable'],
+      VICE_PRINCIPAL_ADMIN: ['teacher_attendance', 'discipline', 'events', 'transport', 'hostel'],
+      HEAD_TEACHER: ['teacher_attendance', 'attendance', 'classes', 'students', 'report_cards', 'lessons', 'settings'],
+      DEAN_OF_STUDENTS: ['discipline', 'hostel', 'prefects', 'events', 'students'],
+      HEAD_OF_DEPARTMENT: ['subjects', 'class_subjects', 'teacher_assignments', 'lessons'],
+      EXAM_OFFICER: ['question_bank', 'examinations', 'exam_attempts', 'results', 'transcripts'],
+
+      SENIOR_TEACHER: ['classes', 'students', 'attendance', 'assignments', 'examinations', 'results', 'lessons'],
+      CLASS_TEACHER: ['classes', 'students', 'attendance', 'report_cards', 'timetable'],
+      SUBJECT_TEACHER: ['subjects', 'assignments', 'question_bank', 'examinations', 'results', 'lessons'],
       TEACHER: ['classes', 'students', 'attendance', 'assignments', 'examinations', 'results', 'timetable', 'lessons'],
+
+      BURSAR: ['fees', 'invoices', 'payments', 'receipts', 'reports', 'inventory'],
+      ACCOUNTANT: ['invoices', 'payments', 'receipts', 'reports', 'fee_accounts'],
+
+      LIBRARIAN: ['library', 'documents', 'announcements'],
+      LAB_ATTENDANT: ['inventory', 'exam_attempts', 'settings'],
+      HEALTH_OFFICER: ['medical', 'students', 'notifications'],
+      TRANSPORT_MANAGER: ['transport', 'students', 'events'],
+      HOSTEL_WARDEN: ['hostel', 'students', 'discipline'],
+      INVENTORY_OFFICER: ['inventory', 'reports'],
+
+      SECURITY_CHIEF: ['discipline', 'events', 'announcements'],
       STAFF: ['announcements', 'events', 'documents', 'messaging', 'notifications'],
+
       STUDENT: ['dashboards', 'assignments', 'examinations', 'report_cards', 'attendance', 'timetable'],
       PARENT: ['parents', 'students', 'report_cards', 'invoices', 'payments', 'messaging'],
     };
@@ -179,34 +230,34 @@
         {
           key: 'fullName',
           label: 'User Name',
-          render: (r) => `<a href="javascript:void(0)" class="view-user-details" data-id="${r.id}" style="color:#041664; font-weight:bold; text-decoration:underline;">${escapeHtml(r.fullName || 'Unnamed Account')}</a>`
+          render: (r) => `<a href="javascript:void(0)" class="view-user-details" data-id="${r.id}" style="color:#0A192F; font-weight:600;">${escapeHtml(r.fullName || 'Unnamed Account')}</a>`
         },
         { key: 'email', label: 'Email Address', render: (r) => escapeHtml(r.email || '—') },
         {
           key: 'role',
           label: 'Role',
-          render: (r) => `<span class="badge badge-outline" style="border-color:#052F9A; color:#052F9A;">${escapeHtml(titleCaseFromEnum(r.role))}</span>`
+          render: (r) => `<span class="badge badge-outline">${escapeHtml(titleCaseFromEnum(r.role))}</span>`
         },
         {
           key: 'status',
           label: 'Status',
           render: (r) => {
             const st = (r.status || 'INACTIVE').toUpperCase();
-            if (st === 'ACTIVE') return `<span class="badge badge-success" style="background:#10b981; color:#fff;">✓ Active</span>`;
-            return `<span class="badge badge-danger" style="background:#B02032; color:#fff;">✗ Inactive</span>`;
+            if (st === 'ACTIVE') return `<span class="badge badge-success">✓ Active</span>`;
+            return `<span class="badge badge-danger">✗ Inactive</span>`;
           }
         },
       ],
       rowActions: (row) => {
         const isActive = (row.status || '').toUpperCase() === 'ACTIVE';
         return `
-          <button type="button" class="btn btn-secondary btn-sm" data-action="change-role" style="font-size:12px;">Change Role</button>
-          <button type="button" class="btn btn-outline btn-sm" data-action="manage-perms" style="font-size:12px;">Grant Permissions</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-action="change-role">Change Role</button>
+          <button type="button" class="btn btn-outline btn-sm" data-action="manage-perms">Grant Permissions</button>
           ${isActive 
-            ? `<button type="button" class="btn btn-warning btn-sm" data-action="deactivate" style="background-color:#D97706; border-color:#D97706; color:#fff; font-size:12px;">Deactivate</button>`
-            : `<button type="button" class="btn btn-success btn-sm" data-action="activate" style="background-color:#10b981; border-color:#10b981; color:#fff; font-size:12px;">Activate</button>`
+            ? `<button type="button" class="btn btn-secondary btn-sm" data-action="deactivate">Deactivate</button>`
+            : `<button type="button" class="btn btn-primary btn-sm" data-action="activate">Activate</button>`
           }
-          <button type="button" class="btn btn-danger btn-sm" data-action="delete" style="background-color:#B02032; border-color:#B02032; color:#fff; font-size:12px;">Delete</button>
+          <button type="button" class="btn btn-danger btn-sm" data-action="delete">Delete</button>
         `;
       },
       fetchPage: async (page, filters) => {
@@ -343,53 +394,56 @@
           size: 'md',
           content: `
             <div class="user-role-modal-wrap" style="padding: 4px 0;">
-              <div class="active-role-banner" style="background:#041664; color:#ffffff; padding:14px 18px; border-radius:8px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 6px rgba(4,22,100,0.15);">
+              <div class="active-role-banner" style="background:#0A192F; color:#ffffff; padding:14px 18px; border-radius:4px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
                   <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; opacity:0.85;">Current Active Role</div>
-                  <div style="font-size:18px; font-weight:bold; margin-top:2px; color:#ffffff;">${escapeHtml(formatRoleName(currentRole))} <span style="font-size:13px; font-weight:normal; opacity:0.85;">(${currentRole})</span></div>
+                  <div style="font-size:16px; font-weight:700; margin-top:2px; color:#ffffff;">${escapeHtml(formatRoleName(currentRole))} <span style="font-size:12px; font-weight:normal; opacity:0.85;">(${currentRole})</span></div>
                 </div>
-                <span class="badge" style="background:#04A1D0; color:#fff; font-size:12px; padding:6px 12px; font-weight:bold; border-radius:20px;">✓ Active</span>
+                <span class="badge" style="background:#162A45; color:#fff; font-size:11px; padding:4px 10px; font-weight:600;">✓ Active</span>
               </div>
 
               <div class="edit-role-controls" style="margin-bottom: 16px;">
-                <label style="font-weight:bold; color:#041664; display:block; margin-bottom:8px; font-size:14px;">Edit Role Action</label>
+                <label style="font-weight:600; color:#111111; display:block; margin-bottom:8px; font-size:13px;">Edit Role Action</label>
                 <div style="display:flex; gap:10px;">
-                  <button type="button" class="btn btn-primary role-toggle-btn active" id="btn-action-add" style="flex:1; background:#052F9A; border-color:#052F9A; font-weight:bold; font-size:13px;">Assign / Add Role</button>
-                  <button type="button" class="btn btn-outline role-toggle-btn" id="btn-action-remove" style="flex:1; border-color:#B02032; color:#B02032; font-weight:bold; font-size:13px;">Remove Role (Reset)</button>
+                  <button type="button" class="btn btn-primary role-toggle-btn active" id="btn-action-add" style="flex:1; background:#0A192F; border-color:#0A192F; font-weight:600; font-size:13px;">Assign / Add Role</button>
+                  <button type="button" class="btn btn-outline role-toggle-btn" id="btn-action-remove" style="flex:1; border-color:#991B1B; color:#991B1B; font-weight:600; font-size:13px;">Remove Role (Reset)</button>
                 </div>
               </div>
 
               <form id="change-role-form" class="form">
                 <div id="role-select-box">
-                  <label class="form-label" style="font-weight:bold; color:#041664; font-size:13px;">Select Target Role from Defined System Roles</label>
-                  <div class="roles-grid-select" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap:10px; max-height:280px; overflow-y:auto; padding:4px;">
+                  <div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                    <label class="form-label" style="font-weight:600; color:#111111; font-size:13px; margin:0;">Select Target Role (26 Categorized Roles)</label>
+                    <input type="text" id="role-modal-search" placeholder="🔍 Search roles..." style="padding:4px 10px; font-size:12px; border:1px solid #D8D2C6; border-radius:4px; width:160px;" />
+                  </div>
+                  <div class="roles-grid-select" id="roles-modal-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap:8px; max-height:280px; overflow-y:auto; padding:4px;">
                     ${ALL_ROLES.map((r) => {
                       const isSelected = r.id === currentRole;
                       return `
-                        <label class="role-card-opt ${isSelected ? 'active-opt' : ''}" style="border:2px solid ${isSelected ? '#052F9A' : '#e2e8f0'}; background:${isSelected ? 'rgba(5, 47, 154, 0.06)' : '#ffffff'}; padding:10px 12px; border-radius:8px; cursor:pointer; display:block; transition:all 0.2s ease;">
+                        <label class="role-card-opt ${isSelected ? 'active-opt' : ''}" data-role-id="${r.id}" data-role-label="${escapeHtml(r.label).toLowerCase()}" data-role-cat="${escapeHtml(r.category).toLowerCase()}" style="border:1px solid ${isSelected ? '#0A192F' : '#D8D2C6'}; background:${isSelected ? '#F3EEE7' : '#ffffff'}; padding:8px 12px; border-radius:4px; cursor:pointer; display:block; transition:all 0.12s ease;">
                           <div style="display:flex; align-items:center; justify-content:space-between;">
-                            <strong style="color:#041664; font-size:14px;">${escapeHtml(r.label)}</strong>
-                            <input type="radio" name="role" value="${r.id}" ${isSelected ? 'checked' : ''} style="width:16px; height:16px; cursor:pointer;" />
+                            <strong style="color:#111111; font-size:13px;">${escapeHtml(r.label)}</strong>
+                            <input type="radio" name="role" value="${r.id}" ${isSelected ? 'checked' : ''} style="width:15px; height:15px; cursor:pointer;" />
                           </div>
-                          <div style="font-size:11px; color:#64748b; margin-top:4px;">Code: <code>${r.id}</code></div>
+                          <div style="font-size:11px; color:#666666; margin-top:4px;">Category: <span>${escapeHtml(r.category)}</span></div>
                         </label>
                       `;
                     }).join('')}
                   </div>
                 </div>
 
-                <div id="role-remove-warning" style="display:none; background:#fff5f5; border:1px solid #fecaca; padding:14px; border-radius:8px; margin-top:10px;">
+                <div id="role-remove-warning" style="display:none; background:#FEF2F2; border:1px solid rgba(153,27,27,0.2); padding:12px; border-radius:4px; margin-top:10px;">
                   <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="color:#B02032; font-size:18px;">⚠️</span>
-                    <strong style="color:#B02032; font-size:14px;">Remove Active Role Override</strong>
+                    <span style="color:#991B1B; font-size:16px;">⚠️</span>
+                    <strong style="color:#991B1B; font-size:13px;">Remove Active Role Override</strong>
                   </div>
-                  <p style="color:#64748b; margin:6px 0 0 0; font-size:13px; line-height:1.5;">
+                  <p style="color:#555555; margin:4px 0 0 0; font-size:12px; line-height:1.5;">
                     Removing the active role override will reset this user account to default basic <strong>STAFF</strong> profile and revoke custom administrative privileges.
                   </p>
                 </div>
 
-                <div class="modal__footer" style="margin-top:20px; text-align:right;">
-                  <button type="submit" class="btn btn-primary" id="submit-role-btn" style="background:#052F9A; border-color:#052F9A; font-weight:bold; padding:8px 20px;">Save Role Changes</button>
+                <div class="modal__footer" style="margin-top:16px; text-align:right;">
+                  <button type="submit" class="btn btn-primary" id="submit-role-btn" style="background:#0A192F; border-color:#0A192F; font-weight:600; padding:8px 18px;">Save Role Changes</button>
                 </div>
               </form>
             </div>
@@ -400,17 +454,34 @@
             const roleSelectBox = modalEl.querySelector('#role-select-box');
             const roleRemoveWarning = modalEl.querySelector('#role-remove-warning');
             const form = modalEl.querySelector('#change-role-form');
+            const roleSearchInput = modalEl.querySelector('#role-modal-search');
             let isRemoveMode = false;
+
+            if (roleSearchInput) {
+              roleSearchInput.addEventListener('input', () => {
+                const query = roleSearchInput.value.toLowerCase().trim();
+                modalEl.querySelectorAll('.role-card-opt').forEach((card) => {
+                  const id = card.dataset.roleId.toLowerCase();
+                  const label = card.dataset.roleLabel;
+                  const cat = card.dataset.roleCat;
+                  if (id.includes(query) || label.includes(query) || cat.includes(query)) {
+                    card.style.display = 'block';
+                  } else {
+                    card.style.display = 'none';
+                  }
+                });
+              });
+            }
 
             if (btnAdd && btnRemove) {
               btnAdd.addEventListener('click', () => {
                 isRemoveMode = false;
                 btnAdd.classList.add('active');
-                btnAdd.style.background = '#052F9A';
+                btnAdd.style.background = '#0A192F';
                 btnAdd.style.color = '#ffffff';
                 btnRemove.classList.remove('active');
                 btnRemove.style.background = 'transparent';
-                btnRemove.style.color = '#B02032';
+                btnRemove.style.color = '#991B1B';
                 roleSelectBox.style.display = 'block';
                 roleRemoveWarning.style.display = 'none';
               });
@@ -418,11 +489,11 @@
               btnRemove.addEventListener('click', () => {
                 isRemoveMode = true;
                 btnRemove.classList.add('active');
-                btnRemove.style.background = '#B02032';
+                btnRemove.style.background = '#991B1B';
                 btnRemove.style.color = '#ffffff';
                 btnAdd.classList.remove('active');
                 btnAdd.style.background = 'transparent';
-                btnAdd.style.color = '#052F9A';
+                btnAdd.style.color = '#0A192F';
                 roleSelectBox.style.display = 'none';
                 roleRemoveWarning.style.display = 'block';
               });
@@ -451,42 +522,47 @@
           size: 'lg',
           content: `
             <div class="grant-access-modal-wrap" style="padding: 4px 0;">
-              <div class="user-header-banner" style="background:#041664; color:#ffffff; padding:14px 18px; border-radius:8px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
+              <div class="user-header-banner" style="background:#0A192F; color:#ffffff; padding:14px 18px; border-radius:4px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
                   <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; opacity:0.85;">User Account Profile</div>
-                  <div style="font-size:18px; font-weight:bold; margin-top:2px; color:#ffffff;">${escapeHtml(userName)}</div>
+                  <div style="font-size:16px; font-weight:700; margin-top:2px; color:#ffffff;">${escapeHtml(userName)}</div>
                   <div style="font-size:12px; opacity:0.85;">${escapeHtml(rowData ? rowData.email : '')}</div>
                 </div>
                 <div>
-                  <span class="badge" style="background:#052F9A; color:#fff; font-size:13px; padding:6px 14px; font-weight:bold; border:1px solid rgba(255,255,255,0.3);">
+                  <span class="badge" style="background:#162A45; color:#fff; font-size:12px; padding:4px 12px; font-weight:600; border:1px solid rgba(255,255,255,0.2);">
                     Active Role: ${escapeHtml(formatRoleName(currentRole))}
                   </span>
                 </div>
               </div>
 
-              <p style="color:#475569; font-size:13px; margin-bottom:14px; line-height:1.5;">
-                Select any defined role below to grant total module access under that role to <strong>${escapeHtml(userName)}</strong>. Granting a role provisions linked Student/Staff/Parent profile records, generates identification numbers, and opens workspace permissions.
-              </p>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:10px;">
+                <p style="color:#555555; font-size:13px; margin:0; line-height:1.4;">
+                  Select any defined role below to grant total module access under that role to <strong>${escapeHtml(userName)}</strong>.
+                </p>
+                <input type="text" id="grant-modal-search" placeholder="🔍 Search role or module..." style="padding:5px 12px; font-size:12px; border:1px solid #D8D2C6; border-radius:4px; width:220px;" />
+              </div>
 
-              <div class="defined-roles-list" style="display:flex; flex-direction:column; gap:10px; max-height:340px; overflow-y:auto; padding-right:4px;">
+              <div class="defined-roles-list" id="grant-roles-modal-list" style="display:flex; flex-direction:column; gap:8px; max-height:340px; overflow-y:auto; padding-right:4px;">
                 ${ALL_ROLES.map((r) => {
                   const modules = ROLE_MODULE_MAP[r.id] || [];
                   const isCurrent = r.id === currentRole;
+                  const modulesSearchStr = modules.join(' ').toLowerCase();
                   return `
-                    <div class="role-def-card" style="border: 1px solid ${isCurrent ? '#052F9A' : '#cbd5e1'}; background: ${isCurrent ? 'rgba(5, 47, 154, 0.04)' : '#ffffff'}; border-radius:8px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; transition:all 0.2s ease;">
+                    <div class="role-def-card" data-role-id="${r.id}" data-role-label="${escapeHtml(r.label).toLowerCase()}" data-modules="${modulesSearchStr}" style="border: 1px solid ${isCurrent ? '#0A192F' : '#D8D2C6'}; background: ${isCurrent ? '#F3EEE7' : '#ffffff'}; border-radius:4px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; transition:all 0.12s ease;">
                       <div style="flex:1; padding-right:15px;">
                         <div style="display:flex; align-items:center; gap:8px;">
-                          <h4 style="margin:0; color:#041664; font-size:15px; font-weight:bold;">${escapeHtml(r.label)}</h4>
-                          <code style="background:rgba(4, 22, 100, 0.08); color:#052F9A; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold;">${r.id}</code>
-                          ${isCurrent ? '<span class="badge badge-success" style="font-size:11px; padding:2px 8px;">Active Role</span>' : ''}
+                          <h4 style="margin:0; color:#111111; font-size:14px; font-weight:600;">${escapeHtml(r.label)}</h4>
+                          <code style="background:#F3EEE7; color:#0A192F; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:600;">${r.id}</code>
+                          <span style="font-size:11px; color:#666666; background:#F8FAF9; padding:2px 6px; border-radius:4px; border:1px solid #D8D2C6;">${escapeHtml(r.category)}</span>
+                          ${isCurrent ? '<span class="badge badge-success" style="font-size:11px; padding:2px 6px;">Active Role</span>' : ''}
                         </div>
                         <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:4px;">
-                          ${modules.map((m) => `<span style="background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; border-radius:4px; padding:2px 6px; font-size:11px;">${m}</span>`).join('')}
+                          ${modules.map((m) => `<span style="background:#F3EEE7; color:#333333; border:1px solid #D8D2C6; border-radius:4px; padding:2px 6px; font-size:11px;">${m}</span>`).join('')}
                         </div>
                       </div>
                       <div>
-                        <button type="button" class="btn ${isCurrent ? 'btn-secondary' : 'btn-primary'} btn-grant-role-action" data-role-id="${r.id}" data-role-label="${escapeHtml(r.label)}" style="${isCurrent ? '' : 'background:#052F9A; border-color:#052F9A;'} font-size:12px; font-weight:bold; padding:8px 14px;">
-                          ${isCurrent ? 'Current Role' : 'Grant This Role & Modules'}
+                        <button type="button" class="btn ${isCurrent ? 'btn-secondary' : 'btn-primary'} btn-grant-role-action" data-role-id="${r.id}" data-role-label="${escapeHtml(r.label)}" style="${isCurrent ? '' : 'background:#0A192F; border-color:#0A192F;'} font-size:12px; font-weight:600; padding:6px 12px;">
+                          ${isCurrent ? 'Current Role' : 'Grant Role'}
                         </button>
                       </div>
                     </div>
@@ -494,15 +570,15 @@
                 }).join('')}
               </div>
 
-              <div style="margin-top:16px; padding-top:14px; border-top:1px dashed #cbd5e1;">
+              <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #D8D2C6;">
                 <details style="cursor:pointer;">
-                  <summary style="font-weight:bold; color:#041664; font-size:13px;">Or Grant Single Module Permission Override</summary>
+                  <summary style="font-weight:600; color:#111111; font-size:13px;">Or Grant Single Module Permission Override</summary>
                   <form id="grant-single-module-form" class="form" style="margin-top:10px;">
                     <div class="form-group" style="display:flex; gap:10px; margin-bottom:0;">
                       <select name="moduleKey" class="form-control" style="flex:1;" required>
                         ${ALL_MODULES.map((m) => `<option value="${m.key}">${m.label} (${m.key})</option>`).join('')}
                       </select>
-                      <button type="submit" class="btn btn-outline" style="border-color:#052F9A; color:#052F9A; font-weight:bold;">Grant Single Module</button>
+                      <button type="submit" class="btn btn-outline" style="border-color:#0A192F; color:#0A192F; font-weight:600;">Grant Single Module</button>
                     </div>
                   </form>
                 </details>
@@ -510,6 +586,22 @@
             </div>
           `,
           onOpen: (modalEl) => {
+            const grantSearchInput = modalEl.querySelector('#grant-modal-search');
+            if (grantSearchInput) {
+              grantSearchInput.addEventListener('input', () => {
+                const query = grantSearchInput.value.toLowerCase().trim();
+                modalEl.querySelectorAll('.role-def-card').forEach((card) => {
+                  const id = card.dataset.roleId.toLowerCase();
+                  const label = card.dataset.roleLabel;
+                  const modules = card.dataset.modules;
+                  if (id.includes(query) || label.includes(query) || modules.includes(query)) {
+                    card.style.display = 'flex';
+                  } else {
+                    card.style.display = 'none';
+                  }
+                });
+              });
+            }
             modalEl.querySelectorAll('.btn-grant-role-action').forEach((btn) => {
               btn.addEventListener('click', async () => {
                 const targetRoleId = btn.dataset.roleId;
@@ -566,9 +658,9 @@
           return `
             <tr>
               <td>
-                <strong style="color:#041664; font-size:14px;">${escapeHtml(m.label)}</strong>
-                <code style="background:rgba(4, 22, 100, 0.06); padding:2px 6px; border-radius:4px; margin-left:6px; color:#052F9A; font-size:12px;">${escapeHtml(m.key)}</code>
-                <div style="font-size:12px; color:#64748b; margin-top:2px;">${escapeHtml(m.desc)}</div>
+                <strong style="color:#111111; font-size:13px;">${escapeHtml(m.label)}</strong>
+                <code style="background:#F3EEE7; padding:2px 6px; border-radius:4px; margin-left:6px; color:#0A192F; font-size:11px;">${escapeHtml(m.key)}</code>
+                <div style="font-size:11px; color:#666666; margin-top:2px;">${escapeHtml(m.desc)}</div>
               </td>
               ${ALL_ROLES.map((r) => {
                 const stateKey = `${r.id}:${m.key}`;
@@ -578,7 +670,7 @@
                 
                 return `
                   <td style="text-align:center;">
-                    <input type="checkbox" class="matrix-toggle" data-role-id="${r.id}" data-module-key="${m.key}" ${isChecked ? 'checked' : ''} ${r.id === 'SUPER_ADMIN' ? 'disabled' : ''} style="width:18px; height:18px; cursor:pointer;" />
+                    <input type="checkbox" class="matrix-toggle" data-role-id="${r.id}" data-module-key="${m.key}" ${isChecked ? 'checked' : ''} ${r.id === 'SUPER_ADMIN' ? 'disabled' : ''} style="width:16px; height:16px; cursor:pointer;" />
                   </td>
                 `;
               }).join('')}
@@ -616,13 +708,13 @@
       grid.innerHTML = '<div class="loader"></div>';
       try {
         grid.innerHTML = ALL_ROLES.map((r) => `
-          <div class="perm-card">
-            <div class="perm-card__header">
-              <span style="color:#041664; font-weight:bold;">${escapeHtml(r.label)}</span>
-              ${r.isSystem ? '<span class="badge badge-outline" style="border-color:#041664; color:#041664;">System</span>' : '<span class="badge badge-success">Custom</span>'}
+          <div class="perm-card" style="border:1px solid #D8D2C6; background:#ffffff; border-radius:4px; padding:12px 16px;">
+            <div class="perm-card__header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="color:#111111; font-weight:600;">${escapeHtml(r.label)}</span>
+              ${r.isSystem ? '<span class="badge badge-outline">System</span>' : '<span class="badge badge-success">Custom</span>'}
             </div>
-            <div class="perm-card__desc">${escapeHtml(r.name)} role definition for Mercy T College Nursery and Primary School.</div>
-            <div style="font-size:12px; color:#64748b; font-weight:bold;">Access Scope: ${r.id === 'SUPER_ADMIN' || r.id === 'ADMIN' ? 'Full Access (All 56 Modules)' : 'Role Tailored Access'}</div>
+            <div class="perm-card__desc" style="font-size:12px; color:#555555; margin-bottom:8px;">${escapeHtml(r.name)} role definition for Mercy T College.</div>
+            <div style="font-size:11px; color:#666666; font-weight:600;">Access Scope: ${r.id === 'SUPER_ADMIN' || r.id === 'ADMIN' ? 'Full Access (All 56 Modules)' : 'Role Tailored Access'}</div>
           </div>
         `).join('');
       } catch (err) {

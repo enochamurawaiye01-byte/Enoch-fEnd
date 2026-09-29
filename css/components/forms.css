@@ -6,7 +6,7 @@
   font-family: var(--font-body);
   font-size: var(--fs-small);
   font-weight: 700;
-  color: var(--color-emerald-800);
+  color: var(--color-deep-navy);
   margin: var(--space-2) 0 var(--space-3);
   padding-bottom: var(--space-2);
   border-bottom: 1px solid var(--surface-border);
@@ -19,7 +19,7 @@ label, .form-label {
 }
 .form-label .required { color: var(--color-danger); margin-left: 2px; }
 .form-help { font-size: var(--fs-xs); color: var(--text-muted); }
-.form-error { font-size: var(--fs-xs); color: var(--color-danger); display: none; }
+.form-error { font-size: var(--fs-xs); color: var(--color-danger); display: none; margin-top: 4px; }
 .form-group.has-error .form-error { display: block; }
 .form-group.has-error input, .form-group.has-error select, .form-group.has-error textarea {
   border-color: var(--color-danger);
@@ -28,8 +28,8 @@ label, .form-label {
 input, select, textarea {
   height: 40px;
   padding: 0 var(--space-3);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   background: var(--color-white);
   font-size: var(--fs-body);
   color: var(--text-primary);
@@ -37,39 +37,40 @@ input, select, textarea {
   transition: border-color var(--transition);
 }
 .auth-card input, .auth-card select, .auth-card textarea {
-  background: #fff;
-  border-color: #C7D8D1;
-  color: var(--color-ink);
+  background: #ffffff;
+  border-color: var(--color-border);
+  color: var(--color-black);
 }
 .auth-card input:focus, .auth-card select:focus, .auth-card textarea:focus {
-  border-color: var(--color-emerald-600);
-  box-shadow: 0 0 0 3px var(--color-emerald-50);
+  border-color: var(--color-deep-navy);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(10, 25, 47, 0.12);
 }
-.auth-card label, .auth-card .form-label { color: var(--color-ink-soft); }
+.auth-card label, .auth-card .form-label { color: var(--color-black); }
 textarea { height: auto; padding: var(--space-3); min-height: 96px; resize: vertical; }
 input:focus, select:focus, textarea:focus {
-  border-color: var(--color-emerald-600);
+  border-color: var(--color-deep-navy);
   outline: none;
-  box-shadow: 0 0 0 3px var(--color-emerald-50);
+  box-shadow: 0 0 0 2px rgba(10, 25, 47, 0.12);
 }
 input::placeholder, textarea::placeholder { color: var(--color-ink-mute); }
-input:disabled, select:disabled, textarea:disabled { background: var(--color-bg-alt); cursor: not-allowed; }
+input:disabled, select:disabled, textarea:disabled { background: var(--color-cream-alt); cursor: not-allowed; }
 
 select {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23374151' stroke-width='1.6' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23111111' stroke-width='1.6' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 32px;
 }
 
-.input-group { position: relative; display: flex; align-items: center; }
-.input-group input { padding-right: 40px; }
+.input-group { position: relative; display: flex; align-items: center; width: 100%; }
+.input-group input { padding-right: 70px; }
 .input-group__action {
   position: absolute; right: 4px; display: flex; align-items: center; justify-content: center;
-  width: 32px; height: 32px; border-radius: var(--radius-sm); color: var(--text-muted); cursor: pointer;
+  padding: 4px 8px; border-radius: var(--radius-sm); color: var(--text-muted); cursor: pointer;
 }
-.input-group__action:hover { background: var(--color-bg-alt); color: var(--text-primary); }
+.input-group__action:hover { background: var(--color-cream-alt); color: var(--text-primary); }
 
 .checkbox-field, .radio-field {
   display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-small); color: var(--text-primary);

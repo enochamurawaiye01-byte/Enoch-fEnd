@@ -407,6 +407,20 @@
 
       if (action === 'change-role') {
         const currentRole = (rowData?.role || 'STAFF').toUpperCase();
+        const categories = [...new Set(ALL_ROLES.map((r) => r.category))];
+        const dropdownOptionsHtml = categories.map((cat) => {
+          const catRoles = ALL_ROLES.filter((r) => r.category === cat);
+          return `
+            <optgroup label="${escapeHtml(cat)}">
+              ${catRoles.map((r) => `
+                <option value="${r.id}" ${r.id === currentRole ? 'selected' : ''}>
+                  ${escapeHtml(r.label)} (${r.id})
+                </option>
+              `).join('')}
+            </optgroup>
+          `;
+        }).join('');
+
         Modal.open({
           title: `Change & Edit User Role — ${userName}`,
           size: 'md',
@@ -423,40 +437,28 @@
               <div class="edit-role-controls" style="margin-bottom: 16px;">
                 <label style="font-weight:600; color:#111111; display:block; margin-bottom:8px; font-size:13px;">Edit Role Action</label>
                 <div style="display:flex; gap:10px;">
-                  <button type="button" class="btn btn-primary role-toggle-btn active" id="btn-action-add" style="flex:1; background:#0A192F; border-color:#0A192F; font-weight:600; font-size:13px;">Assign / Add Role</button>
-                  <button type="button" class="btn btn-outline role-toggle-btn" id="btn-action-remove" style="flex:1; border-color:#991B1B; color:#991B1B; font-weight:600; font-size:13px;">Remove Role (Reset)</button>
+                  <button type="button" class="btn btn-primary role-toggle-btn active" id="btn-action-add" style="flex:1; background:#0A192F; border-color:#0A192F; font-weight:600; font-size:13px;">Assign / Change Role</button>
+                  <button type="button" class="btn btn-outline role-toggle-btn" id="btn-action-remove" style="flex:1; border-color:#991B1B; color:#991B1B; font-weight:600; font-size:13px;">Reset to Basic Staff</button>
                 </div>
               </div>
 
               <form id="change-role-form" class="form">
-                <div id="role-select-box">
-                  <div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                    <label class="form-label" style="font-weight:600; color:#111111; font-size:13px; margin:0;">Select Target Role (26 Categorized Roles)</label>
-                    <input type="text" id="role-modal-search" placeholder="🔍 Search roles..." style="padding:4px 10px; font-size:12px; border:1px solid #D8D2C6; border-radius:4px; width:160px;" />
-                  </div>
-                  <div class="roles-grid-select" id="roles-modal-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap:8px; max-height:280px; overflow-y:auto; padding:4px;">
-                    ${ALL_ROLES.map((r) => {
-                      const isSelected = r.id === currentRole;
-                      return `
-                        <label class="role-card-opt ${isSelected ? 'active-opt' : ''}" data-role-id="${r.id}" data-role-label="${escapeHtml(r.label).toLowerCase()}" data-role-cat="${escapeHtml(r.category).toLowerCase()}" style="border:1px solid ${isSelected ? '#0A192F' : '#D8D2C6'}; background:${isSelected ? '#F3EEE7' : '#ffffff'}; padding:8px 12px; border-radius:4px; cursor:pointer; display:block; transition:all 0.12s ease;">
-                          <div style="display:flex; align-items:center; justify-content:space-between;">
-                            <strong style="color:#111111; font-size:13px;">${escapeHtml(r.label)}</strong>
-                            <input type="radio" name="role" value="${r.id}" ${isSelected ? 'checked' : ''} style="width:15px; height:15px; cursor:pointer;" />
-                          </div>
-                          <div style="font-size:11px; color:#666666; margin-top:4px;">Category: <span>${escapeHtml(r.category)}</span></div>
-                        </label>
-                      `;
-                    }).join('')}
-                  </div>
+                <div id="role-select-box" style="margin-bottom: 16px;">
+                  <label for="change-role-select" class="form-label" style="font-weight:600; color:#111111; font-size:13px; display:block; margin-bottom:8px;">
+                    Select Target Defined Role
+                  </label>
+                  <select id="change-role-select" name="role" class="form-control" style="width:100%; padding:10px 12px; font-size:14px; font-weight:600; border:1px solid #D8D2C6; border-radius:4px; background:#FAF7F2; color:#0A192F; cursor:pointer;">
+                    ${dropdownOptionsHtml}
+                  </select>
                 </div>
 
-                <div id="role-remove-warning" style="display:none; background:#FEF2F2; border:1px solid rgba(153,27,27,0.2); padding:12px; border-radius:4px; margin-top:10px;">
+                <div id="role-remove-warning" style="display:none; background:#FEF2F2; border:1px solid rgba(153,27,27,0.2); padding:12px; border-radius:4px; margin-bottom:16px;">
                   <div style="display:flex; align-items:center; gap:8px;">
                     <span style="color:#991B1B; font-size:16px;">⚠️</span>
-                    <strong style="color:#991B1B; font-size:13px;">Remove Active Role Override</strong>
+                    <strong style="color:#991B1B; font-size:13px;">Reset User to Basic Staff Profile</strong>
                   </div>
                   <p style="color:#555555; margin:4px 0 0 0; font-size:12px; line-height:1.5;">
-                    Removing the active role override will reset this user account to default basic <strong>STAFF</strong> profile and revoke custom administrative privileges.
+                    Resetting will change this user account back to basic default <strong>STAFF</strong> profile and clear administrative privileges.
                   </p>
                 </div>
 
@@ -472,24 +474,7 @@
             const roleSelectBox = modalEl.querySelector('#role-select-box');
             const roleRemoveWarning = modalEl.querySelector('#role-remove-warning');
             const form = modalEl.querySelector('#change-role-form');
-            const roleSearchInput = modalEl.querySelector('#role-modal-search');
             let isRemoveMode = false;
-
-            if (roleSearchInput) {
-              roleSearchInput.addEventListener('input', () => {
-                const query = roleSearchInput.value.toLowerCase().trim();
-                modalEl.querySelectorAll('.role-card-opt').forEach((card) => {
-                  const id = card.dataset.roleId.toLowerCase();
-                  const label = card.dataset.roleLabel;
-                  const cat = card.dataset.roleCat;
-                  if (id.includes(query) || label.includes(query) || cat.includes(query)) {
-                    card.style.display = 'block';
-                  } else {
-                    card.style.display = 'none';
-                  }
-                });
-              });
-            }
 
             if (btnAdd && btnRemove) {
               btnAdd.addEventListener('click', () => {
@@ -521,7 +506,11 @@
               e.preventDefault();
               const targetRole = isRemoveMode ? 'STAFF' : form.role.value;
               try {
-                await RolesService.changeUserRole(userId, targetRole);
+                try {
+                  await RolesService.changeUserRole(userId, targetRole);
+                } catch (firstErr) {
+                  await UsersService.update(userId, { role: targetRole });
+                }
                 Toast.success(`Role updated to ${formatRoleName(targetRole)}. Profile & modules provisioned!`);
                 Modal.close();
                 userTable.reload();

@@ -31,7 +31,6 @@
     ACCESS_TOKEN: 'enoch_access_token',
     REFRESH_TOKEN: 'enoch_refresh_token',
     USER: 'enoch_user',
-    THEME: 'enoch_theme',
     SIDEBAR_COLLAPSED: 'enoch_sidebar_collapsed',
   };
 

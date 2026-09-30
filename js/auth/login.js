@@ -5,11 +5,20 @@
   'use strict';
 
   document.addEventListener('DOMContentLoaded', () => {
+    const returnTo = new URLSearchParams(window.location.search).get('returnTo');
+    const getRedirectPath = (user) => {
+      if (returnTo && returnTo.startsWith('/') && !returnTo.startsWith('//')) {
+        const destination = new URL(returnTo, window.location.origin);
+        if (destination.origin === window.location.origin) return destination.href;
+      }
+      return Permissions.dashboardPathForRole(user.role);
+    };
+
     // If already authenticated, skip straight to the right dashboard.
     if (AuthService.isAuthenticated()) {
       const user = AuthService.getStoredUser();
       if (user && user.role) {
-        window.location.href = Permissions.dashboardPathForRole(user.role);
+        window.location.href = getRedirectPath(user);
         return;
       }
     }
@@ -41,7 +50,7 @@
       if (errorBox) {
         errorBox.textContent = message;
         errorBox.hidden = false;
-        errorBox.style.color = '#B02032';
+        errorBox.style.color = '#A33B45';
         errorBox.style.background = '#fff5f5';
         errorBox.style.border = '1px solid #fecaca';
       }
@@ -68,7 +77,7 @@
       if (errSpan) {
         errSpan.textContent = msg;
         errSpan.style.display = 'block';
-        errSpan.style.color = '#B02032';
+        errSpan.style.color = '#A33B45';
         errSpan.style.fontWeight = 'bold';
         errSpan.style.fontSize = '12px';
         errSpan.style.marginTop = '4px';
@@ -108,7 +117,7 @@
       try {
         const user = await AuthService.login({ email, password });
         Toast.show('success', `Welcome back, ${user.firstName || user.name || user.fullName || 'there'}.`);
-        window.location.href = Permissions.dashboardPathForRole(user.role);
+        window.location.href = getRedirectPath(user);
       } catch (err) {
         showError(err.message || 'Unable to sign in. Please check your credentials.');
       } finally {

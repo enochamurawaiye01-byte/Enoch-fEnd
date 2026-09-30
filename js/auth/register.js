@@ -44,20 +44,20 @@
 
         pwBar.style.width = score + '%';
         if (score <= 40) {
-          pwBar.style.background = '#ef4444';
-          pwText.style.color = '#ef4444';
+          pwBar.style.background = 'var(--color-brand-red)';
+          pwText.style.color = 'var(--color-brand-red)';
           pwText.textContent = 'Weak';
         } else if (score <= 60) {
-          pwBar.style.background = '#f59e0b';
-          pwText.style.color = '#f59e0b';
+          pwBar.style.background = '#b9783c';
+          pwText.style.color = '#b9783c';
           pwText.textContent = 'Fair';
         } else if (score <= 80) {
-          pwBar.style.background = '#04A1D0';
-          pwText.style.color = '#04A1D0';
+          pwBar.style.background = 'var(--color-deep-navy)';
+          pwText.style.color = 'var(--color-deep-navy)';
           pwText.textContent = 'Good';
         } else {
-          pwBar.style.background = '#10b981';
-          pwText.style.color = '#10b981';
+          pwBar.style.background = 'var(--color-deep-navy)';
+          pwText.style.color = 'var(--color-deep-navy)';
           pwText.textContent = 'Strong ✓';
         }
       });
@@ -83,14 +83,14 @@
       if (errEl) {
         errEl.textContent = msg;
         errEl.style.display = 'block';
-        errEl.style.color = '#B02032';
+        errEl.style.color = 'var(--color-brand-red)';
         errEl.style.fontWeight = 'bold';
         errEl.style.fontSize = '12px';
         errEl.style.marginTop = '4px';
       }
       if (inputEl) {
         inputEl.classList.add('input-error');
-        inputEl.style.borderColor = '#B02032';
+        inputEl.style.borderColor = 'var(--color-brand-red)';
       }
     }
 
@@ -98,9 +98,9 @@
       if (submitErrorBox) {
         submitErrorBox.textContent = msg;
         submitErrorBox.hidden = false;
-        submitErrorBox.style.color = '#B02032';
-        submitErrorBox.style.background = '#fff5f5';
-        submitErrorBox.style.border = '1px solid #fecaca';
+        submitErrorBox.style.color = 'var(--color-brand-red)';
+        submitErrorBox.style.background = 'var(--color-danger-bg)';
+        submitErrorBox.style.border = '1px solid rgba(163, 59, 69, 0.2)';
       }
     }
 
@@ -151,15 +151,6 @@
 
       try {
         await AuthService.register(rawData);
-        if (qs('#marketingConsent')?.checked) {
-          ApiClient.post('/klaviyo/subscribe', {
-            email: rawData.email,
-            firstName: rawData.firstName,
-            lastName: rawData.lastName,
-            phoneNumber: rawData.phoneNumber,
-            consent: true,
-          }).catch(() => {});
-        }
         form.hidden = true;
         if (successBox) {
           successBox.textContent = 'Application submitted successfully! Your account is pending administrator approval before you can sign in.';

@@ -8,9 +8,8 @@
 (function () {
   'use strict';
 
-  document.addEventListener('DOMContentLoaded', () => {
-    // Apply persisted theme before paint-sensitive components render.
-    document.documentElement.dataset.theme = Storage.getTheme();
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (window.authGuardReady) await window.authGuardReady;
 
     if (!window.CurrentUser) return; // auth-guard already handled redirect
 

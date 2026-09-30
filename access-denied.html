@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Access Denied — Enoch International College ERP</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/components/buttons.css" />
+  <style>
+    body { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+    main { width: min(100%, 480px); }
+    h1 { margin: 0 0 8px; font-size: 24px; }
+    p { line-height: 1.55; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Access unavailable</h1>
+    <p>Your account has no active module access. Contact a school administrator to review your role assignments.</p>
+    <button class="btn btn-secondary" type="button" id="sign-out-button">Sign Out</button>
+  </main>
+  <script src="js/config/api.js"></script>
+  <script src="js/utils/storage.js"></script>
+  <script>
+    document.getElementById('sign-out-button').addEventListener('click', () => {
+      Storage.clearSession();
+      window.location.replace('login.html');
+    });
+  </script>
+</body>
+</html>

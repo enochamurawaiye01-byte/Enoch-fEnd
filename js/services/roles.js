@@ -29,8 +29,12 @@
       const payload = await ApiClient.post(ROLES.REVOKE, data);
       return ApiClient.unwrapItem(payload);
     },
-    async changeUserRole(userId, role) {
-      const payload = await ApiClient.patch(ROLES.CHANGE_USER_ROLE(userId), { role });
+    async activateRole(assignmentId) {
+      const payload = await ApiClient.post(ROLES.ACTIVATE, { assignmentId });
+      return ApiClient.unwrapItem(payload);
+    },
+    async changeUserRole(userId, roles) {
+      const payload = await ApiClient.patch(ROLES.CHANGE_USER_ROLE(userId), { roles });
       return ApiClient.unwrapItem(payload);
     },
   };

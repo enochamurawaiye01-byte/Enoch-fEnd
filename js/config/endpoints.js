@@ -301,11 +301,13 @@
       BY_ID: (id_) => `/roles/${id_}`,
       ASSIGN: '/roles/assign',
       REVOKE: '/roles/revoke',
+      ACTIVATE: '/roles/activate',
       CHANGE_USER_ROLE: (userId) => `/roles/users/${userId}`,
     },
 
     PERMISSIONS: {
       BASE: '/permissions',
+      MODULES: '/permissions/modules',
       BY_ID: (id_) => `/permissions/${id_}`,
       ASSIGN: '/permissions/assign',
       REVOKE: '/permissions/revoke',

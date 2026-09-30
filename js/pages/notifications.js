@@ -20,7 +20,9 @@
         { key: 'status', label: 'Status', render: (r) => (r.readAt || r.isRead ? '<span class="badge badge-outline">Read</span>' : '<span class="badge badge-warning">Unread</span>') },
         { key: 'createdAt', label: 'Received', render: (r) => timeAgo(r.createdAt) },
       ],
-      rowActions: (row) => (row.readAt || row.isRead ? '' : `<button type="button" class="btn btn-secondary btn-sm" data-action="mark-read">Mark Read</button>`),
+      rowActions: (row) => row.canActivateRole
+        ? `<button type="button" class="btn btn-primary btn-sm" data-action="activate-role" data-assignment-id="${escapeHtml(row.roleAssignment.id)}">Activate Role</button>`
+        : (row.readAt || row.isRead ? '' : `<button type="button" class="btn btn-secondary btn-sm" data-action="mark-read">Mark Read</button>`),
       fetchPage: (page) => NotificationsService.list({ page, pageSize: 20 }),
       emptyMessage: 'You have no notifications.',
     });
@@ -34,9 +36,19 @@
 
     document.getElementById('notifications-tbody').addEventListener('click', async (e) => {
       const rowEl = e.target.closest('tr[data-row-id]');
-      if (!rowEl || !e.target.closest('[data-action="mark-read"]')) return;
-      await NotificationsService.markRead(rowEl.dataset.rowId);
-      table.reload();
+      const actionButton = e.target.closest('[data-action]');
+      if (!rowEl || !actionButton) return;
+      try {
+        if (actionButton.dataset.action === 'activate-role') {
+          await RolesService.activateRole(actionButton.dataset.assignmentId);
+          Toast.success('Role activated. Your access is updated.');
+        } else if (actionButton.dataset.action === 'mark-read') {
+          await NotificationsService.markRead(rowEl.dataset.rowId);
+        }
+        table.reload();
+      } catch (error) {
+        Toast.error(error.message || 'Unable to update this notification.');
+      }
     });
   });
 })();

@@ -1,40 +1,47 @@
 /* ==========================================================================
    MERCY T COLLEGE NURSERY AND PRIMARY SCHOOL — CORE STYLESHEET
    Motto: "Knowledge is Light"
-   Palette: Ivory White (#EBEBED), Deep Navy (#041664), Royal Blue (#052F9A), Azure Blue (#04A1D0), Red (#B02032)
+  Palette: Pale Lemon (#FBFCD9), Soft White, Deep Navy, Restrained Red, Black
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 :root {
-  /* ---- Brand palette: Cream, Deep Navy & Black ---- */
-  --color-cream-bg:     #FAF7F2;
-  --color-cream-surface:#FFFFFF;
-  --color-cream-alt:    #F3EEE7;
+  /* ---- Brand palette ---- */
+  --color-cream-bg:     #FBFCD9;
+  --color-cream-surface:#FFFEF5;
+  --color-cream-alt:    #F1F2D6;
 
-  --color-deep-navy:    #0A192F;
-  --color-navy-soft:    #162A45;
+  --color-deep-navy:    #13283E;
+  --color-navy-soft:    #1C374F;
+  --color-brand-red:    #A33B45;
 
-  --color-black:        #111111;
-  --color-ink:          #111111;
-  --color-ink-soft:     #333333;
-  --color-ink-mute:     #666666;
+  --color-black:        #17191C;
+  --color-ink:          #17191C;
+  --color-ink-soft:     #3B4147;
+  --color-ink-mute:     #666D72;
 
-  --color-white:        #FFFFFF;
+  --color-white:        #FFFEF5;
   --color-bg:           var(--color-cream-bg);
   --color-bg-alt:       var(--color-cream-alt);
   --color-surface:      var(--color-cream-surface);
-  --color-border:       #D8D2C6;
-  --color-border-strong: #B8B0A0;
+  --color-border:       #D6D8BC;
+  --color-border-strong: #BFC39F;
 
-  --color-success:      #166534;
-  --color-success-bg:   #F0FDF4;
-  --color-warning:      #9A3412;
-  --color-warning-bg:   #FFF7ED;
-  --color-danger:       #991B1B;
-  --color-danger-bg:    #FEF2F2;
-  --color-info:         #0A192F;
-  --color-info-bg:      #F3EEE7;
+  --color-success:      #13283E;
+  --color-success-bg:   #F1F2D6;
+  --color-warning:      #8B414B;
+  --color-warning-bg:   #F7ECEB;
+  --color-danger:       #A33B45;
+  --color-danger-bg:    #F8E9E9;
+  --color-info:         #13283E;
+  --color-info-bg:      #EFF1DF;
+
+  /* Legacy accent tokens now point at the current brand palette. */
+  --color-emerald-50:   #F1F2D6;
+  --color-emerald-600:  #13283E;
+  --color-emerald-700:  #13283E;
+  --color-emerald-800:  #13283E;
 
   /* ---- Semantic tokens ---- */
   --app-bg: var(--color-cream-bg);
@@ -44,7 +51,7 @@
   --text-secondary: var(--color-ink-soft);
   --text-muted: var(--color-ink-mute);
   --sidebar-bg: var(--color-deep-navy);
-  --sidebar-text: #D8D2C6;
+  --sidebar-text: #D6D8BC;
   --sidebar-text-active: var(--color-white);
   --sidebar-active-bg: var(--color-navy-soft);
 
@@ -119,7 +126,7 @@ h1, h2, h3, .heading {
   font-family: var(--font-display);
   color: var(--color-ink);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   line-height: 1.25;
 }
 h1 { font-size: var(--fs-h1); }
@@ -243,11 +250,11 @@ h3 { font-size: var(--fs-h3); }
 .stat-card {
   background: var(--surface-bg);
   border: 1px solid var(--surface-border);
-  border-left: 3px solid var(--color-emerald-600);
+  border-left: 3px solid var(--color-deep-navy);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
 }
-.stat-card--accent { border-left-color: var(--color-emerald-600); }
+.stat-card--accent { border-left-color: var(--color-deep-navy); }
 .stat-card__label {
   font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
   color: var(--text-muted); margin-bottom: var(--space-2);

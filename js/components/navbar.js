@@ -22,16 +22,12 @@
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </button>
         <div class="topbar__crumbs">
-          <h1 style="color:#041664;">${escapeHtml(pageTitle || '')}</h1>
-          <span class="topbar__breadcrumb" style="font-size:12px; color:#B02032; font-weight:bold; font-style:italic;">Mercy T College — Motto: "Knowledge is Light"</span>
+          <h1 style="color:#13283E;">${escapeHtml(pageTitle || '')}</h1>
+          <span class="topbar__breadcrumb" style="font-size:12px; color:#A33B45; font-weight:bold; font-style:italic;">Mercy T College — Motto: "Knowledge is Light"</span>
         </div>
       </div>
 
       <div class="topbar__right">
-        <button type="button" class="topbar__icon-btn" id="theme-toggle-btn" aria-label="Toggle dark mode">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-        </button>
-
         <div class="dropdown" data-dropdown style="position:relative;">
           <button type="button" class="topbar__icon-btn" data-dropdown-trigger aria-label="Notifications">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
@@ -39,8 +35,8 @@
           </button>
           <div class="dropdown-panel notif-panel" data-dropdown-panel>
             <div class="notif-panel__head">
-              <strong class="text-small" style="color:#041664;">Notifications</strong>
-              <button type="button" class="link-btn" id="mark-all-read-btn" style="background:none;border:none;color:#052F9A;font-size:12px;font-weight:600;cursor:pointer;">Mark all read</button>
+              <strong class="text-small" style="color:#13283E;">Notifications</strong>
+              <button type="button" class="link-btn" id="mark-all-read-btn" style="background:none;border:none;color:#13283E;font-size:12px;font-weight:600;cursor:pointer;">Mark all read</button>
             </div>
             <div id="notif-list"></div>
           </div>
@@ -48,10 +44,10 @@
 
         <div class="dropdown" data-dropdown style="position:relative;">
           <div class="topbar__profile" data-dropdown-trigger>
-            <span class="avatar" style="background:#041664; color:#ffffff;">${escapeHtml(initials(displayName))}</span>
+            <span class="avatar" style="background:#13283E; color:#ffffff;">${escapeHtml(initials(displayName))}</span>
             <div class="topbar__profile-meta">
               <span class="name">${escapeHtml(displayName)}</span>
-              <span class="role" style="color:#B02032; font-weight:bold;">${escapeHtml(roleLabel)}</span>
+              <span class="role" style="color:#A33B45; font-weight:bold;">${escapeHtml(roleLabel)}</span>
             </div>
           </div>
           <div class="dropdown-panel" data-dropdown-panel>
@@ -60,7 +56,7 @@
               Profile Settings
             </a>
             <div class="dropdown-panel__divider"></div>
-            <a href="#" class="dropdown-panel__item danger" data-action="logout" style="color:#B02032;">
+            <a href="#" class="dropdown-panel__item danger" data-action="logout" style="color:#A33B45;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
               Sign Out
             </a>
@@ -74,16 +70,6 @@
     const appShell = document.querySelector('.app-shell');
     if (mobileBtn && appShell) {
       mobileBtn.addEventListener('click', () => appShell.classList.toggle('mobile-nav-open'));
-    }
-
-    const themeBtn = document.getElementById('theme-toggle-btn');
-    if (themeBtn) {
-      themeBtn.addEventListener('click', () => {
-        const isDark = document.documentElement.dataset.theme === 'dark';
-        const next = isDark ? 'light' : 'dark';
-        document.documentElement.dataset.theme = next;
-        Storage.setTheme(next);
-      });
     }
 
     Dropdown.init(header);

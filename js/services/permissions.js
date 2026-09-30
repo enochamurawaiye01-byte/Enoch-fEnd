@@ -2,6 +2,10 @@
   'use strict';
   const { PERMISSIONS } = ENOCH_ENDPOINTS;
   global.PermissionsService = {
+    async modules() {
+      const payload = await ApiClient.get(PERMISSIONS.MODULES);
+      return ApiClient.unwrapList(payload);
+    },
     async list() {
       const payload = await ApiClient.get(PERMISSIONS.BASE);
       return ApiClient.unwrapList(payload);

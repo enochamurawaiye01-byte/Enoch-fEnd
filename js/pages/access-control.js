@@ -1,15 +1,19 @@
 (function () {
   'use strict';
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (window.authGuardReady) await window.authGuardReady;
     if (!window.CurrentUser || !['ADMIN', 'SUPER_ADMIN'].includes(window.CurrentUser.role)) return;
 
     let activeRoleGroup = 'ALL';
     let activeStatusFilter = 'ALL';
     let cachedUsersMap = new Map();
+    let matrixRoles = [];
+    let matrixPermissions = [];
+    let pendingMatrixChanges = new Map();
 
     // Complete System Roles Taxonomy (Categorized)
-    const ALL_ROLES = [
+    let ALL_ROLES = [
       // Category 1: Executive & Administrative Leadership
       { id: 'SUPER_ADMIN', name: 'SUPER_ADMIN', label: 'Super Admin', category: 'Executive & Admin', isSystem: true },
       { id: 'ADMIN', name: 'ADMIN', label: 'School Admin', category: 'Executive & Admin', isSystem: true },
@@ -114,7 +118,7 @@
     }
 
     // All 56 Backend Modules from College/src/modules/
-    const ALL_MODULES = [
+    let ALL_MODULES = [
       { key: 'admissions', label: 'Admissions & Applications', desc: 'Manage student admission applications, approvals, and student conversions' },
       { key: 'academic_sessions', label: 'Academic Sessions', desc: 'Create and configure academic years and school sessions' },
       { key: 'analytics', label: 'School Analytics', desc: 'View student performance charts, enrollment statistics, and financial overview' },
@@ -139,7 +143,7 @@
       { key: 'inventory', label: 'Inventory & Stock', desc: 'Track textbooks, uniforms, stationary, and school equipment' },
       { key: 'invoices', label: 'Fee Invoices', desc: 'Generate and issue billing invoices for student tuition' },
       { key: 'jobs', label: 'Background Jobs', desc: 'Execute scheduled email broadcasts, result calculations, and backups' },
-      { key: 'klaviyo', label: 'Klaviyo Email Sync', desc: 'Sync subscriber profiles and send automated admission approval emails' },
+      { key: 'klaviyo', label: 'Legacy Marketing Integration (Disabled)', desc: 'Legacy integration is disabled; approval email is sent directly through the server mailer' },
       { key: 'lessons', label: 'Lesson Notes & Plans', desc: 'Submit and approve teacher weekly lesson plans and schemes of work' },
       { key: 'library', label: 'Library & Book Loans', desc: 'Catalog library books, issue loans, and track overdue returns' },
       { key: 'management', label: 'Executive Management', desc: 'Access high-level administrative overviews and board metrics' },
@@ -173,6 +177,45 @@
       { key: 'website', label: 'Public School Website CMS', desc: 'Edit public portal content, landing page, and news' },
     ];
 
+    const roleMetadata = new Map(ALL_ROLES.map((role) => [role.id, role]));
+    try {
+      const roleResponse = await RolesService.list();
+      ALL_ROLES = roleResponse.items
+        .filter((role) => role.isActive !== false)
+        .map((role) => {
+          const roleName = role.name || role.id;
+          const metadata = roleMetadata.get(roleName) || {};
+          return {
+            ...metadata,
+            id: roleName,
+            name: roleName,
+            label: role.label || metadata.label || titleCaseFromEnum(roleName),
+            category: metadata.category || 'Defined Roles',
+            description: role.description || metadata.description || `${titleCaseFromEnum(roleName)} role`,
+            isSystem: Boolean(role.isSystem),
+          };
+        });
+    } catch (error) {
+      console.warn('[Access Control] Could not load role definitions from the server.');
+    }
+
+    try {
+      const moduleResponse = await PermissionsService.modules();
+      if (moduleResponse.items.length) {
+        const existingModuleMetadata = new Map(ALL_MODULES.map((module) => [module.key, module]));
+        ALL_MODULES = moduleResponse.items.map((module) => ({
+          key: module.key,
+          label: module.displayName,
+          desc: existingModuleMetadata.get(module.key)?.desc || `${module.displayName} module`,
+          apiRoute: module.apiRoute,
+          frontendRoutes: module.frontendRoutes,
+          actions: module.actions,
+        }));
+      }
+    } catch (error) {
+      console.warn('[Access Control] Could not load the module registry from the server.');
+    }
+
     // Main Tabs switching
     const tabBtns = document.querySelectorAll('.rbac-tab-btn');
     const tabPanes = document.querySelectorAll('.tab-pane');
@@ -200,16 +243,40 @@
     // Save Matrix button
     const saveMatrixBtn = document.getElementById('save-matrix-btn');
     if (saveMatrixBtn) {
-      saveMatrixBtn.addEventListener('click', () => {
-        const checkboxes = document.querySelectorAll('.matrix-toggle');
-        let matrixState = {};
-        checkboxes.forEach((cb) => {
-          const roleId = cb.dataset.roleId;
-          const moduleKey = cb.dataset.moduleKey;
-          matrixState[`${roleId}:${moduleKey}`] = cb.checked;
-        });
-        Storage.setItem('mtc_role_permission_matrix', matrixState);
-        Toast.success('Role Permission Matrix configuration saved successfully!');
+      saveMatrixBtn.addEventListener('click', async () => {
+        if (!pendingMatrixChanges.size) {
+          Toast.show('info', 'There are no permission changes to save.');
+          return;
+        }
+        saveMatrixBtn.disabled = true;
+        try {
+          for (const [key, shouldHaveAccess] of pendingMatrixChanges) {
+            const [roleName, moduleKey] = key.split(':');
+            const role = matrixRoles.find((item) => item.name === roleName);
+            if (!role || roleName === 'SUPER_ADMIN') continue;
+            const modulePermissions = matrixPermissions.filter((permission) => permission.module === moduleKey);
+            const viewPermission = modulePermissions.find((permission) => permission.action === 'view');
+            if (shouldHaveAccess && viewPermission) {
+              await PermissionsService.assign({ roleId: role.id, permissionId: viewPermission.id });
+            } else if (!shouldHaveAccess) {
+              const assignedIds = new Set(role.permissions.map((item) => item.permissionId));
+              for (const permission of modulePermissions) {
+                if (assignedIds.has(permission.id)) {
+                  await PermissionsService.revoke({ roleId: role.id, permissionId: permission.id });
+                }
+              }
+            }
+          }
+          pendingMatrixChanges.clear();
+          Toast.success('Role permissions saved to the database.');
+          await loadMatrix();
+        } catch (error) {
+          Toast.error(error.message || 'Some permissions could not be saved. The matrix will be refreshed from the server.');
+          pendingMatrixChanges.clear();
+          await loadMatrix();
+        } finally {
+          saveMatrixBtn.disabled = false;
+        }
       });
     }
 
@@ -248,7 +315,7 @@
         {
           key: 'fullName',
           label: 'User Name',
-          render: (r) => `<a href="javascript:void(0)" class="view-user-details" data-id="${r.id}" style="color:#0A192F; font-weight:600;">${escapeHtml(r.fullName || 'Unnamed Account')}</a>`
+          render: (r) => `<a href="javascript:void(0)" class="view-user-details" data-id="${r.id}" style="color:#13283E; font-weight:600;">${escapeHtml(r.fullName || 'Unnamed Account')}</a>`
         },
         { key: 'email', label: 'Email Address', render: (r) => escapeHtml(r.email || '—') },
         {
@@ -407,14 +474,17 @@
 
       if (action === 'change-role') {
         const currentRole = (rowData?.role || 'STAFF').toUpperCase();
+        const currentAssignments = (rowData?.roleAssignments || []).filter((assignment) => ['ACTIVE', 'PENDING'].includes(assignment.status));
+        const currentRoleNames = new Set(currentAssignments.map((assignment) => assignment.role?.name));
+        if (!currentRoleNames.size && currentRole) currentRoleNames.add(currentRole);
         const categories = [...new Set(ALL_ROLES.map((r) => r.category))];
         const dropdownOptionsHtml = categories.map((cat) => {
           const catRoles = ALL_ROLES.filter((r) => r.category === cat);
           return `
             <optgroup label="${escapeHtml(cat)}">
               ${catRoles.map((r) => `
-                <option value="${r.id}" ${r.id === currentRole ? 'selected' : ''}>
-                  ${escapeHtml(r.label)} (${r.id})
+                <option value="${escapeHtml(r.id)}" ${currentRoleNames.has(r.id) ? 'selected' : ''}>
+                  ${escapeHtml(r.label)}${currentAssignments.find((assignment) => assignment.role?.name === r.id)?.status ? ` (${currentAssignments.find((assignment) => assignment.role?.name === r.id).status})` : ''}
                 </option>
               `).join('')}
             </optgroup>
@@ -426,96 +496,63 @@
           size: 'md',
           content: `
             <div class="user-role-modal-wrap" style="padding: 4px 0;">
-              <div class="active-role-banner" style="background:#0A192F; color:#ffffff; padding:14px 18px; border-radius:4px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
+              <div class="active-role-banner" style="background:#13283E; color:#ffffff; padding:14px 18px; border-radius:4px; margin-bottom:18px;">
                 <div>
-                  <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; opacity:0.85;">Current Active Role</div>
-                  <div style="font-size:16px; font-weight:700; margin-top:2px; color:#ffffff;">${escapeHtml(formatRoleName(currentRole))} <span style="font-size:12px; font-weight:normal; opacity:0.85;">(${currentRole})</span></div>
-                </div>
-                <span class="badge" style="background:#162A45; color:#fff; font-size:11px; padding:4px 10px; font-weight:600;">✓ Active</span>
-              </div>
-
-              <div class="edit-role-controls" style="margin-bottom: 16px;">
-                <label style="font-weight:600; color:#111111; display:block; margin-bottom:8px; font-size:13px;">Edit Role Action</label>
-                <div style="display:flex; gap:10px;">
-                  <button type="button" class="btn btn-primary role-toggle-btn active" id="btn-action-add" style="flex:1; background:#0A192F; border-color:#0A192F; font-weight:600; font-size:13px;">Assign / Change Role</button>
-                  <button type="button" class="btn btn-outline role-toggle-btn" id="btn-action-remove" style="flex:1; border-color:#991B1B; color:#991B1B; font-weight:600; font-size:13px;">Reset to Basic Staff</button>
+                  <div style="font-size:11px; text-transform:uppercase; opacity:0.85;">Current Roles</div>
+                  <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">
+                    ${[...currentRoleNames].map((roleName) => {
+                      const assignment = currentAssignments.find((item) => item.role?.name === roleName);
+                      const status = assignment?.status || 'ACTIVE';
+                      return `<span class="badge ${status === 'ACTIVE' ? 'badge-success' : 'badge-warning'}">${escapeHtml(formatRoleName(roleName))} · ${status}</span>`;
+                    }).join('') || '<span>No active or pending roles</span>'}
+                  </div>
                 </div>
               </div>
 
               <form id="change-role-form" class="form">
-                <div id="role-select-box" style="margin-bottom: 16px;">
+                <div style="margin-bottom:16px;">
                   <label for="change-role-select" class="form-label" style="font-weight:600; color:#111111; font-size:13px; display:block; margin-bottom:8px;">
-                    Select Target Defined Role
+                    Select the staff member's active and pending roles
                   </label>
-                  <select id="change-role-select" name="role" class="form-control" style="width:100%; padding:10px 12px; font-size:14px; font-weight:600; border:1px solid #D8D2C6; border-radius:4px; background:#FAF7F2; color:#0A192F; cursor:pointer;">
+                  <select id="change-role-select" name="roles" class="form-control" multiple size="9" style="width:100%; padding:10px 12px; font-size:14px; border:1px solid #D6D8BC; border-radius:4px; background:#FBFCD9; color:#13283E;">
                     ${dropdownOptionsHtml}
                   </select>
                 </div>
 
-                <div id="role-remove-warning" style="display:none; background:#FEF2F2; border:1px solid rgba(153,27,27,0.2); padding:12px; border-radius:4px; margin-bottom:16px;">
-                  <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="color:#991B1B; font-size:16px;">⚠️</span>
-                    <strong style="color:#991B1B; font-size:13px;">Reset User to Basic Staff Profile</strong>
-                  </div>
-                  <p style="color:#555555; margin:4px 0 0 0; font-size:12px; line-height:1.5;">
-                    Resetting will change this user account back to basic default <strong>STAFF</strong> profile and clear administrative privileges.
-                  </p>
-                </div>
-
                 <div class="modal__footer" style="margin-top:16px; text-align:right;">
-                  <button type="submit" class="btn btn-primary" id="submit-role-btn" style="background:#0A192F; border-color:#0A192F; font-weight:600; padding:8px 18px;">Save Role Changes</button>
+                  <button type="submit" class="btn btn-primary" id="submit-role-btn" style="background:#13283E; border-color:#13283E; font-weight:600; padding:8px 18px;">Save Role Changes</button>
                 </div>
               </form>
             </div>
           `,
           onOpen: (modalEl) => {
-            const btnAdd = modalEl.querySelector('#btn-action-add');
-            const btnRemove = modalEl.querySelector('#btn-action-remove');
-            const roleSelectBox = modalEl.querySelector('#role-select-box');
-            const roleRemoveWarning = modalEl.querySelector('#role-remove-warning');
             const form = modalEl.querySelector('#change-role-form');
-            let isRemoveMode = false;
-
-            if (btnAdd && btnRemove) {
-              btnAdd.addEventListener('click', () => {
-                isRemoveMode = false;
-                btnAdd.classList.add('active');
-                btnAdd.style.background = '#0A192F';
-                btnAdd.style.color = '#ffffff';
-                btnRemove.classList.remove('active');
-                btnRemove.style.background = 'transparent';
-                btnRemove.style.color = '#991B1B';
-                roleSelectBox.style.display = 'block';
-                roleRemoveWarning.style.display = 'none';
-              });
-
-              btnRemove.addEventListener('click', () => {
-                isRemoveMode = true;
-                btnRemove.classList.add('active');
-                btnRemove.style.background = '#991B1B';
-                btnRemove.style.color = '#ffffff';
-                btnAdd.classList.remove('active');
-                btnAdd.style.background = 'transparent';
-                btnAdd.style.color = '#0A192F';
-                roleSelectBox.style.display = 'none';
-                roleRemoveWarning.style.display = 'block';
-              });
-            }
-
             form.addEventListener('submit', async (e) => {
               e.preventDefault();
-              const targetRole = isRemoveMode ? 'STAFF' : form.role.value;
-              try {
+              const targetRoles = Array.from(form.roles.selectedOptions, (option) => option.value);
+              const removed = currentAssignments.filter((assignment) => !targetRoles.includes(assignment.role?.name));
+              const saveChanges = async () => {
                 try {
-                  await RolesService.changeUserRole(userId, targetRole);
-                } catch (firstErr) {
-                  await UsersService.update(userId, { role: targetRole });
+                  const result = await RolesService.changeUserRole(userId, targetRoles);
+                  const pending = (result.assignments || []).filter((assignment) => assignment.status === 'PENDING').length;
+                  Toast.success(`Roles updated.${pending ? ` ${pending} new role(s) await staff activation.` : ''}`);
+                  if (result.warnings?.length) Toast.error(`Saved, but follow-up failed: ${result.warnings.join('; ')}`);
+                  Modal.close();
+                  userTable.reload();
+                } catch (err) {
+                  Toast.error(err.message || 'Failed to update user roles.');
                 }
-                Toast.success(`Role updated to ${formatRoleName(targetRole)}. Profile & modules provisioned!`);
-                Modal.close();
-                userTable.reload();
-              } catch (err) {
-                Toast.error(err.message || 'Failed to update user role.');
+              };
+              if (removed.length) {
+                ConfirmDialog.open({
+                  title: 'Remove assigned roles?',
+                  message: `This will revoke ${removed.map((assignment) => formatRoleName(assignment.role?.name)).join(', ')} immediately.`,
+                  confirmLabel: 'Remove Roles',
+                  tone: 'danger',
+                  onConfirm: saveChanges,
+                });
+              } else {
+                await saveChanges();
               }
             });
           },
@@ -524,124 +561,63 @@
 
       if (action === 'grant-access' || action === 'manage-perms') {
         const currentRole = (rowData?.role || 'STAFF').toUpperCase();
+        const assignments = rowData?.roleAssignments || [];
+        const currentAssignmentByRole = new Map(assignments.map((assignment) => [assignment.role?.name, assignment]));
         Modal.open({
           title: `Grant Access & Role Entitlements — ${userName}`,
           size: 'lg',
           content: `
             <div class="grant-access-modal-wrap" style="padding: 4px 0;">
-              <div class="user-header-banner" style="background:#0A192F; color:#ffffff; padding:14px 18px; border-radius:4px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+              <div class="user-header-banner" style="background:#13283E; color:#ffffff; padding:14px 18px; border-radius:4px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
                   <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.8px; opacity:0.85;">User Account Profile</div>
                   <div style="font-size:16px; font-weight:700; margin-top:2px; color:#ffffff;">${escapeHtml(userName)}</div>
                   <div style="font-size:12px; opacity:0.85;">${escapeHtml(rowData ? rowData.email : '')}</div>
                 </div>
                 <div>
-                  <span class="badge" style="background:#162A45; color:#fff; font-size:12px; padding:4px 12px; font-weight:600; border:1px solid rgba(255,255,255,0.2);">
-                    Active Role: ${escapeHtml(formatRoleName(currentRole))}
+                  <span class="badge" style="background:#1C374F; color:#fff; font-size:12px; padding:4px 12px; font-weight:600; border:1px solid rgba(255,255,255,0.2);">
+                    Current Role: ${escapeHtml(formatRoleName(currentRole))}
                   </span>
                 </div>
               </div>
 
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:10px;">
                 <p style="color:#555555; font-size:13px; margin:0; line-height:1.4;">
-                  Select any defined role below to grant total module access under that role to <strong>${escapeHtml(userName)}</strong>.
+                  Select one or more backend-defined roles. New assignments remain pending until the staff member activates them.
                 </p>
-                <input type="text" id="grant-modal-search" placeholder="🔍 Search role or module..." style="padding:5px 12px; font-size:12px; border:1px solid #D8D2C6; border-radius:4px; width:220px;" />
               </div>
 
-              <div class="defined-roles-list" id="grant-roles-modal-list" style="display:flex; flex-direction:column; gap:8px; max-height:340px; overflow-y:auto; padding-right:4px;">
-                ${ALL_ROLES.map((r) => {
-                  const modules = ROLE_MODULE_MAP[r.id] || [];
-                  const isCurrent = r.id === currentRole;
-                  const modulesSearchStr = modules.join(' ').toLowerCase();
-                  return `
-                    <div class="role-def-card" data-role-id="${r.id}" data-role-label="${escapeHtml(r.label).toLowerCase()}" data-modules="${modulesSearchStr}" style="border: 1px solid ${isCurrent ? '#0A192F' : '#D8D2C6'}; background: ${isCurrent ? '#F3EEE7' : '#ffffff'}; border-radius:4px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; transition:all 0.12s ease;">
-                      <div style="flex:1; padding-right:15px;">
-                        <div style="display:flex; align-items:center; gap:8px;">
-                          <h4 style="margin:0; color:#111111; font-size:14px; font-weight:600;">${escapeHtml(r.label)}</h4>
-                          <code style="background:#F3EEE7; color:#0A192F; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:600;">${r.id}</code>
-                          <span style="font-size:11px; color:#666666; background:#F8FAF9; padding:2px 6px; border-radius:4px; border:1px solid #D8D2C6;">${escapeHtml(r.category)}</span>
-                          ${isCurrent ? '<span class="badge badge-success" style="font-size:11px; padding:2px 6px;">Active Role</span>' : ''}
-                        </div>
-                        <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:4px;">
-                          ${modules.map((m) => `<span style="background:#F3EEE7; color:#333333; border:1px solid #D8D2C6; border-radius:4px; padding:2px 6px; font-size:11px;">${m}</span>`).join('')}
-                        </div>
-                      </div>
-                      <div>
-                        <button type="button" class="btn ${isCurrent ? 'btn-secondary' : 'btn-primary'} btn-grant-role-action" data-role-id="${r.id}" data-role-label="${escapeHtml(r.label)}" style="${isCurrent ? '' : 'background:#0A192F; border-color:#0A192F;'} font-size:12px; font-weight:600; padding:6px 12px;">
-                          ${isCurrent ? 'Current Role' : 'Grant Role'}
-                        </button>
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-
-              <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #D8D2C6;">
-                <details style="cursor:pointer;">
-                  <summary style="font-weight:600; color:#111111; font-size:13px;">Or Grant Single Module Permission Override</summary>
-                  <form id="grant-single-module-form" class="form" style="margin-top:10px;">
-                    <div class="form-group" style="display:flex; gap:10px; margin-bottom:0;">
-                      <select name="moduleKey" class="form-control" style="flex:1;" required>
-                        ${ALL_MODULES.map((m) => `<option value="${m.key}">${m.label} (${m.key})</option>`).join('')}
-                      </select>
-                      <button type="submit" class="btn btn-outline" style="border-color:#0A192F; color:#0A192F; font-weight:600;">Grant Single Module</button>
-                    </div>
-                  </form>
-                </details>
+              <div class="form-group" style="display:flex; gap:10px; margin-bottom:0;">
+                <select id="grant-role-select" class="form-control" style="flex:1;" multiple size="9" required>
+                  ${ALL_ROLES.map((role) => {
+                    const existing = currentAssignmentByRole.get(role.id);
+                    const isAssigned = existing && ['ACTIVE', 'PENDING'].includes(existing.status);
+                    return `<option value="${escapeHtml(role.id)}" ${isAssigned ? 'disabled' : ''}>${escapeHtml(role.label)}${existing ? ` (${existing.status})` : ''}</option>`;
+                  }).join('')}
+                </select>
+                <button type="button" class="btn btn-primary" id="grant-selected-role-btn" style="background:#13283E; border-color:#13283E; font-weight:600;">Grant Role</button>
               </div>
             </div>
           `,
           onOpen: (modalEl) => {
-            const grantSearchInput = modalEl.querySelector('#grant-modal-search');
-            if (grantSearchInput) {
-              grantSearchInput.addEventListener('input', () => {
-                const query = grantSearchInput.value.toLowerCase().trim();
-                modalEl.querySelectorAll('.role-def-card').forEach((card) => {
-                  const id = card.dataset.roleId.toLowerCase();
-                  const label = card.dataset.roleLabel;
-                  const modules = card.dataset.modules;
-                  if (id.includes(query) || label.includes(query) || modules.includes(query)) {
-                    card.style.display = 'flex';
-                  } else {
-                    card.style.display = 'none';
-                  }
-                });
-              });
-            }
-            modalEl.querySelectorAll('.btn-grant-role-action').forEach((btn) => {
-              btn.addEventListener('click', async () => {
-                const targetRoleId = btn.dataset.roleId;
-                const targetRoleLabel = btn.dataset.roleLabel;
-                try {
-                  await RolesService.changeUserRole(userId, targetRoleId);
-                  Toast.success(`Granted ${targetRoleLabel} access to ${userName}. All role modules provisioned!`);
-                  Modal.close();
-                  userTable.reload();
-                } catch (err) {
-                  Toast.error(err.message || 'Failed to grant role permissions.');
-                }
-              });
+            const grantRoleSelect = modalEl.querySelector('#grant-role-select');
+            const grantRoleButton = modalEl.querySelector('#grant-selected-role-btn');
+            grantRoleButton.addEventListener('click', async () => {
+              const roleIds = Array.from(grantRoleSelect.selectedOptions, (option) => option.value);
+              if (!roleIds.length) {
+                Toast.error('Select one or more roles to grant access.');
+                return;
+              }
+              try {
+                const result = await RolesService.assign({ userId, roleIds });
+                Toast.success(`Assigned ${roleIds.length} role(s) to ${userName}; access is pending staff activation.`);
+                if (result.warnings?.length) Toast.error(`Saved, but follow-up failed: ${result.warnings.join('; ')}`);
+                Modal.close();
+                userTable.reload();
+              } catch (err) {
+                Toast.error(err.message || 'Failed to grant role permissions.');
+              }
             });
-
-            const singleForm = modalEl.querySelector('#grant-single-module-form');
-            if (singleForm) {
-              singleForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const moduleKey = e.target.moduleKey.value;
-                try {
-                  let userObj = cachedUsersMap.get(userId);
-                  if (userObj) {
-                    userObj.grantedModules = userObj.grantedModules || [];
-                    if (!userObj.grantedModules.includes(moduleKey)) userObj.grantedModules.push(moduleKey);
-                  }
-                  Toast.success(`Granted access to ${moduleKey} module.`);
-                  Modal.close();
-                } catch (err) {
-                  Toast.error(err.message || 'Failed to grant module access.');
-                }
-              });
-            }
           },
         });
       }
@@ -656,28 +632,32 @@
       tbody.innerHTML = '<tr><td colspan="12">Loading 56-Module Permission Matrix...</td></tr>';
       
       try {
+        const [rolesResponse, permissionsResponse] = await Promise.all([
+          RolesService.list(),
+          PermissionsService.list(),
+        ]);
+        matrixRoles = rolesResponse.items;
+        matrixPermissions = permissionsResponse.items;
+        pendingMatrixChanges.clear();
         theadRow.innerHTML = '<th>Module Name & Scope</th>' + ALL_ROLES.map((r) => `<th style="text-align:center; font-size:12px;">${escapeHtml(r.label)}</th>`).join('');
-
-        // Matrix state from localStorage or defaults
-        let matrixState = Storage.getItem('mtc_role_permission_matrix') || {};
 
         tbody.innerHTML = ALL_MODULES.map((m) => {
           return `
             <tr>
               <td>
                 <strong style="color:#111111; font-size:13px;">${escapeHtml(m.label)}</strong>
-                <code style="background:#F3EEE7; padding:2px 6px; border-radius:4px; margin-left:6px; color:#0A192F; font-size:11px;">${escapeHtml(m.key)}</code>
+                <code style="background:#F1F2D6; padding:2px 6px; border-radius:4px; margin-left:6px; color:#13283E; font-size:11px;">${escapeHtml(m.key)}</code>
                 <div style="font-size:11px; color:#666666; margin-top:2px;">${escapeHtml(m.desc)}</div>
               </td>
               ${ALL_ROLES.map((r) => {
-                const stateKey = `${r.id}:${m.key}`;
-                const isChecked = matrixState[stateKey] !== undefined 
-                  ? matrixState[stateKey] 
-                  : (r.id === 'SUPER_ADMIN' || r.id === 'ADMIN' || (r.id === 'TEACHER' && ['classes', 'students', 'attendance', 'assignments', 'examinations', 'results', 'timetable', 'lessons'].includes(m.key)));
+                const role = matrixRoles.find((item) => item.name === r.id);
+                const viewPermission = matrixPermissions.find((permission) => permission.module === m.key && permission.action === 'view');
+                const isChecked = r.id === 'SUPER_ADMIN'
+                  || Boolean(role && viewPermission && role.permissions.some((item) => item.permissionId === viewPermission.id));
                 
                 return `
                   <td style="text-align:center;">
-                    <input type="checkbox" class="matrix-toggle" data-role-id="${r.id}" data-module-key="${m.key}" ${isChecked ? 'checked' : ''} ${r.id === 'SUPER_ADMIN' ? 'disabled' : ''} style="width:16px; height:16px; cursor:pointer;" />
+                    <input type="checkbox" class="matrix-toggle" data-role-id="${escapeHtml(r.id)}" data-module-key="${escapeHtml(m.key)}" ${isChecked ? 'checked' : ''} ${r.id === 'SUPER_ADMIN' || !role || !viewPermission ? 'disabled' : ''} style="width:16px; height:16px; cursor:pointer;" />
                   </td>
                 `;
               }).join('')}
@@ -699,12 +679,8 @@
         const roleId = checkbox.dataset.roleId;
         const moduleKey = checkbox.dataset.moduleKey;
         const isChecked = checkbox.checked;
-
-        let matrixState = Storage.getItem('mtc_role_permission_matrix') || {};
-        matrixState[`${roleId}:${moduleKey}`] = isChecked;
-        Storage.setItem('mtc_role_permission_matrix', matrixState);
-
-        Toast.success(`${isChecked ? 'Granted' : 'Revoked'} ${moduleKey} for ${roleId}.`);
+        pendingMatrixChanges.set(`${roleId}:${moduleKey}`, isChecked);
+        Toast.show('info', 'Permission change pending. Select Save Matrix to apply it.');
       });
     }
 
@@ -715,7 +691,7 @@
       grid.innerHTML = '<div class="loader"></div>';
       try {
         grid.innerHTML = ALL_ROLES.map((r) => `
-          <div class="perm-card" style="border:1px solid #D8D2C6; background:#ffffff; border-radius:4px; padding:12px 16px;">
+          <div class="perm-card" style="border:1px solid #D6D8BC; background:#ffffff; border-radius:4px; padding:12px 16px;">
             <div class="perm-card__header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
               <span style="color:#111111; font-weight:600;">${escapeHtml(r.label)}</span>
               ${r.isSystem ? '<span class="badge badge-outline">System</span>' : '<span class="badge badge-success">Custom</span>'}
@@ -735,7 +711,7 @@
       if (!tbody) return;
       tbody.innerHTML = ALL_MODULES.map((m) => `
         <tr>
-          <td><span class="badge badge-outline" style="border-color:#041664; color:#041664;">${escapeHtml(m.key)}</span></td>
+          <td><span class="badge badge-outline" style="border-color:#13283E; color:#13283E;">${escapeHtml(m.key)}</span></td>
           <td><code>${escapeHtml(m.key)}:manage</code></td>
           <td>FULL_ACCESS</td>
           <td>${escapeHtml(m.desc)}</td>

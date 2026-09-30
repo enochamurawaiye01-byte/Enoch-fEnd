@@ -17,7 +17,7 @@
         {
           key: 'role',
           label: 'Role',
-          render: (row) => `<span class="badge badge-outline" style="border-color:#1b2a4a; color:#1b2a4a;">${escapeHtml(titleCaseFromEnum(row.user?.role || 'SYSTEM'))}</span>`
+          render: (row) => `<span class="badge badge-outline" style="border-color:var(--color-deep-navy); color:var(--color-deep-navy);">${escapeHtml(titleCaseFromEnum(row.user?.role || 'SYSTEM'))}</span>`
         },
         {
           key: 'action',
@@ -31,7 +31,7 @@
         {
           key: 'entity',
           label: 'Entity / Module',
-          render: (row) => `<span style="font-weight:600; color:#1b2a4a;">${escapeHtml(row.entity || '-')}</span>`
+          render: (row) => `<span style="font-weight:600; color:var(--color-deep-navy);">${escapeHtml(row.entity || '-')}</span>`
         },
         {
           key: 'description',
@@ -41,7 +41,7 @@
         {
           key: 'createdAt',
           label: 'Timestamp',
-          render: (row) => `<span style="color:#64748b; font-size:13px;">${formatDateTime(row.createdAt)}</span>`
+          render: (row) => `<span style="color:var(--text-muted); font-size:13px;">${formatDateTime(row.createdAt)}</span>`
         },
       ],
       fetchPage: async (page, filters) => {

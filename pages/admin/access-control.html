@@ -6,7 +6,7 @@
 <title>Access Control & RBAC — Mercy T College Nursery and Primary School</title>
 <link rel="stylesheet" href="../../css/style.css" />
 <link rel="stylesheet" href="../../css/responsive.css" />
-<link rel="stylesheet" href="../../css/dark-mode.css" />
+
 <link rel="stylesheet" href="../../css/components/sidebar.css" />
 <link rel="stylesheet" href="../../css/components/navbar.css" />
 <link rel="stylesheet" href="../../css/components/buttons.css" />
@@ -18,22 +18,22 @@
 <link rel="stylesheet" href="../../css/components/pagination.css" />
 <link rel="stylesheet" href="../../css/components/loader.css" />
 <style>
-  .rbac-tabs { display: flex; gap: 12px; margin-bottom: 20px; border-bottom: 2px solid var(--border-color, #cbd5e1); padding-bottom: 8px; flex-wrap: wrap; }
-  .rbac-tab-btn { padding: 10px 18px; border-radius: 8px; background: transparent; color: #64748b; border: none; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s ease; }
-  .rbac-tab-btn.active { background: #052F9A; color: #ffffff; box-shadow: 0 2px 6px rgba(5, 47, 154, 0.2); }
+  .rbac-tabs { display: flex; gap: 12px; margin-bottom: 20px; border-bottom: 2px solid var(--color-border); padding-bottom: 8px; flex-wrap: wrap; }
+  .rbac-tab-btn { padding: 10px 18px; border-radius: 8px; background: transparent; color: var(--text-secondary); border: none; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.12s ease; }
+  .rbac-tab-btn.active { background: var(--color-deep-navy); color: #ffffff; box-shadow: 0 2px 6px rgba(19, 40, 62, 0.12); }
   
   .role-category-tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
-  .role-cat-btn { padding: 8px 14px; border-radius: 20px; background: var(--surface-bg, #ffffff); color: #041664; border: 1px solid #cbd5e1; font-size: 13px; font-weight: 600; cursor: pointer; }
-  .role-cat-btn.active { background: #041664; color: #ffffff; border-color: #041664; }
+  .role-cat-btn { padding: 8px 14px; border-radius: 20px; background: var(--color-cream-surface); color: var(--color-deep-navy); border: 1px solid var(--color-border); font-size: 13px; font-weight: 600; cursor: pointer; }
+  .role-cat-btn.active { background: var(--color-deep-navy); color: #ffffff; border-color: var(--color-deep-navy); }
 
-  .status-sub-filter { display: flex; gap: 6px; margin-bottom: 14px; align-items: center; background: rgba(4, 22, 100, 0.04); padding: 8px 12px; border-radius: 8px; }
-  .status-sub-btn { padding: 6px 12px; border-radius: 6px; background: transparent; border: 1px solid transparent; font-size: 12px; font-weight: bold; cursor: pointer; color: #64748b; }
-  .status-sub-btn.active { background: #ffffff; color: #041664; border-color: #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .status-sub-filter { display: flex; gap: 6px; margin-bottom: 14px; align-items: center; background: var(--color-cream-alt); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--color-border); }
+  .status-sub-btn { padding: 6px 12px; border-radius: 6px; background: transparent; border: 1px solid transparent; font-size: 12px; font-weight: bold; cursor: pointer; color: var(--text-secondary); }
+  .status-sub-btn.active { background: var(--color-white); color: var(--color-deep-navy); border-color: var(--color-border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 
   .permission-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
-  .perm-card { background: var(--surface-bg, #ffffff); border: 1px solid var(--surface-border, #cbd5e1); border-radius: 12px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
-  .perm-card__header { font-weight: 700; font-size: 15px; margin-bottom: 8px; color: #041664; display: flex; align-items: center; justify-content: space-between; }
-  .perm-card__desc { font-size: 13px; color: #64748b; margin-bottom: 12px; }
+  .perm-card { background: var(--color-cream-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 16px; box-shadow: 0 2px 6px rgba(17, 17, 17, 0.04); }
+  .perm-card__header { font-weight: 700; font-size: 15px; margin-bottom: 8px; color: var(--color-deep-navy); display: flex; align-items: center; justify-content: space-between; }
+  .perm-card__desc { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
 </style>
 </head>
 <body data-page-title="Access Control" data-workspace="admin">
@@ -48,7 +48,7 @@
     <main class="app-content">
       <div class="page-head">
         <div class="page-head__title">
-          <h1 style="color:#041664;">Access Control & User Management</h1>
+          <h1>Access Control & User Management</h1>
           <span class="page-head__desc">Categorized account management, Active/Inactive status controls, user deletion, and full 56-module Role Permission Matrix.</span>
         </div>
       </div>
@@ -73,10 +73,10 @@
 
         <!-- Status Sub-Filters -->
         <div class="status-sub-filter">
-          <span style="font-size:12px; font-weight:bold; color:#041664; margin-right:8px;">Status Filter:</span>
+          <span style="font-size:12px; font-weight:bold; color:var(--color-deep-navy); margin-right:8px;">Status Filter:</span>
           <button type="button" class="status-sub-btn active" data-status-filter="ALL">All Statuses</button>
-          <button type="button" class="status-sub-btn" data-status-filter="ACTIVE" style="color:#10b981;">✓ Active Users</button>
-          <button type="button" class="status-sub-btn" data-status-filter="INACTIVE" style="color:#B02032;">✗ Inactive / Pending</button>
+          <button type="button" class="status-sub-btn" data-status-filter="ACTIVE" style="color:var(--color-success);">✓ Active Users</button>
+          <button type="button" class="status-sub-btn" data-status-filter="INACTIVE" style="color:var(--color-danger);">✗ Inactive / Pending</button>
         </div>
 
         <div class="table-wrap">
@@ -109,15 +109,15 @@
         <div style="margin-bottom: 16px;" class="card">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
             <div>
-              <h3 style="margin:0 0 4px 0; font-size:16px; color:#041664;">Comprehensive Role Permission Matrix</h3>
-              <p style="margin:0; font-size:13px; color:#64748b;">Grant or revoke access across all 56 backend modules for any system role. Changes apply immediately.</p>
+              <h3 style="margin:0 0 4px 0; font-size:16px; color:var(--color-deep-navy);">Comprehensive Role Permission Matrix</h3>
+              <p style="margin:0; font-size:13px; color:var(--text-muted);">Grant or revoke access across all 56 backend modules for any system role. Changes apply immediately.</p>
             </div>
             <div style="display:flex; gap:8px;">
-              <button type="button" class="btn btn-secondary btn-sm" id="refresh-matrix-btn" style="background:#64748b; color:#fff; border-color:#64748b;">
+              <button type="button" class="btn btn-secondary btn-sm" id="refresh-matrix-btn" style="background:var(--color-ink-soft); color:#fff; border-color:var(--color-ink-soft);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
                 Refresh Matrix
               </button>
-              <button type="button" class="btn btn-primary btn-sm" id="save-matrix-btn" style="background:#052F9A; color:#fff; border-color:#052F9A; font-weight:bold;">
+              <button type="button" class="btn btn-primary btn-sm" id="save-matrix-btn" style="background:var(--color-deep-navy); color:#fff; border-color:var(--color-deep-navy); font-weight:bold;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                 Save Permission Matrix Changes
               </button>
@@ -144,7 +144,7 @@
       <!-- Tab 3: Role Definitions -->
       <div id="tab-roles" class="tab-pane" style="display: none;">
         <div style="margin-bottom: 16px; text-align: right;">
-          <button type="button" class="btn btn-primary" id="add-role-btn" style="background:#052F9A; border-color:#052F9A;">
+          <button type="button" class="btn btn-primary" id="add-role-btn" style="background:var(--color-deep-navy); border-color:var(--color-deep-navy);">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
             Create Role
           </button>
@@ -155,7 +155,7 @@
       <!-- Tab 4: Permissions Catalog -->
       <div id="tab-permissions" class="tab-pane" style="display: none;">
         <div style="margin-bottom: 16px; text-align: right;">
-          <button type="button" class="btn btn-primary" id="add-permission-btn" style="background:#052F9A; border-color:#052F9A;">
+          <button type="button" class="btn btn-primary" id="add-permission-btn" style="background:var(--color-deep-navy); border-color:var(--color-deep-navy);">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
             Create Permission Key
           </button>

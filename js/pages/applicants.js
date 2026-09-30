@@ -16,12 +16,12 @@
         {
           key: 'fullName',
           label: 'Applicant Name',
-          render: (row) => `<a href="javascript:void(0)" class="view-user-details" data-id="${row.id}" style="color: #1b2a4a; font-weight: bold; text-decoration: underline;">${escapeHtml(row.fullName || `${row.firstName || ''} ${row.lastName || ''}` || 'Unnamed Applicant')}</a>`
+          render: (row) => `<a href="javascript:void(0)" class="view-user-details" data-id="${row.id}" style="color: var(--color-deep-navy); font-weight: bold; text-decoration: underline;">${escapeHtml(row.fullName || `${row.firstName || ''} ${row.lastName || ''}` || 'Unnamed Applicant')}</a>`
         },
         {
           key: 'role',
           label: 'Role / Class',
-          render: (row) => `<span class="badge badge-outline" style="border-color:#1b2a4a; color:#1b2a4a;">${escapeHtml(titleCaseFromEnum(row.role || row.currentClass || row.desiredClass?.name || 'STUDENT'))}</span>`
+          render: (row) => `<span class="badge badge-outline" style="border-color:var(--color-deep-navy); color:var(--color-deep-navy);">${escapeHtml(titleCaseFromEnum(row.role || row.currentClass || row.desiredClass?.name || 'STUDENT'))}</span>`
         },
         { key: 'email', label: 'Email Address', render: (row) => escapeHtml(row.email || '-') },
         { key: 'phoneNumber', label: 'Phone Number', render: (row) => escapeHtml(row.phoneNumber || row.parentPhone || '-') },
@@ -32,26 +32,26 @@
           render: (row) => {
             const st = (row.status || 'INACTIVE').toUpperCase();
             if (['ACTIVE', 'APPROVED', 'CONVERTED'].includes(st)) {
-              return `<span class="badge badge-success" style="background:#10b981; color:#fff;">Approved</span>`;
+              return `<span class="badge badge-success" style="background:var(--color-deep-navy); color:#fff;">Approved</span>`;
             } else if (['REJECTED', 'DEACTIVATED', 'SUSPENDED'].includes(st)) {
-              return `<span class="badge badge-danger" style="background:#ef4444; color:#fff;">Rejected</span>`;
+              return `<span class="badge badge-danger" style="background:var(--color-brand-red); color:#fff;">Rejected</span>`;
             }
-            return `<span class="badge badge-warning" style="background:#f59e0b; color:#fff;">Pending Review</span>`;
+            return `<span class="badge badge-warning" style="background:#b9783c; color:#fff;">Pending Review</span>`;
           }
         },
       ],
       rowActions: (row) => {
         const st = (row.status || 'INACTIVE').toUpperCase();
         if (['ACTIVE', 'APPROVED', 'CONVERTED'].includes(st)) {
-          return `<span class="text-success font-weight-bold" style="color:#10b981; font-weight:bold;"><i class="fas fa-check-circle"></i> Approved</span>`;
+          return `<span class="text-success font-weight-bold" style="color:var(--color-deep-navy); font-weight:bold;"><i class="fas fa-check-circle"></i> Approved</span>`;
         } else if (['REJECTED', 'DEACTIVATED', 'SUSPENDED'].includes(st)) {
-          return `<span class="text-danger font-weight-bold" style="color:#ef4444; font-weight:bold;"><i class="fas fa-times-circle"></i> Rejected</span>`;
+          return `<span class="text-danger font-weight-bold" style="color:var(--color-brand-red); font-weight:bold;"><i class="fas fa-times-circle"></i> Rejected</span>`;
         }
 
         if (!canManage) return '';
         return `
-          <button type="button" class="btn btn-primary btn-sm" data-action="approve" data-source="${row.source || 'user'}" style="background-color:#10b981; border-color:#10b981;">Approve</button>
-          <button type="button" class="btn btn-danger btn-sm" data-action="reject" data-source="${row.source || 'user'}" style="background-color:#ef4444; border-color:#ef4444;">Reject</button>
+          <button type="button" class="btn btn-primary btn-sm" data-action="approve" data-source="${row.source || 'user'}" style="background-color:var(--color-deep-navy); border-color:var(--color-deep-navy);">Approve</button>
+          <button type="button" class="btn btn-danger btn-sm" data-action="reject" data-source="${row.source || 'user'}" style="background-color:var(--color-brand-red); border-color:var(--color-brand-red);">Reject</button>
         `;
       },
       fetchPage: async (page, filters) => {

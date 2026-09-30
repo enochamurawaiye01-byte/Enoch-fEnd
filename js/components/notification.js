@@ -34,7 +34,7 @@
           (n) => `
           <a class="notif-item ${n.readAt || n.isRead ? '' : 'unread'}" href="${n.targetPath ? `${rootPrefix()}${n.targetPath.replace(/^\//, '')}` : `${rootPrefix()}pages/notifications.html`}">
             <div class="title">${escapeHtml(n.title || n.message || 'Notification')}</div>
-            <div class="meta">${timeAgo(n.createdAt)}</div>
+            <div class="meta">${n.canActivateRole ? 'Activate Role' : timeAgo(n.createdAt)}</div>
           </a>`
         )
         .join('');

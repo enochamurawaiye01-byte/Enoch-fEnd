@@ -33,20 +33,37 @@
       return;
     }
 
-    const expectedWorkspace = Permissions.getWorkspaceForRole(user.role);
-    const actualWorkspace = currentWorkspaceFromPath();
-
-    if (actualWorkspace && actualWorkspace !== expectedWorkspace) {
-      window.location.href = `${rootPrefix()}${Permissions.dashboardPathForRole(user.role)}`;
-      return;
-    }
-
     window.CurrentUser = user;
-
-    // Refresh the profile, but keep the cached identity if the API is briefly unavailable.
-    AuthService.fetchCurrentUser().catch((error) => {
-      if (error && error.status === 401) return;
+    window.authGuardReady = AuthService.fetchCurrentUser().then((freshUser) => {
+      const currentUser = freshUser || user;
+      window.CurrentUser = currentUser;
+      const activeRoles = Array.isArray(currentUser.activeRoles) && currentUser.activeRoles.length
+        ? currentUser.activeRoles
+        : [currentUser.role];
+      const allowedWorkspaces = new Set(activeRoles.map((role) => Permissions.getWorkspaceForRole(role)));
+      const actualWorkspace = currentWorkspaceFromPath();
+      if (actualWorkspace && !allowedWorkspaces.has(actualWorkspace)) {
+        window.location.replace(`${rootPrefix()}${Permissions.dashboardPathForRole(currentUser.role)}`);
+        return currentUser;
+      }
+      const moduleKey = Permissions.getPageModule(window.location.pathname);
+      if (moduleKey && !Permissions.canAccessModule(currentUser.role, moduleKey)) {
+        const homePath = Permissions.dashboardPathForRole(currentUser.role);
+        const homeModule = Permissions.getPageModule(homePath);
+        if (homeModule && Permissions.canAccessModule(currentUser.role, homeModule)) {
+          window.location.replace(`${rootPrefix()}${homePath}`);
+        } else {
+          window.location.replace(`${rootPrefix()}access-denied.html`);
+        }
+      }
+      return currentUser;
+    }).catch((error) => {
+      if (error && error.status === 401) {
+        redirectToLogin();
+        return null;
+      }
       console.warn('Could not refresh the current user profile.', error);
+      return user;
     });
   })();
 })();

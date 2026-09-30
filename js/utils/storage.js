@@ -73,13 +73,6 @@
       safeRemove(STORAGE_KEYS.USER);
     },
 
-    getTheme() {
-      return safeGet(STORAGE_KEYS.THEME) || 'light';
-    },
-    setTheme(theme) {
-      return safeSet(STORAGE_KEYS.THEME, theme);
-    },
-
     getSidebarCollapsed() {
       return safeGet(STORAGE_KEYS.SIDEBAR_COLLAPSED) === 'true';
     },

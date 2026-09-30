@@ -119,6 +119,7 @@
         group: 'Communication',
         items: [
           { label: 'Announcements', href: 'announcements.html', icon: 'megaphone' },
+          { label: 'Notifications', href: 'notifications.html', icon: 'bell' },
           { label: 'News', href: 'news.html', icon: 'newspaper' },
         ],
       },
@@ -263,35 +264,27 @@
     const placeholder = document.getElementById(containerId);
     if (!placeholder) return;
     
-    let groups = NAV[workspace] || NAV.student;
-
-    // Dynamic Module Access Override for Teachers / Staff
-    if (workspace === 'teacher' && window.CurrentUser) {
-      const grantedModules = window.CurrentUser.grantedModules || [];
-      if (Array.isArray(grantedModules) && grantedModules.length > 0) {
-        const adminGroups = NAV.admin;
-        const extraItems = [];
-        
-        adminGroups.forEach(g => {
-          g.items.forEach(item => {
-            const moduleKey = item.label.toLowerCase().replace(/\s+/g, '_');
-            if (grantedModules.includes(moduleKey) || grantedModules.includes(item.label.toLowerCase())) {
-              if (!extraItems.some(ex => ex.href === item.href)) {
-                extraItems.push(item);
-              }
-            }
-          });
-        });
-
-        if (extraItems.length > 0) {
-          groups = JSON.parse(JSON.stringify(groups));
-          groups.push({
-            group: 'Granted Admin Modules',
-            items: extraItems
-          });
-        }
+    const activeRoles = Array.isArray(window.CurrentUser?.activeRoles) && window.CurrentUser.activeRoles.length
+      ? window.CurrentUser.activeRoles
+      : [window.CurrentUser?.role].filter(Boolean);
+    const workspaces = [...new Set(activeRoles.map((role) => Permissions.getWorkspaceForRole(role)))];
+    const groupMap = new Map();
+    for (const activeWorkspace of workspaces.length ? workspaces : [workspace]) {
+      for (const group of NAV[activeWorkspace] || NAV.student) {
+        if (!groupMap.has(group.group)) groupMap.set(group.group, new Map());
+        const items = groupMap.get(group.group);
+        for (const item of group.items) items.set(item.href, item);
       }
     }
+    let groups = [...groupMap].map(([group, items]) => ({ group, items: [...items.values()] }));
+
+    groups = groups.map((group) => ({
+      ...group,
+      items: group.items.filter((item) => {
+        const moduleKey = Permissions.getPageModule(item.href);
+        return !moduleKey || Permissions.canAccessModule(window.CurrentUser?.role, moduleKey);
+      })
+    })).filter((group) => group.items.length);
 
     const active = currentFileName();
 
@@ -319,7 +312,7 @@
     aside.innerHTML = `
       <div class="sidebar__brand">
         <img src="${rootPrefix()}logo.png" alt="MTC Logo" style="width:36px; height:36px; object-fit:contain; flex-shrink:0;" />
-        <span class="sidebar__name">Mercy T College<small style="color:#B02032; font-weight:bold; font-style:italic;">Knowledge is Light</small></span>
+        <span class="sidebar__name">Mercy T College<small style="color:#A33B45; font-weight:bold; font-style:italic;">Knowledge is Light</small></span>
       </div>
       <button type="button" class="sidebar__collapse-btn" id="sidebar-collapse-btn" aria-label="Collapse sidebar">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>

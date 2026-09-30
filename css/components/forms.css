@@ -17,7 +17,7 @@ label, .form-label {
   font-weight: 600;
   color: var(--text-secondary);
 }
-.form-label .required { color: var(--color-danger); margin-left: 2px; }
+.form-label .required, .required { color: var(--color-brand-red); margin-left: 2px; }
 .form-help { font-size: var(--fs-xs); color: var(--text-muted); }
 .form-error { font-size: var(--fs-xs); color: var(--color-danger); display: none; margin-top: 4px; }
 .form-group.has-error .form-error { display: block; }
@@ -37,7 +37,7 @@ input, select, textarea {
   transition: border-color var(--transition);
 }
 .auth-card input, .auth-card select, .auth-card textarea {
-  background: #ffffff;
+  background: var(--color-cream-surface);
   border-color: var(--color-border);
   color: var(--color-black);
 }

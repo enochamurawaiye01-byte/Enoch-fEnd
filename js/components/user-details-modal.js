@@ -13,7 +13,7 @@
     overlay.className = 'modal-overlay';
     overlay.style.cssText = `
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px);
+      background: rgba(19, 40, 62, 0.28); backdrop-filter: blur(3px);
       display: none; align-items: center; justify-content: center;
       z-index: 9999; padding: 16px;
     `;
@@ -27,14 +27,14 @@
         max-height: 90vh; overflow-y: auto;
         box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
       ">
-        <div style="padding: 16px 20px; border-bottom: 1px solid var(--surface-border, #e2e8f0); display: flex; align-items: center; justify-content: space-between; background: rgba(27, 42, 74, 0.04);">
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--surface-border, #e2e8f0); display: flex; align-items: center; justify-content: space-between; background: rgba(19, 40, 62, 0.04);">
           <div style="display: flex; align-items: center; gap: 12px;">
-            <div id="udm-avatar-container" style="width: 52px; height: 52px; border-radius: 50%; background: #1b2a4a; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; border: 2px solid #c53030; overflow: hidden; flex-shrink: 0;">
+            <div id="udm-avatar-container" style="width: 52px; height: 52px; border-radius: 50%; background: var(--color-deep-navy); color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; border: 2px solid var(--color-brand-red); overflow: hidden; flex-shrink: 0;">
               <span id="udm-initials">MTC</span>
               <img id="udm-photo" src="" alt="Passport" style="width: 100%; height: 100%; object-fit: cover; display: none;" />
             </div>
             <div>
-              <h3 id="udm-name" style="margin: 0; font-size: 18px; font-weight: 700; color: var(--text-primary, #1b2a4a);">Applicant Profile</h3>
+              <h3 id="udm-name" style="margin: 0; font-size: 18px; font-weight: 700; color: var(--text-primary);">Applicant Profile</h3>
               <div style="display: flex; gap: 6px; margin-top: 4px;">
                 <span id="udm-role-badge" class="badge badge-outline">Role</span>
                 <span id="udm-status-badge" class="badge badge-warning">Status</span>
@@ -47,7 +47,7 @@
         <div style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
           <!-- Basic & Contact Information -->
           <div style="background: var(--card-bg, #f8fafc); border-radius: 8px; padding: 14px; border: 1px solid var(--surface-border, #e2e8f0);">
-            <h4 style="margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #1b2a4a; font-weight: bold;">Personal & Contact Details</h4>
+            <h4 style="margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-deep-navy); font-weight: bold;">Personal & Contact Details</h4>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 13px;">
               <div><strong>Email:</strong> <span id="udm-email">-</span></div>
               <div><strong>Phone:</strong> <span id="udm-phone">-</span></div>
@@ -60,9 +60,9 @@
 
           <!-- Academic Class & Term Details -->
           <div style="background: rgba(27, 42, 74, 0.04); border-radius: 8px; padding: 14px; border: 1px solid rgba(27, 42, 74, 0.15);">
-            <h4 style="margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #1b2a4a; font-weight: bold;">Academic Class & Progress Details</h4>
+            <h4 style="margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-deep-navy); font-weight: bold;">Academic Class & Progress Details</h4>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 13px;">
-              <div><strong>Reg / Staff No:</strong> <span id="udm-reg-no" style="font-family: monospace; font-weight: bold; color: #c53030;">-</span></div>
+              <div><strong>Reg / Staff No:</strong> <span id="udm-reg-no" style="font-family: monospace; font-weight: bold; color: var(--color-brand-red);">-</span></div>
               <div><strong>Current Class:</strong> <span id="udm-current-class" class="badge badge-primary">-</span></div>
               <div><strong>Current Term:</strong> <span id="udm-current-term">-</span></div>
               <div><strong>Target Class (Going To):</strong> <span id="udm-target-class" class="badge badge-info">-</span></div>
@@ -74,9 +74,9 @@
           <div style="background: rgba(197, 48, 48, 0.04); border-radius: 8px; padding: 14px; border: 1px solid rgba(197, 48, 48, 0.2);">
             <h4 style="margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #c53030; font-weight: bold;">Medical Record & Emergency Details</h4>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 13px;">
-              <div><strong>Blood Group:</strong> <span id="udm-blood-group" style="font-weight: bold; color: #c53030;">-</span></div>
+              <div><strong>Blood Group:</strong> <span id="udm-blood-group" style="font-weight: bold; color: var(--color-brand-red);">-</span></div>
               <div><strong>Genotype:</strong> <span id="udm-genotype" style="font-weight: bold;">-</span></div>
-              <div><strong>Known Allergies:</strong> <span id="udm-allergies" style="color: #b91c1c;">-</span></div>
+              <div><strong>Known Allergies:</strong> <span id="udm-allergies" style="color: var(--color-brand-red);">-</span></div>
               <div><strong>Emergency Contact:</strong> <span id="udm-emergency">-</span></div>
             </div>
             <div style="margin-top: 8px; font-size: 13px;">
@@ -87,7 +87,7 @@
 
           <!-- Parent / Guardian Information -->
           <div id="udm-parent-section" style="background: var(--card-bg, #f8fafc); border-radius: 8px; padding: 14px; border: 1px solid var(--surface-border, #e2e8f0);">
-            <h4 style="margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #1b2a4a; font-weight: bold;">Parent / Guardian Information</h4>
+            <h4 style="margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-deep-navy); font-weight: bold;">Parent / Guardian Information</h4>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 13px;">
               <div><strong>Parent Name:</strong> <span id="udm-parent-name">-</span></div>
               <div><strong>Parent Phone:</strong> <span id="udm-parent-phone">-</span></div>

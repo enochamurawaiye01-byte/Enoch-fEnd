@@ -19,7 +19,7 @@
 .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .btn-primary { background: var(--color-deep-navy); color: #ffffff; border-color: var(--color-deep-navy); }
-.btn-primary:hover:not(:disabled) { background: #162A45; border-color: #162A45; }
+.btn-primary:hover:not(:disabled) { background: #1C374F; border-color: #1C374F; }
 .auth-form .btn-primary { height: 44px; border-radius: var(--radius-sm); border: 1px solid var(--color-deep-navy); box-shadow: none; font-size: 0.9375rem; }
 
 .btn-secondary { background: var(--color-white); color: var(--color-black); border-color: var(--color-border); }

@@ -34,6 +34,21 @@
   .perm-card { background: var(--color-cream-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 16px; box-shadow: 0 2px 6px rgba(17, 17, 17, 0.04); }
   .perm-card__header { font-weight: 700; font-size: 15px; margin-bottom: 8px; color: var(--color-deep-navy); display: flex; align-items: center; justify-content: space-between; }
   .perm-card__desc { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+  .role-definition-card { min-width: 0; padding: 16px; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-cream-surface); }
+  .role-definition-card__header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .role-definition-card__header h3 { margin: 0; color: var(--color-deep-navy); font-size: 15px; }
+  .role-definition-card__description { margin: 10px 0 14px; color: var(--text-secondary); font-size: 13px; line-height: 1.5; }
+  .role-module-details { border-top: 1px solid var(--color-border); padding-top: 10px; }
+  .role-module-details > summary { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: var(--color-deep-navy); font-size: 12px; font-weight: 700; cursor: pointer; list-style: none; }
+  .role-module-details > summary::-webkit-details-marker { display: none; }
+  .role-module-details > summary span { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .role-module-list { display: grid; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+  .role-module-list li { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--color-border); }
+  .role-module-list li:last-child { padding-bottom: 0; border-bottom: 0; }
+  .role-module-list__name { color: var(--text-primary); font-size: 12px; }
+  .role-module-list__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
+  .role-module-list__actions span { padding: 2px 5px; border-radius: 3px; background: var(--color-cream-alt); color: var(--color-deep-navy); font-size: 9px; font-weight: 700; }
+  .role-module-empty { margin: 10px 0 0; color: var(--text-muted); font-size: 12px; }
   .role-picker { width: 100%; min-width: 0; position: relative; }
   .role-picker > summary { min-height: 40px; padding: 10px 36px 10px 12px; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-cream-surface); color: var(--color-deep-navy); cursor: pointer; list-style: none; position: relative; }
   .role-picker > summary::-webkit-details-marker { display: none; }
@@ -52,6 +67,29 @@
   .grant-access-modal-wrap .form-group { display: flex; flex-direction: column; }
   .grant-access-modal-wrap .role-picker { flex: 1; }
   .grant-access-modal-wrap #grant-selected-role-btn { align-self: flex-start; }
+  @media (max-width: 720px) {
+    .rbac-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+    .rbac-tab-btn { min-width: 0; padding: 9px 10px; text-align: left; font-size: 12px; }
+    .role-category-tabs { gap: 6px; }
+    .role-cat-btn { max-width: 100%; padding: 7px 10px; font-size: 12px; }
+    .status-sub-filter { flex-wrap: wrap; gap: 4px; padding: 8px; }
+    .status-sub-filter > span { flex-basis: 100%; }
+    .status-sub-btn { padding: 6px 8px; }
+    #matrix-wrap .table-scroll { overflow-x: auto; }
+    #matrix-table { display: table; width: max-content; min-width: 100%; }
+    #matrix-table thead { display: table-header-group; }
+    #matrix-table tbody { display: table-row-group; }
+    #matrix-table tr { display: table-row; padding: 0; }
+    #matrix-table th,
+    #matrix-table td { display: table-cell; width: auto; white-space: nowrap; }
+    #matrix-table tbody td::before { content: none; }
+  }
+  @media (max-width: 400px) {
+    .rbac-tabs { grid-template-columns: minmax(0, 1fr); }
+    .role-cat-btn { flex: 1 1 100%; text-align: left; }
+    .grant-access-modal-wrap .role-picker { width: 100%; }
+    .grant-access-modal-wrap #grant-selected-role-btn { width: 100%; }
+  }
 </style>
 </head>
 <body data-page-title="Access Control" data-workspace="admin">

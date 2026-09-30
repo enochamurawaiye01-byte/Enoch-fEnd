@@ -240,6 +240,7 @@
             label: role.label || metadata.label || titleCaseFromEnum(roleName),
             category: metadata.category || 'Defined Roles',
             description: role.description || metadata.description || `${titleCaseFromEnum(roleName)} role`,
+            permissions: role.permissions || [],
             isSystem: Boolean(role.isSystem),
           };
         });
@@ -726,16 +727,44 @@
       if (!grid) return;
       grid.innerHTML = '<div class="loader"></div>';
       try {
-        grid.innerHTML = ALL_ROLES.map((r) => `
-          <div class="perm-card" style="border:1px solid #D6D8BC; background:#ffffff; border-radius:4px; padding:12px 16px;">
-            <div class="perm-card__header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <span style="color:#111111; font-weight:600;">${escapeHtml(r.label)}</span>
-              ${r.isSystem ? '<span class="badge badge-outline">System</span>' : '<span class="badge badge-success">Custom</span>'}
-            </div>
-            <div class="perm-card__desc" style="font-size:12px; color:#555555; margin-bottom:8px;">${escapeHtml(r.name)} role definition for Mercy T College.</div>
-            <div style="font-size:11px; color:#666666; font-weight:600;">Access Scope: ${r.id === 'SUPER_ADMIN' || r.id === 'ADMIN' ? 'Full Access (All 56 Modules)' : 'Role Tailored Access'}</div>
-          </div>
-        `).join('');
+        grid.innerHTML = ALL_ROLES.map((role) => {
+          const permissionsByModule = new Map();
+          (role.permissions || []).forEach((entry) => {
+            const permission = entry.permission || entry;
+            if (!permission.module) return;
+            if (!permissionsByModule.has(permission.module)) permissionsByModule.set(permission.module, new Set());
+            permissionsByModule.get(permission.module).add(permission.action || 'view');
+          });
+
+          const assignedModules = ALL_MODULES
+            .filter((module) => permissionsByModule.has(module.key))
+            .map((module) => ({ ...module, actions: [...permissionsByModule.get(module.key)].sort() }));
+          const responsibilities = role.description
+            || `${role.label} is responsible for the school operations covered by its assigned module permissions.`;
+
+          return `
+            <article class="role-definition-card">
+              <div class="role-definition-card__header">
+                <h3>${escapeHtml(role.label)}</h3>
+                ${role.isSystem ? '<span class="badge badge-outline">System</span>' : '<span class="badge badge-success">Custom</span>'}
+              </div>
+              <p class="role-definition-card__description">${escapeHtml(responsibilities)}</p>
+              <details class="role-module-details">
+                <summary>Module access <span>${assignedModules.length}</span></summary>
+                ${assignedModules.length ? `
+                  <ul class="role-module-list">
+                    ${assignedModules.map((module) => `
+                      <li>
+                        <span class="role-module-list__name">${escapeHtml(module.label || module.key)}</span>
+                        <span class="role-module-list__actions">${module.actions.map((action) => `<span>${escapeHtml(action.toUpperCase())}</span>`).join('')}</span>
+                      </li>
+                    `).join('')}
+                  </ul>
+                ` : '<p class="role-module-empty">No module permissions are assigned to this role.</p>'}
+              </details>
+            </article>
+          `;
+        }).join('');
       } catch (err) {
         grid.innerHTML = `<p class="text-danger">Failed to load roles: ${escapeHtml(err.message)}</p>`;
       }

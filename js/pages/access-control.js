@@ -117,6 +117,54 @@
       return roleStr.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
     }
 
+    function normalizeRoleKey(role) {
+      if (!role) return '';
+      if (typeof role === 'string') return role.trim();
+      return String(role.name || role.id || role.value || '').trim();
+    }
+
+    function roleOptionValue(role) {
+      const value = normalizeRoleKey(role);
+      return value || 'UNASSIGNED';
+    }
+
+    function renderRolePicker(id, selectedRoleKeys = new Set(), disabledRoleKeys = new Set(), statusByRole = new Map()) {
+      const categories = [...new Set(ALL_ROLES.map((role) => role.category || 'Defined Roles'))];
+      return `
+        <details class="role-picker" id="${escapeHtml(id)}">
+          <summary><span data-role-picker-label>Select roles</span><span class="role-picker-chevron" aria-hidden="true"></span></summary>
+          <div class="role-picker-options">
+            ${categories.map((category) => `
+              <fieldset class="role-picker-group">
+                <legend>${escapeHtml(category)}</legend>
+                ${ALL_ROLES.filter((role) => (role.category || 'Defined Roles') === category).map((role) => {
+                  const roleKey = roleOptionValue(role);
+                  const status = statusByRole.get(roleKey);
+                  const disabled = disabledRoleKeys.has(roleKey);
+                  return `
+                    <label class="role-picker-option">
+                      <input type="checkbox" value="${escapeHtml(roleKey)}" ${selectedRoleKeys.has(roleKey) ? 'checked' : ''} ${disabled ? 'disabled' : ''} />
+                      <span>${escapeHtml(role.label || formatRoleName(roleKey))}${status ? ` <small>(${escapeHtml(status)})</small>` : ''}</span>
+                    </label>
+                  `;
+                }).join('')}
+              </fieldset>
+            `).join('')}
+          </div>
+        </details>
+      `;
+    }
+
+    function updateRolePickerLabel(picker) {
+      const selectedCount = picker.querySelectorAll('input[type="checkbox"]:checked').length;
+      const label = picker.querySelector('[data-role-picker-label]');
+      if (label) label.textContent = selectedCount ? `${selectedCount} role${selectedCount === 1 ? '' : 's'} selected` : 'Select roles';
+    }
+
+    function getSelectedRoles(picker) {
+      return Array.from(picker.querySelectorAll('input[type="checkbox"]:checked'), (input) => input.value);
+    }
+
     // All 56 Backend Modules from College/src/modules/
     let ALL_MODULES = [
       { key: 'admissions', label: 'Admissions & Applications', desc: 'Manage student admission applications, approvals, and student conversions' },
@@ -475,33 +523,21 @@
       if (action === 'change-role') {
         const currentRole = (rowData?.role || 'STAFF').toUpperCase();
         const currentAssignments = (rowData?.roleAssignments || []).filter((assignment) => ['ACTIVE', 'PENDING'].includes(assignment.status));
-        const currentRoleNames = new Set(currentAssignments.map((assignment) => assignment.role?.name));
+        const currentRoleNames = new Set(currentAssignments.map((assignment) => normalizeRoleKey(assignment.role)));
         if (!currentRoleNames.size && currentRole) currentRoleNames.add(currentRole);
-        const categories = [...new Set(ALL_ROLES.map((r) => r.category))];
-        const dropdownOptionsHtml = categories.map((cat) => {
-          const catRoles = ALL_ROLES.filter((r) => r.category === cat);
-          return `
-            <optgroup label="${escapeHtml(cat)}">
-              ${catRoles.map((r) => `
-                <option value="${escapeHtml(r.id)}" ${currentRoleNames.has(r.id) ? 'selected' : ''}>
-                  ${escapeHtml(r.label)}${currentAssignments.find((assignment) => assignment.role?.name === r.id)?.status ? ` (${currentAssignments.find((assignment) => assignment.role?.name === r.id).status})` : ''}
-                </option>
-              `).join('')}
-            </optgroup>
-          `;
-        }).join('');
+        const currentStatusByRole = new Map(currentAssignments.map((assignment) => [normalizeRoleKey(assignment.role), assignment.status]));
 
         Modal.open({
           title: `Change & Edit User Role — ${userName}`,
           size: 'md',
-          content: `
+          bodyHtml: `
             <div class="user-role-modal-wrap" style="padding: 4px 0;">
               <div class="active-role-banner" style="background:#13283E; color:#ffffff; padding:14px 18px; border-radius:4px; margin-bottom:18px;">
                 <div>
                   <div style="font-size:11px; text-transform:uppercase; opacity:0.85;">Current Roles</div>
                   <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">
                     ${[...currentRoleNames].map((roleName) => {
-                      const assignment = currentAssignments.find((item) => item.role?.name === roleName);
+                      const assignment = currentAssignments.find((item) => normalizeRoleKey(item.role) === roleName);
                       const status = assignment?.status || 'ACTIVE';
                       return `<span class="badge ${status === 'ACTIVE' ? 'badge-success' : 'badge-warning'}">${escapeHtml(formatRoleName(roleName))} · ${status}</span>`;
                     }).join('') || '<span>No active or pending roles</span>'}
@@ -511,12 +547,10 @@
 
               <form id="change-role-form" class="form">
                 <div style="margin-bottom:16px;">
-                  <label for="change-role-select" class="form-label" style="font-weight:600; color:#111111; font-size:13px; display:block; margin-bottom:8px;">
+                  <label class="form-label" style="font-weight:600; color:#111111; font-size:13px; display:block; margin-bottom:8px;">
                     Select the staff member's active and pending roles
                   </label>
-                  <select id="change-role-select" name="roles" class="form-control" multiple size="9" style="width:100%; padding:10px 12px; font-size:14px; border:1px solid #D6D8BC; border-radius:4px; background:#FBFCD9; color:#13283E;">
-                    ${dropdownOptionsHtml}
-                  </select>
+                  ${renderRolePicker('change-role-select', currentRoleNames, new Set(), currentStatusByRole)}
                 </div>
 
                 <div class="modal__footer" style="margin-top:16px; text-align:right;">
@@ -525,12 +559,15 @@
               </form>
             </div>
           `,
-          onOpen: (modalEl) => {
+          onMount: (modalEl) => {
             const form = modalEl.querySelector('#change-role-form');
+            const rolePicker = modalEl.querySelector('#change-role-select');
+            updateRolePickerLabel(rolePicker);
+            rolePicker.addEventListener('change', () => updateRolePickerLabel(rolePicker));
             form.addEventListener('submit', async (e) => {
               e.preventDefault();
-              const targetRoles = Array.from(form.roles.selectedOptions, (option) => option.value);
-              const removed = currentAssignments.filter((assignment) => !targetRoles.includes(assignment.role?.name));
+              const targetRoles = getSelectedRoles(rolePicker);
+              const removed = currentAssignments.filter((assignment) => !targetRoles.includes(normalizeRoleKey(assignment.role)));
               const saveChanges = async () => {
                 try {
                   const result = await RolesService.changeUserRole(userId, targetRoles);
@@ -562,11 +599,14 @@
       if (action === 'grant-access' || action === 'manage-perms') {
         const currentRole = (rowData?.role || 'STAFF').toUpperCase();
         const assignments = rowData?.roleAssignments || [];
-        const currentAssignmentByRole = new Map(assignments.map((assignment) => [assignment.role?.name, assignment]));
+        const currentAssignmentByRole = new Map(assignments.map((assignment) => [normalizeRoleKey(assignment.role), assignment]));
+        const assignedRoleKeys = new Set(assignments
+          .filter((assignment) => ['ACTIVE', 'PENDING'].includes(assignment.status))
+          .map((assignment) => normalizeRoleKey(assignment.role)));
         Modal.open({
           title: `Grant Access & Role Entitlements — ${userName}`,
           size: 'lg',
-          content: `
+          bodyHtml: `
             <div class="grant-access-modal-wrap" style="padding: 4px 0;">
               <div class="user-header-banner" style="background:#13283E; color:#ffffff; padding:14px 18px; border-radius:4px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
@@ -588,22 +628,18 @@
               </div>
 
               <div class="form-group" style="display:flex; gap:10px; margin-bottom:0;">
-                <select id="grant-role-select" class="form-control" style="flex:1;" multiple size="9" required>
-                  ${ALL_ROLES.map((role) => {
-                    const existing = currentAssignmentByRole.get(role.id);
-                    const isAssigned = existing && ['ACTIVE', 'PENDING'].includes(existing.status);
-                    return `<option value="${escapeHtml(role.id)}" ${isAssigned ? 'disabled' : ''}>${escapeHtml(role.label)}${existing ? ` (${existing.status})` : ''}</option>`;
-                  }).join('')}
-                </select>
+                ${renderRolePicker('grant-role-select', new Set(), assignedRoleKeys, new Map([...currentAssignmentByRole].map(([roleKey, assignment]) => [roleKey, assignment.status])))}
                 <button type="button" class="btn btn-primary" id="grant-selected-role-btn" style="background:#13283E; border-color:#13283E; font-weight:600;">Grant Role</button>
               </div>
             </div>
           `,
-          onOpen: (modalEl) => {
+          onMount: (modalEl) => {
             const grantRoleSelect = modalEl.querySelector('#grant-role-select');
             const grantRoleButton = modalEl.querySelector('#grant-selected-role-btn');
+            updateRolePickerLabel(grantRoleSelect);
+            grantRoleSelect.addEventListener('change', () => updateRolePickerLabel(grantRoleSelect));
             grantRoleButton.addEventListener('click', async () => {
-              const roleIds = Array.from(grantRoleSelect.selectedOptions, (option) => option.value);
+              const roleIds = getSelectedRoles(grantRoleSelect);
               if (!roleIds.length) {
                 Toast.error('Select one or more roles to grant access.');
                 return;

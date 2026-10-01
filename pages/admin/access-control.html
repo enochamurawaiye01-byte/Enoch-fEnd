@@ -113,6 +113,7 @@
         <button type="button" class="rbac-tab-btn active" data-tab="user-access">User Accounts & Roles</button>
         <button type="button" class="rbac-tab-btn" data-tab="matrix">Role Permission Matrix (All Modules)</button>
         <button type="button" class="rbac-tab-btn" data-tab="roles">Role Definitions</button>
+        <button type="button" class="rbac-tab-btn" data-tab="role-assignments">Role Assignments</button>
         <button type="button" class="rbac-tab-btn" data-tab="permissions">Permissions Catalog</button>
       </div>
 
@@ -206,6 +207,28 @@
           </button>
         </div>
         <div class="permission-grid" id="roles-grid"></div>
+      </div>
+
+      <div id="tab-role-assignments" class="tab-pane" style="display: none;">
+        <div class="page-head role-assignment-head">
+          <div class="page-head__title">
+            <h2>Assigned Staff Roles</h2>
+            <span class="page-head__desc">Review current and pending leadership assignments, and remove a role when it is no longer needed.</span>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" id="refresh-role-assignments-btn">Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr><th>Person</th><th>Email</th><th>Assigned Role</th><th>Status</th><th style="text-align:right;">Action</th></tr>
+              </thead>
+              <tbody id="role-assignments-tbody">
+                <tr><td colspan="5">Open this tab to load current role assignments.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- Tab 4: Permissions Catalog -->

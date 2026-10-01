@@ -22,7 +22,13 @@
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </button>
         <div class="topbar__crumbs">
-          <h1 style="color:#13283E;">${escapeHtml(pageTitle || '')}</h1>
+          <div class="topbar__title-row">
+            <h1 style="color:#13283E;">${escapeHtml(pageTitle || '')}</h1>
+            <span class="topbar__active-role" aria-label="Current dashboard role">
+              <span class="topbar__active-role-label">CURRENT ROLE</span>
+              <strong>${escapeHtml(roleLabel || 'Unassigned')}</strong>
+            </span>
+          </div>
           <span class="topbar__breadcrumb" style="font-size:12px; color:#A33B45; font-weight:bold; font-style:italic;">Mercy T College — Motto: "Knowledge is Light"</span>
         </div>
       </div>

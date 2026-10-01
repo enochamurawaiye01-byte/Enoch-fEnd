@@ -11,6 +11,10 @@
 .topbar__menu-btn { display: none; }
 .topbar__crumbs { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .topbar__crumbs h1 { font-size: 1.05rem; color: var(--color-black); }
+.topbar__title-row { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3); min-width: 0; }
+.topbar__active-role { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border-left: 3px solid var(--color-brand-red); background: var(--color-cream-alt); color: var(--color-deep-navy); font-size: 11px; line-height: 1.2; white-space: nowrap; }
+.topbar__active-role-label { color: var(--text-muted); font-size: 9px; font-weight: 700; }
+.topbar__active-role strong { color: var(--color-deep-navy); font-size: 11px; font-weight: 800; }
 .topbar__breadcrumb { font-size: var(--fs-xs); color: var(--text-muted); }
 .topbar__breadcrumb a:hover { color: var(--color-deep-navy); }
 
@@ -63,4 +67,14 @@
 @media (max-width: 1024px) {
   .topbar__menu-btn { display: flex; }
   .topbar__profile-meta { display: none; }
+}
+
+@media (max-width: 640px) {
+  .topbar__title-row { gap: 6px; }
+  .topbar__active-role { padding: 3px 7px; }
+}
+
+@media (max-width: 400px) {
+  .topbar__active-role-label { display: none; }
+  .topbar__active-role { max-width: 44vw; overflow: hidden; text-overflow: ellipsis; }
 }

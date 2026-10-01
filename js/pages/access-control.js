@@ -8,9 +8,15 @@
     let activeRoleGroup = 'ALL';
     let activeStatusFilter = 'ALL';
     let cachedUsersMap = new Map();
+    let roleUsersCache = null;
+    let roleUsersLoadPromise = null;
     let matrixRoles = [];
     let matrixPermissions = [];
     let pendingMatrixChanges = new Map();
+    const EXCLUSIVE_ROLE_NAMES = new Set([
+      'PRINCIPAL', 'VICE_PRINCIPAL', 'VICE_PRINCIPAL_ACADEMICS', 'VICE_PRINCIPAL_ADMIN',
+      'HEAD_TEACHER', 'DEPUTY_HEAD_TEACHER', 'SCHOOL_ADMINISTRATOR', 'BURSAR', 'REGISTRAR'
+    ]);
 
     // Complete System Roles Taxonomy (Categorized)
     let ALL_ROLES = [
@@ -123,12 +129,57 @@
       return String(role.name || role.id || role.value || '').trim();
     }
 
+    function isStudentAccount(user) {
+      return (user?.role || '').toUpperCase() === 'STUDENT' || Boolean(user?.student);
+    }
+
     function roleOptionValue(role) {
       const value = normalizeRoleKey(role);
       return value || 'UNASSIGNED';
     }
 
-    function renderRolePicker(id, selectedRoleKeys = new Set(), disabledRoleKeys = new Set(), statusByRole = new Map()) {
+    async function loadAllRoleUsers(force = false) {
+      if (!force && roleUsersCache) return roleUsersCache;
+      if (roleUsersLoadPromise) return roleUsersLoadPromise;
+
+      roleUsersLoadPromise = (async () => {
+        const firstPage = await UsersService.list({ page: 1, limit: 100 });
+        const users = [...(firstPage.items || [])];
+        const pageCount = Math.max(1, Number(firstPage.meta?.pages || firstPage.meta?.totalPages) || 1);
+        for (let page = 2; page <= pageCount; page += 1) {
+          const nextPage = await UsersService.list({ page, limit: 100 });
+          users.push(...(nextPage.items || []));
+        }
+        roleUsersCache = users;
+        return users;
+      })();
+
+      try {
+        return await roleUsersLoadPromise;
+      } finally {
+        roleUsersLoadPromise = null;
+      }
+    }
+
+    function userHasRole(user, roleName) {
+      if (user.status === 'ACTIVE' && user.role === roleName) return true;
+      return (user.roleAssignments || []).some((assignment) => {
+        const name = normalizeRoleKey(assignment.role);
+        if (name !== roleName) return false;
+        if (assignment.status === 'ACTIVE') return true;
+        return assignment.status === 'PENDING'
+          && (!assignment.activationExpiresAt || new Date(assignment.activationExpiresAt) > new Date());
+      });
+    }
+
+    function findExclusiveRoleHolder(roleName, targetUser) {
+      if (!EXCLUSIVE_ROLE_NAMES.has(roleName) || !targetUser || !roleUsersCache) return null;
+      return roleUsersCache.find((user) => user.id !== targetUser.id
+        && (user.schoolId || null) === (targetUser.schoolId || null)
+        && userHasRole(user, roleName)) || null;
+    }
+
+    function renderRolePicker(id, selectedRoleKeys = new Set(), disabledRoleKeys = new Set(), statusByRole = new Map(), targetUser = null) {
       const categories = [...new Set(ALL_ROLES.map((role) => role.category || 'Defined Roles'))];
       return `
         <details class="role-picker" id="${escapeHtml(id)}">
@@ -140,11 +191,13 @@
                 ${ALL_ROLES.filter((role) => (role.category || 'Defined Roles') === category).map((role) => {
                   const roleKey = roleOptionValue(role);
                   const status = statusByRole.get(roleKey);
-                  const disabled = disabledRoleKeys.has(roleKey);
+                  const holder = findExclusiveRoleHolder(roleKey, targetUser);
+                  const disabled = disabledRoleKeys.has(roleKey) || Boolean(holder);
+                  const statusLabel = holder ? `Assigned to ${holder.fullName || holder.email || 'another user'}` : status;
                   return `
                     <label class="role-picker-option">
                       <input type="checkbox" value="${escapeHtml(roleKey)}" ${selectedRoleKeys.has(roleKey) ? 'checked' : ''} ${disabled ? 'disabled' : ''} />
-                      <span>${escapeHtml(role.label || formatRoleName(roleKey))}${status ? ` <small>(${escapeHtml(status)})</small>` : ''}</span>
+                      <span>${escapeHtml(role.label || formatRoleName(roleKey))}${statusLabel ? ` <small>(${escapeHtml(statusLabel)})</small>` : ''}</span>
                     </label>
                   `;
                 }).join('')}
@@ -279,6 +332,7 @@
 
         if (btn.dataset.tab === 'matrix') loadMatrix();
         if (btn.dataset.tab === 'roles') loadRoles();
+        if (btn.dataset.tab === 'role-assignments') loadRoleAssignments();
         if (btn.dataset.tab === 'permissions') loadPermissions();
       });
     });
@@ -384,9 +438,13 @@
       ],
       rowActions: (row) => {
         const isActive = (row.status || '').toUpperCase() === 'ACTIVE';
+        const isStudent = isStudentAccount(row);
         return `
-          <button type="button" class="btn btn-secondary btn-sm" data-action="change-role">Change Role</button>
-          <button type="button" class="btn btn-outline btn-sm" data-action="manage-perms">Grant Permissions</button>
+          ${isStudent
+            ? '<a class="btn btn-outline btn-sm" href="prefects.html">Manage Prefects</a>'
+            : `<button type="button" class="btn btn-secondary btn-sm" data-action="change-role">Change Role</button>
+               <button type="button" class="btn btn-outline btn-sm" data-action="manage-perms">Grant Permissions</button>`
+          }
           ${isActive 
             ? `<button type="button" class="btn btn-secondary btn-sm" data-action="deactivate">Deactivate</button>`
             : `<button type="button" class="btn btn-primary btn-sm" data-action="activate">Activate</button>`
@@ -396,7 +454,7 @@
       },
       fetchPage: async (page, filters) => {
         try {
-          const res = await UsersService.list({ page: 1, pageSize: 100, search: filters.search || '' });
+          const res = await UsersService.list({ page: 1, limit: 100, search: filters.search || '' });
           let items = res.items || res.data || [];
           cachedUsersMap.clear();
           items.forEach((u) => cachedUsersMap.set(String(u.id), u));
@@ -522,6 +580,13 @@
       }
 
       if (action === 'change-role') {
+        if (isStudentAccount(rowData)) return;
+        try {
+          await loadAllRoleUsers();
+        } catch (error) {
+          Toast.error(error.message || 'Could not verify current role holders. Try again.');
+          return;
+        }
         const currentRole = (rowData?.role || 'STAFF').toUpperCase();
         const currentAssignments = (rowData?.roleAssignments || []).filter((assignment) => ['ACTIVE', 'PENDING'].includes(assignment.status));
         const currentRoleNames = new Set(currentAssignments.map((assignment) => normalizeRoleKey(assignment.role)));
@@ -551,7 +616,7 @@
                   <label class="form-label" style="font-weight:600; color:#111111; font-size:13px; display:block; margin-bottom:8px;">
                     Select the staff member's active and pending roles
                   </label>
-                  ${renderRolePicker('change-role-select', currentRoleNames, new Set(), currentStatusByRole)}
+                  ${renderRolePicker('change-role-select', currentRoleNames, new Set(), currentStatusByRole, rowData)}
                 </div>
 
                 <div class="modal__footer" style="margin-top:16px; text-align:right;">
@@ -575,6 +640,7 @@
                   const pending = (result.assignments || []).filter((assignment) => assignment.status === 'PENDING').length;
                   Toast.success(`Roles updated.${pending ? ` ${pending} new role(s) await staff activation.` : ''}`);
                   if (result.warnings?.length) Toast.error(`Saved, but follow-up failed: ${result.warnings.join('; ')}`);
+                  roleUsersCache = null;
                   Modal.close();
                   userTable.reload();
                 } catch (err) {
@@ -598,6 +664,13 @@
       }
 
       if (action === 'grant-access' || action === 'manage-perms') {
+        if (isStudentAccount(rowData)) return;
+        try {
+          await loadAllRoleUsers();
+        } catch (error) {
+          Toast.error(error.message || 'Could not verify current role holders. Try again.');
+          return;
+        }
         const currentRole = (rowData?.role || 'STAFF').toUpperCase();
         const assignments = rowData?.roleAssignments || [];
         const currentAssignmentByRole = new Map(assignments.map((assignment) => [normalizeRoleKey(assignment.role), assignment]));
@@ -629,7 +702,7 @@
               </div>
 
               <div class="form-group" style="display:flex; gap:10px; margin-bottom:0;">
-                ${renderRolePicker('grant-role-select', new Set(), assignedRoleKeys, new Map([...currentAssignmentByRole].map(([roleKey, assignment]) => [roleKey, assignment.status])))}
+                ${renderRolePicker('grant-role-select', new Set(), assignedRoleKeys, new Map([...currentAssignmentByRole].map(([roleKey, assignment]) => [roleKey, assignment.status])), rowData)}
                 <button type="button" class="btn btn-primary" id="grant-selected-role-btn" style="background:#13283E; border-color:#13283E; font-weight:600;">Grant Role</button>
               </div>
             </div>
@@ -649,6 +722,7 @@
                 const result = await RolesService.assign({ userId, roleIds });
                 Toast.success(`Assigned ${roleIds.length} role(s) to ${userName}; access is pending staff activation.`);
                 if (result.warnings?.length) Toast.error(`Saved, but follow-up failed: ${result.warnings.join('; ')}`);
+                roleUsersCache = null;
                 Modal.close();
                 userTable.reload();
               } catch (err) {
@@ -659,6 +733,94 @@
         });
       }
     });
+
+    async function loadRoleAssignments(force = false) {
+      const assignmentBody = document.getElementById('role-assignments-tbody');
+      if (!assignmentBody) return;
+      assignmentBody.innerHTML = '<tr><td colspan="5">Loading role assignments...</td></tr>';
+
+      try {
+        const users = await loadAllRoleUsers(force);
+        const assignments = users.flatMap((user) => {
+          if (isStudentAccount(user)) return [];
+          return (user.roleAssignments || [])
+            .filter((assignment) => ['ACTIVE', 'PENDING'].includes(assignment.status)
+              && normalizeRoleKey(assignment.role) !== 'STUDENT')
+            .map((assignment) => ({ user, assignment }));
+        }).sort((left, right) => {
+          const nameOrder = (left.user.fullName || '').localeCompare(right.user.fullName || '');
+          return nameOrder || formatRoleName(normalizeRoleKey(left.assignment.role))
+            .localeCompare(formatRoleName(normalizeRoleKey(right.assignment.role)));
+        });
+
+        if (!assignments.length) {
+          assignmentBody.innerHTML = '<tr><td colspan="5">No staff role assignments found.</td></tr>';
+          return;
+        }
+
+        assignmentBody.innerHTML = assignments.map(({ user, assignment }) => {
+          const roleName = normalizeRoleKey(assignment.role);
+          const currentUserId = window.CurrentUser?.id || window.CurrentUser?.userId;
+          const canRelieve = user.id !== currentUserId;
+          return `
+            <tr>
+              <td data-label="Person">${escapeHtml(user.fullName || 'Unnamed Account')}</td>
+              <td data-label="Email">${escapeHtml(user.email || '—')}</td>
+              <td data-label="Assigned role"><strong>${escapeHtml(formatRoleName(roleName))}</strong></td>
+              <td data-label="Status"><span class="badge ${assignment.status === 'ACTIVE' ? 'badge-success' : 'badge-warning'}">${escapeHtml(assignment.status)}</span></td>
+              <td data-label="Action" class="cell-actions">
+                ${canRelieve
+                  ? `<button type="button" class="btn btn-outline-danger btn-sm" data-action="relieve-role" data-user-id="${escapeHtml(user.id)}" data-role-name="${escapeHtml(roleName)}">Relieve role</button>`
+                  : '<span class="text-muted">Your account</span>'}
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (error) {
+        assignmentBody.innerHTML = `<tr><td colspan="5" class="text-danger">Could not load role assignments: ${escapeHtml(error.message)}</td></tr>`;
+      }
+    }
+
+    const roleAssignmentsBody = document.getElementById('role-assignments-tbody');
+    if (roleAssignmentsBody) {
+      roleAssignmentsBody.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-action="relieve-role"]');
+        if (!button) return;
+        const userId = button.dataset.userId;
+        const roleName = button.dataset.roleName;
+        const user = roleUsersCache?.find((item) => item.id === userId);
+        if (!user || isStudentAccount(user)) return;
+
+        const remainingRoles = (user.roleAssignments || [])
+          .filter((assignment) => ['ACTIVE', 'PENDING'].includes(assignment.status)
+            && normalizeRoleKey(assignment.role) !== roleName)
+          .map((assignment) => normalizeRoleKey(assignment.role));
+        const userName = user.fullName || user.email || 'this user';
+
+        ConfirmDialog.open({
+          title: `Relieve ${userName} of this role?`,
+          message: `${formatRoleName(roleName)} access will be removed from this account.`,
+          confirmLabel: 'Relieve role',
+          tone: 'danger',
+          onConfirm: async () => {
+            try {
+              await RolesService.changeUserRole(userId, remainingRoles);
+              Toast.success(`${formatRoleName(roleName)} was removed from ${userName}.`);
+              roleUsersCache = null;
+              await loadRoleAssignments(true);
+              userTable.reload();
+            } catch (error) {
+              Toast.error(error.message || 'Could not remove this role.');
+            }
+          },
+        });
+      });
+    }
+
+    const refreshRoleAssignmentsButton = document.getElementById('refresh-role-assignments-btn');
+    if (refreshRoleAssignmentsButton) {
+      refreshRoleAssignmentsButton.addEventListener('click', () => loadRoleAssignments(true));
+    }
 
     // Tab 2: Full 56-Module Role Permission Matrix
     async function loadMatrix() {

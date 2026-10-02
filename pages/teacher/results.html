@@ -32,28 +32,24 @@
       <div class="page-head">
         <div class="page-head__title">
           <h1>Results</h1>
-          <span class="page-head__desc">Enter and publish results for your classes.</span>
+          <span class="page-head__desc">Enter scores only for your assigned classes and subjects.</span>
         </div>
         <div class="page-head__actions">
-          <button type="button" class="btn btn-primary" id="add-result-btn" hidden>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-            Add Result
-          </button>
+          <button type="button" class="btn btn-primary" id="save-term-results-btn">Save scores</button>
         </div>
       </div>
       <div class="table-wrap">
         <div class="table-toolbar">
-          <div class="search-field results-search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-            <input type="search" id="results-search" placeholder="Search results…" />
-          </div>
-          <select id="filter-class" style="min-width:180px;"><option value="">All Classes</option></select>
-          <select id="filter-term" style="min-width:200px;"><option value="">All Terms</option></select>
+          <select id="filter-session" aria-label="Academic session"><option value="">Select session</option></select>
+          <select id="filter-term" aria-label="Term" disabled><option value="">Select term</option></select>
+          <select id="filter-class" aria-label="Assigned class"><option value="">Select class</option></select>
+          <select id="filter-subject" aria-label="Assigned subject"><option value="">Select subject</option></select>
+          <button type="button" class="btn btn-secondary btn-sm" id="load-result-sheet-btn">Load students</button>
         </div>
         <div class="table-scroll">
           <table class="data-table">
-            <thead><tr><th>Student</th><th>Subject</th><th>Term</th><th>Score</th><th>Grade</th><th>Status</th><th style="text-align:right;">Actions</th></tr></thead>
-            <tbody id="results-tbody"></tbody>
+            <thead><tr><th>Student</th><th>Registration No.</th><th>1st CA</th><th>2nd CA</th><th>Examination</th><th>Total</th></tr></thead>
+            <tbody id="results-tbody"><tr><td colspan="6">Select session, term, class and subject to load the roster.</td></tr></tbody>
           </table>
         </div>
         <div id="results-pagination"></div>
@@ -76,8 +72,11 @@
 <script src="../../js/services/students.js"></script>
 <script src="../../js/services/subjects.js"></script>
 <script src="../../js/services/terms.js"></script>
+<script src="../../js/services/academic-sessions.js"></script>
 <script src="../../js/services/classes.js"></script>
+<script src="../../js/services/teacher-assignments.js"></script>
 <script src="../../js/services/results.js"></script>
+<script src="../../js/services/report-cards.js"></script>
 <script src="../../js/services/auth.js"></script>
 <script src="../../js/components/toast.js"></script>
 <script src="../../js/components/loader.js"></script>

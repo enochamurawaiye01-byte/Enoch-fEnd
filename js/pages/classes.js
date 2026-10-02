@@ -8,11 +8,7 @@
 
   let table;
   let canManage = false;
-
-  function armsBadgesHtml(arms) {
-    if (!arms || !arms.length) return '<span class="text-muted text-small">No arms</span>';
-    return arms.map((a) => `<span class="tag" style="margin-right:4px;">${escapeHtml(a.name)}</span>`).join('');
-  }
+  let classLevels = [];
 
   function rowActionsHtml(row) {
     return `
@@ -40,22 +36,21 @@
 
   function classFormHtml(row) {
     const c = row || {};
+    const selectedLevel = c.classLevel?.name || c.level || '';
     return `
       <form id="class-form" novalidate>
         <div class="form-group">
-          <label class="form-label">Class Name <span class="required">*</span></label>
-          <input type="text" name="name" value="${escapeHtml(c.name || '')}" placeholder="e.g. JSS1" required />
-          <span class="form-error"></span>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Level</label>
-          <select name="level">
-            <option value="">Select…</option>
-            ${['JSS1', 'JSS2', 'JSS3', 'SS1', 'SS2', 'SS3']
-              .map((lvl) => `<option value="${lvl}" ${c.level === lvl ? 'selected' : ''}>${lvl}</option>`)
-              .join('')}
+          <label class="form-label">Class level <span class="required">*</span></label>
+          <select name="level" required>
+            <option value="">Select class level</option>
+            ${classLevels.map((level) => `<option value="${escapeHtml(level.name)}" ${level.name === selectedLevel ? 'selected' : ''}>${escapeHtml(level.name)}</option>`).join('')}
           </select>
         </div>
+        <div class="form-group">
+          <label class="form-label">Arm / stream <span class="required">*</span></label>
+          <input type="text" name="arm" value="${escapeHtml(c.arm || '')}" placeholder="e.g. A, Science, Arts" required />
+        </div>
+        <div class="form-group"><label class="form-label">Description</label><input type="text" name="description" value="${escapeHtml(c.description || '')}" /></div>
       </form>
     `;
   }
@@ -75,11 +70,17 @@
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
           const values = Object.fromEntries(new FormData(form).entries());
-          const { valid, errors } = Validators.validateForm(values, { name: [(v) => Validators.required(v, 'Class name')] });
+          const { valid, errors } = Validators.validateForm(values, {
+            level: [(v) => Validators.required(v, 'Class level')],
+            arm: [(v) => Validators.required(v, 'Class arm')]
+          });
           if (!valid) {
-            const group = form.querySelector('[name="name"]').closest('.form-group');
-            group.classList.add('has-error');
-            group.querySelector('.form-error').textContent = errors.name;
+            Object.entries(errors).forEach(([field, message]) => {
+              const group = form.querySelector(`[name="${field}"]`).closest('.form-group');
+              group.classList.add('has-error');
+              const errorElement = group.querySelector('.form-error');
+              if (errorElement) errorElement.textContent = message;
+            });
             return;
           }
           const btn = document.getElementById('class-save-btn');
@@ -135,7 +136,7 @@
               .map(
                 (a) => `
               <div class="list-row" data-arm-id="${escapeHtml(a.id)}">
-                <span class="list-row__title">${escapeHtml(a.name)}</span>
+                <span class="list-row__title">${escapeHtml(a.arm)} <span class="text-muted">${escapeHtml(a.name)}</span></span>
                 <button type="button" class="icon-link" data-remove-arm title="Remove">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
                 </button>
@@ -171,7 +172,7 @@
           const name = input.value.trim();
           if (!name) return;
           try {
-            await ClassesService.createArm({ classId: classRow.id, name });
+            await ClassesService.create({ level: classRow.classLevel.name, arm: name });
             input.value = '';
             Toast.success('Arm added.');
             refreshArms();
@@ -185,21 +186,29 @@
     });
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     if (!window.CurrentUser) return;
     canManage = Permissions.canAccessModule(window.CurrentUser.role, 'academics');
 
     const addBtn = document.getElementById('add-class-btn');
     if (addBtn) addBtn.hidden = !canManage;
 
+    try {
+      const { items } = await ClassesService.levels();
+      classLevels = items || [];
+    } catch (error) {
+      Toast.error('Unable to load class levels. Class creation is unavailable until they are configured.');
+      if (addBtn) addBtn.disabled = true;
+    }
+
     table = DataTable.create({
       tbody: document.getElementById('classes-tbody'),
       paginationEl: document.getElementById('classes-pagination'),
       columns: [
         { key: 'name', label: 'Class', render: (r) => `<strong>${escapeHtml(r.name)}</strong>` },
-        { key: 'level', label: 'Level', render: (r) => escapeHtml(r.level || '—') },
-        { key: 'arms', label: 'Arms / Streams', render: (r) => armsBadgesHtml(r.arms) },
-        { key: 'studentCount', label: 'Students', render: (r) => escapeHtml(String(r.studentCount ?? '—')) },
+        { key: 'level', label: 'Level', render: (r) => escapeHtml(r.classLevel?.name || '—') },
+        { key: 'arm', label: 'Arm / Stream', render: (r) => escapeHtml(r.arm || '—') },
+        { key: 'studentCount', label: 'Students', render: (r) => escapeHtml(String(r._count?.students ?? '0')) },
       ],
       rowActions: rowActionsHtml,
       fetchPage: (page, filters) => ClassesService.list({ page, pageSize: 20, ...filters }),

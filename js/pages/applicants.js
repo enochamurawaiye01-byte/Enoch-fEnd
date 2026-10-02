@@ -152,9 +152,9 @@
           try {
             if (source === 'admission') {
               if (isApprove) {
-                await AdmissionsService.update(rowId, { status: 'APPROVED' });
-                const converted = await AdmissionsService.convertToStudent(rowId);
-                Toast.success(`Admission approved! Official Reg No: ${converted.registrationNumber || 'N/A'}. Approval email dispatched.`);
+                const approved = await AdmissionsService.update(rowId, { status: 'APPROVED' });
+                const registrationNumber = approved.convertedStudent?.registrationNumber;
+                Toast.success(`Admission approved! ${registrationNumber ? `Official Reg No: ${registrationNumber}.` : ''} Approval email dispatched.`);
               } else {
                 await AdmissionsService.update(rowId, { status: 'REJECTED' });
                 Toast.success(`Admission application rejected. Rejection email dispatched.`);

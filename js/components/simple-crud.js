@@ -58,7 +58,7 @@
     const {
       tbody, paginationEl, searchInput, addBtn,
       moduleKey, entityLabel, service, columns, formFields,
-      buildRowActions, deleteMessage, onFormValues, extraFilters,
+      buildRowActions, deleteMessage, onFormValues, extraFilters, emptyActionHtml,
       pageSize = 20,
     } = config;
 
@@ -87,7 +87,9 @@
       pageSize,
       fetchPage: (page, filters) => service.list({ page, pageSize, ...filters }),
       emptyMessage: `No ${entityLabel.toLowerCase()}s found.`,
-      emptyActionHtml: canManage ? `<button type="button" class="btn btn-primary btn-sm" data-action="empty-add">Add ${escapeHtml(entityLabel)}</button>` : '',
+      emptyActionHtml: emptyActionHtml !== undefined
+        ? emptyActionHtml
+        : canManage ? `<button type="button" class="btn btn-primary btn-sm" data-action="empty-add">Add ${escapeHtml(entityLabel)}</button>` : '',
     });
 
     function openFormModal(row) {

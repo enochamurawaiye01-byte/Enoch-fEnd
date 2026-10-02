@@ -9,6 +9,7 @@
   'use strict';
 
   let classesCache = [];
+  let departmentsCache = [];
   let table = null;
 
   function classOptionsHtml(selectedId) {
@@ -17,9 +18,9 @@
       .join('');
   }
 
-  function armOptionsHtml(arms, selectedId) {
-    return (arms || [])
-      .map((a) => `<option value="${escapeHtml(a.id)}" ${String(a.id) === String(selectedId) ? 'selected' : ''}>${escapeHtml(a.name)}</option>`)
+  function departmentOptionsHtml(selectedId) {
+    return departmentsCache
+      .map((department) => `<option value="${escapeHtml(department.id)}" ${String(department.id) === String(selectedId) ? 'selected' : ''}>${escapeHtml(department.name)}</option>`)
       .join('');
   }
 
@@ -28,6 +29,8 @@
     try {
       const { items } = await ClassesService.list({ pageSize: 100 });
       classesCache = items;
+      const departments = await DepartmentsService.list({ pageSize: 100 });
+      departmentsCache = departments.items || [];
       if (filterSelect) {
         filterSelect.innerHTML = `<option value="">All Classes</option>${classOptionsHtml('')}`;
       }
@@ -53,6 +56,10 @@
             <span class="form-error"></span>
           </div>
         </div>
+        <div class="form-group">
+          <label class="form-label">Middle Name</label>
+          <input type="text" name="middleName" value="${escapeHtml(s.middleName || '')}" />
+        </div>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Date of Birth</label>
@@ -64,25 +71,28 @@
               <option value="">Select…</option>
               <option value="MALE" ${s.gender === 'MALE' ? 'selected' : ''}>Male</option>
               <option value="FEMALE" ${s.gender === 'FEMALE' ? 'selected' : ''}>Female</option>
+              <option value="OTHER" ${s.gender === 'OTHER' ? 'selected' : ''}>Other</option>
             </select>
           </div>
+        </div>
+        <div class="form-group" id="student-department-group" ${String(s.classLevel?.code || '').startsWith('SS') || String(s.className || '').startsWith('SS') ? '' : 'hidden'}>
+          <label class="form-label">Department <span class="required">*</span></label>
+          <select name="desiredDepartmentId" id="student-department-select" ${s.id ? 'disabled' : ''}>
+            <option value="">Select department…</option>
+            ${departmentOptionsHtml(s.desiredDepartmentId)}
+          </select>
+          <span class="form-error"></span>
         </div>
 
         <div class="form-section-title">Academic Information</div>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Class <span class="required">*</span></label>
-            <select name="classId" id="student-class-select" required>
+            <select name="currentClassId" id="student-class-select" required ${s.id ? 'disabled' : ''}>
               <option value="">Select class…</option>
               ${classOptionsHtml(s.classId)}
             </select>
             <span class="form-error"></span>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Class Arm</label>
-            <select name="classArmId" id="student-arm-select">
-              <option value="">Select arm…</option>
-            </select>
           </div>
         </div>
         ${
@@ -94,12 +104,13 @@
         <div class="form-section-title">Contact & Parent Information</div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Email</label>
-            <input type="email" name="email" value="${escapeHtml(s.email || '')}" />
+            <label class="form-label">Email <span class="required">*</span></label>
+            <input type="email" name="email" value="${escapeHtml(s.email || '')}" required />
+            <span class="form-error"></span>
           </div>
           <div class="form-group">
             <label class="form-label">Phone Number</label>
-            <input type="text" name="phone" value="${escapeHtml(s.phone || '')}" />
+            <input type="text" name="phoneNumber" value="${escapeHtml(s.phoneNumber || s.phone || '')}" />
             <span class="form-help">Phone numbers are not required to be unique.</span>
           </div>
         </div>
@@ -109,24 +120,6 @@
         </div>
       </form>
     `;
-  }
-
-  async function populateArmsForClass(classSelect, armSelect, selectedArmId) {
-    const classId = classSelect.value;
-    armSelect.innerHTML = '<option value="">Loading arms…</option>';
-    armSelect.disabled = true;
-    if (!classId) {
-      armSelect.innerHTML = '<option value="">Select a class first</option>';
-      return;
-    }
-    try {
-      const { items } = await ClassesService.arms(classId);
-      armSelect.innerHTML = `<option value="">Select arm…</option>${armOptionsHtml(items, selectedArmId)}`;
-    } catch (err) {
-      armSelect.innerHTML = '<option value="">Unable to load arms</option>';
-    } finally {
-      armSelect.disabled = false;
-    }
   }
 
   function openStudentModal(student) {
@@ -143,24 +136,36 @@
       onMount: async (modalEl) => {
         modalEl.querySelector('[data-action="cancel"]').addEventListener('click', Modal.close);
 
-        const classSelect = modalEl.querySelector('#student-class-select');
-        const armSelect = modalEl.querySelector('#student-arm-select');
-        if (classSelect.value) await populateArmsForClass(classSelect, armSelect, student && student.classArmId);
-        classSelect.addEventListener('change', () => populateArmsForClass(classSelect, armSelect));
-
         const form = modalEl.querySelector('#student-form');
+        const classSelect = form.querySelector('#student-class-select');
+        const departmentGroup = form.querySelector('#student-department-group');
+        const departmentSelect = form.querySelector('#student-department-select');
+        const updateDepartmentVisibility = () => {
+          const schoolClass = classesCache.find((item) => item.id === classSelect.value);
+          const seniorSecondary = (schoolClass?.classLevel?.code || '').startsWith('SS');
+          departmentGroup.hidden = !seniorSecondary;
+          departmentSelect.required = seniorSecondary;
+          if (!seniorSecondary) departmentSelect.value = '';
+        };
+        classSelect.addEventListener('change', updateDepartmentVisibility);
+        updateDepartmentVisibility();
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
           const formData = new FormData(form);
-          const values = Object.fromEntries(formData.entries());
+          const values = Object.fromEntries([...formData.entries()].filter(([, value]) => String(value).trim() !== ''));
+          const selectedClass = classesCache.find((item) => item.id === values.currentClassId);
 
-          const { valid, errors } = Validators.validateForm(values, {
+          const validationRules = {
             firstName: [(v) => Validators.required(v, 'First name')],
             lastName: [(v) => Validators.required(v, 'Last name')],
-            classId: [(v) => Validators.required(v, 'Class')],
             email: [(v) => Validators.email(v)],
             phone: [(v) => Validators.phone(v)],
-          });
+          };
+          if (!isEdit) validationRules.currentClassId = [(v) => Validators.required(v, 'Class')];
+          if (!isEdit && (selectedClass?.classLevel?.code || '').startsWith('SS')) {
+            validationRules.desiredDepartmentId = [(v) => Validators.required(v, 'Department')];
+          }
+          const { valid, errors } = Validators.validateForm(values, validationRules);
 
           form.querySelectorAll('.form-group').forEach((g) => g.classList.remove('has-error'));
           if (!valid) {
@@ -216,8 +221,11 @@
     const canManage = Permissions.canAccessModule(window.CurrentUser.role, 'students');
     return `
       <div class="row" style="gap:4px; justify-content:flex-end;">
-        <a class="icon-link" href="student-details.html?id=${encodeURIComponent(row.id)}" title="View">
+        <a class="icon-link" href="student-details.html?id=${encodeURIComponent(row.id)}" title="View student">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/></svg>
+        </a>
+        <a class="icon-link" href="results.html?studentId=${encodeURIComponent(row.id)}" title="View results">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 19V5M4 19h16M8 15v-4M13 15V8M18 15V5"/></svg>
         </a>
         ${
           canManage
@@ -247,6 +255,8 @@
     if (addBtn) addBtn.hidden = !canManage;
 
     await loadClassesIntoFilter();
+    const initialClassId = new URLSearchParams(window.location.search).get('classId');
+    if (initialClassId && filterClass) filterClass.value = initialClassId;
 
     table = DataTable.create({
       tbody,

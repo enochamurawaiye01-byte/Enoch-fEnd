@@ -17,6 +17,7 @@
 
   global.ENOCH_ENDPOINTS = {
     AUTH: {
+      REGISTRATION_OPTIONS: '/auth/registration-options',
       REGISTER: '/auth/register',
       LOGIN: '/auth/login',
       LOGOUT: '/auth/logout',
@@ -74,6 +75,7 @@
 
     CLASSES: {
       BASE: '/classes',
+      LEVELS: '/classes/levels',
       BY_ID: (classId) => `/classes/${classId}`,
       ARMS: (classId) => `/classes/${classId}/arms`,
       STUDENTS: (classId) => `/classes/${classId}/students`,
@@ -103,6 +105,8 @@
     TEACHER_ASSIGNMENTS: {
       BASE: '/teacher-assignments',
       BY_ID: (id_) => `/teacher-assignments/${id_}`,
+      CLASS_TEACHERS: '/teacher-assignments/class-teachers',
+      CLASS_TEACHER_BY_ID: (id_) => `/teacher-assignments/class-teachers/${id_}`,
     },
 
     ENROLLMENTS: {
@@ -163,10 +167,20 @@
     RESULTS: {
       BASE: '/results',
       TEACHER: '/results/teacher',
+      TERM_ENTRY: '/results/term-entry',
+      TERM_ENTRY_BATCH: '/results/term-entry/batch',
+      TERM_REPORTS: '/results/term-reports',
       BY_ID: (id_) => `/results/${id_}`,
       STUDENT: (studentId) => `/results/student/${studentId}`,
       CLASS: (classId) => `/results/class/${classId}`,
       PUBLISH: (id_) => `/results/${id_}/publish`,
+    },
+
+    REPORT_CARDS: {
+      BASE: '/report-cards',
+      BY_ID: (id_) => `/report-cards/${id_}`,
+      PUBLICATION: (id_) => `/report-cards/${id_}/publication`,
+      CONFIGURATION: '/report-cards/configuration',
     },
 
     TRANSCRIPTS: {

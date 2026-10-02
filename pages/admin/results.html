@@ -41,6 +41,26 @@
           </button>
         </div>
       </div>
+      <section class="section">
+        <div class="section__head">
+          <div><h2 style="margin:0;">Term Results</h2><p class="text-muted text-small">Filter term scores and monitor completion for each class and subject.</p></div>
+        </div>
+        <div class="filter-bar">
+          <div class="form-group"><label for="term-report-session">Session</label><select id="term-report-session"><option value="">All sessions</option></select></div>
+          <div class="form-group"><label for="term-report-term">Term</label><select id="term-report-term"><option value="">All terms</option></select></div>
+          <div class="form-group"><label for="term-report-class">Class</label><select id="term-report-class"><option value="">All classes</option></select></div>
+          <div class="form-group"><label for="term-report-subject">Subject</label><select id="term-report-subject"><option value="">All subjects</option></select></div>
+          <div class="form-group"><label for="term-report-teacher">Teacher</label><select id="term-report-teacher"><option value="">All teachers</option></select></div>
+          <button type="button" class="btn btn-secondary" id="load-term-reports-btn">Apply filters</button>
+        </div>
+        <p id="term-result-completion" class="form-help" aria-live="polite"></p>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th>Student</th><th>Registration no.</th><th>Class</th><th>Subject</th><th>Session / Term</th><th>1st CA</th><th>2nd CA</th><th>Exam</th><th>Total</th><th>Grade</th><th>Remark</th><th>Teacher</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="term-reports-tbody"><tr><td colspan="14">Choose filters and apply to load term results.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
       <div class="table-wrap">
         <div class="table-toolbar">
           <div class="search-field results-search">
@@ -76,8 +96,11 @@
 <script src="../../js/services/students.js"></script>
 <script src="../../js/services/subjects.js"></script>
 <script src="../../js/services/terms.js"></script>
+<script src="../../js/services/academic-sessions.js"></script>
 <script src="../../js/services/classes.js"></script>
+<script src="../../js/services/teachers.js"></script>
 <script src="../../js/services/results.js"></script>
+<script src="../../js/services/report-cards.js"></script>
 <script src="../../js/services/auth.js"></script>
 <script src="../../js/components/toast.js"></script>
 <script src="../../js/components/loader.js"></script>

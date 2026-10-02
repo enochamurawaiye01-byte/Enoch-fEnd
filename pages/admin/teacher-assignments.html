@@ -56,6 +56,21 @@
         </div>
         <div id="assignments-pagination"></div>
       </div>
+
+      <section class="section" style="margin-top:24px;">
+        <div class="section__head">
+          <div><h2 style="margin:0;">Class Teachers</h2><p class="text-muted text-small">One class teacher per class and academic session. Assigning another teacher replaces the current assignment.</p></div>
+          <button type="button" class="btn btn-secondary" id="assign-class-teacher-btn">Assign class teacher</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead><tr><th>Class</th><th>Teacher</th><th>Academic session</th><th style="text-align:right;">Actions</th></tr></thead>
+              <tbody id="class-teachers-tbody"><tr><td colspan="4">Loading class teacher assignments…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </main>
 
     <div class="app-footer-note">Enoch International College ERP</div>
@@ -74,6 +89,7 @@
 <script src="../../js/services/classes.js"></script>
 <script src="../../js/services/subjects.js"></script>
 <script src="../../js/services/teachers.js"></script>
+<script src="../../js/services/academic-sessions.js"></script>
 <script src="../../js/services/teacher-assignments.js"></script>
 <script src="../../js/services/auth.js"></script>
 <script src="../../js/components/toast.js"></script>

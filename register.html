@@ -124,34 +124,24 @@
           <h2 class="auth-section-title">Student academic details</h2>
           <div class="form-row" style="margin-bottom:0;">
             <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label" for="currentClass">Current Class</label>
-              <select id="currentClass" name="currentClass">
-                <option value="">Select Current Class</option>
-                <option value="Nursery 1">Nursery 1</option>
-                <option value="Nursery 2">Nursery 2</option>
-                <option value="Primary 1">Primary 1</option>
-                <option value="Primary 2">Primary 2</option>
-                <option value="Primary 3">Primary 3</option>
-                <option value="Primary 4">Primary 4</option>
-                <option value="Primary 5">Primary 5</option>
-                <option value="Primary 6">Primary 6</option>
+              <label class="form-label" for="currentClassId">Current Class <span class="required">*</span></label>
+              <select id="currentClassId" name="currentClassId">
+                <option value="">Loading classes...</option>
               </select>
+              <span class="form-error" id="error-currentClassId"></span>
             </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label" for="currentTerm">Current Term</label>
-              <select id="currentTerm" name="currentTerm">
-                <option value="">Select Current Term</option>
-                <option value="First Term">First Term</option>
-                <option value="Second Term">Second Term</option>
-                <option value="Third Term">Third Term</option>
+            <div class="form-group" id="department-group" style="margin-bottom:0;" hidden>
+              <label class="form-label" for="desiredDepartmentId">Department <span class="required">*</span></label>
+              <select id="desiredDepartmentId" name="desiredDepartmentId">
+                <option value="">Select Department</option>
               </select>
+              <span class="form-error" id="error-desiredDepartmentId"></span>
             </div>
           </div>
         </div>
 
         <div id="teacher-fields" hidden>
           <h2 class="auth-section-title">Teacher details</h2>
-          <div class="form-group"><label class="form-label" for="staffNumber">Staff Identification Number <span class="required">*</span></label><input id="staffNumber" name="staffNumber" placeholder="e.g. MTC/STF/1024" /><span class="form-error" id="error-staffNumber"></span></div>
           <div class="form-group"><label class="form-label" for="jobTitle">Job Title</label><input id="jobTitle" name="jobTitle" value="Teacher" /></div>
           <div class="form-group"><label class="form-label" for="qualification">Qualification</label><input id="qualification" name="qualification" placeholder="e.g. B.Ed / NCE" /></div>
         </div>

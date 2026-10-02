@@ -20,5 +20,16 @@
     async delete(id) {
       return ApiClient.delete(TEACHER_ASSIGNMENTS.BY_ID(id));
     },
+    async listClassTeachers(params = {}) {
+      const payload = await ApiClient.get(TEACHER_ASSIGNMENTS.CLASS_TEACHERS, params);
+      return ApiClient.unwrapList(payload);
+    },
+    async assignClassTeacher(data) {
+      const payload = await ApiClient.post(TEACHER_ASSIGNMENTS.CLASS_TEACHERS, data);
+      return ApiClient.unwrapItem(payload);
+    },
+    async removeClassTeacher(id) {
+      return ApiClient.delete(TEACHER_ASSIGNMENTS.CLASS_TEACHER_BY_ID(id));
+    },
   };
 })(window);

@@ -12,6 +12,10 @@
       const payload = await ApiClient.get(CLASSES.BASE, params);
       return ApiClient.unwrapList(payload);
     },
+    async levels() {
+      const payload = await ApiClient.get(CLASSES.LEVELS);
+      return ApiClient.unwrapList(payload);
+    },
     async get(classId) {
       const payload = await ApiClient.get(CLASSES.BY_ID(classId));
       return ApiClient.unwrapItem(payload);
@@ -21,7 +25,7 @@
       return ApiClient.unwrapItem(payload);
     },
     async update(classId, data) {
-      const payload = await ApiClient.put(CLASSES.BY_ID(classId), data);
+      const payload = await ApiClient.patch(CLASSES.BY_ID(classId), data);
       return ApiClient.unwrapItem(payload);
     },
     async delete(classId) {

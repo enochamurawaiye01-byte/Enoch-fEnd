@@ -7,8 +7,13 @@
     const successBox = qs('#register-success');
     const submitButton = qs('#register-submit');
     const roleSelect = qs('#role');
+    const studentFields = qs('#student-academic-fields');
     const teacherFields = qs('#teacher-fields');
     const parentFields = qs('#parent-fields');
+    const currentClassSelect = qs('#currentClassId');
+    const departmentGroup = qs('#department-group');
+    const departmentSelect = qs('#desiredDepartmentId');
+    const classLevelsById = new Map();
     const passwordInput = qs('#password');
     const pwContainer = qs('#pw-strength-container');
     const pwBar = qs('#pw-strength-bar');
@@ -18,12 +23,48 @@
     roleSelect.addEventListener('change', () => {
       const isTeacher = roleSelect.value === 'TEACHER';
       const isParent = roleSelect.value === 'PARENT';
+      const isStudent = roleSelect.value === 'STUDENT';
       teacherFields.hidden = !isTeacher;
       parentFields.hidden = !isParent;
-      teacherFields.querySelectorAll('input').forEach((input) => { input.required = isTeacher; });
-      parentFields.querySelectorAll('input').forEach((input) => { input.required = isParent; });
+      studentFields.hidden = !isStudent;
+      currentClassSelect.required = isStudent;
+      const childRegistrationNumber = qs('#childRegistrationNumber');
+      if (childRegistrationNumber) childRegistrationNumber.required = isParent;
       submitButton.textContent = isTeacher ? 'Submit Teacher Application' : isParent ? 'Submit Parent Application' : 'Submit Student Application';
     });
+    roleSelect.dispatchEvent(new Event('change'));
+
+    const updateDepartmentRequirement = () => {
+      const seniorSecondary = (classLevelsById.get(currentClassSelect.value) || '').startsWith('SS');
+      departmentGroup.hidden = !seniorSecondary;
+      departmentSelect.required = seniorSecondary;
+      if (!seniorSecondary) departmentSelect.value = '';
+    };
+    currentClassSelect.addEventListener('change', updateDepartmentRequirement);
+
+    const loadRegistrationOptions = async () => {
+      try {
+        const payload = await AuthService.getRegistrationOptions();
+        const options = payload.data || payload;
+        currentClassSelect.innerHTML = '<option value="">Select Current Class</option>';
+        (options.classes || []).forEach((schoolClass) => {
+          classLevelsById.set(schoolClass.id, schoolClass.classLevel?.code || '');
+          const option = document.createElement('option');
+          option.value = schoolClass.id;
+          option.textContent = `${schoolClass.classLevel?.name || ''} ${schoolClass.arm || schoolClass.name}`.trim();
+          currentClassSelect.appendChild(option);
+        });
+        (options.departments || []).forEach((department) => {
+          const option = document.createElement('option');
+          option.value = department.id;
+          option.textContent = department.name;
+          departmentSelect.appendChild(option);
+        });
+      } catch (error) {
+        currentClassSelect.innerHTML = '<option value="">Classes unavailable</option>';
+      }
+    };
+    loadRegistrationOptions();
 
     // Password Strength Tracker
     if (passwordInput && pwContainer) {
@@ -122,16 +163,20 @@
       
       if (!rawData.phoneNumber) { setFieldError('phoneNumber', 'Phone number is required.'); hasError = true; }
 
+      if (rawData.role === 'STUDENT' && !rawData.currentClassId) {
+        setFieldError('currentClassId', 'Select a class from the available classes.');
+        hasError = true;
+      }
+      if (rawData.role === 'STUDENT' && (classLevelsById.get(rawData.currentClassId) || '').startsWith('SS') && !rawData.desiredDepartmentId) {
+        setFieldError('desiredDepartmentId', 'Select a department for senior secondary classes.');
+        hasError = true;
+      }
+
       if (!rawData.password) { setFieldError('password', 'Password is required.'); hasError = true; }
       else if (rawData.password.length < 8) { setFieldError('password', 'Password must be at least 8 characters.'); hasError = true; }
 
       if (rawData.password !== rawData.confirmPassword) {
         setFieldError('confirmPassword', 'Passwords do not match.');
-        hasError = true;
-      }
-
-      if (rawData.role === 'TEACHER' && !rawData.staffNumber) {
-        setFieldError('staffNumber', 'Staff identification number is required for teacher registration.');
         hasError = true;
       }
 

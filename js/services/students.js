@@ -8,10 +8,24 @@
 
   const { STUDENTS } = ENOCH_ENDPOINTS;
 
+  function normalizeStudent(student) {
+    if (!student) return student;
+    return {
+      ...student,
+      regNumber: student.registrationNumber,
+      email: student.user?.email || student.email || '',
+      phone: student.user?.phoneNumber || student.phoneNumber || '',
+      phoneNumber: student.user?.phoneNumber || student.phoneNumber || '',
+      classId: student.currentClassId || student.classId || '',
+      className: student.currentClass?.name || student.className || '',
+      classArmName: student.currentClass?.arm || student.classArmName || '',
+    };
+  }
+
   const StudentsService = {
     async me() {
       const payload = await ApiClient.get(STUDENTS.ME);
-      return ApiClient.unwrapItem(payload)?.student || ApiClient.unwrapItem(payload);
+      return normalizeStudent(ApiClient.unwrapItem(payload)?.student || ApiClient.unwrapItem(payload));
     },
     async uploadProfilePicture(file) {
       const formData = new FormData();
@@ -28,17 +42,18 @@
         classArmId: classArmId || undefined,
         status: status || undefined,
       });
-      return ApiClient.unwrapList(payload);
+      const result = ApiClient.unwrapList(payload);
+      return { ...result, items: result.items.map(normalizeStudent) };
     },
 
     async get(studentId) {
       const payload = await ApiClient.get(STUDENTS.BY_ID(studentId));
-      return ApiClient.unwrapItem(payload);
+      return normalizeStudent(ApiClient.unwrapItem(payload));
     },
 
     async create(data) {
       const payload = await ApiClient.post(STUDENTS.BASE, data);
-      return ApiClient.unwrapItem(payload);
+      return normalizeStudent(ApiClient.unwrapItem(payload));
     },
 
     async update(studentId, data) {

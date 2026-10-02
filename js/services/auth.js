@@ -7,6 +7,10 @@
   const { AUTH } = ENOCH_ENDPOINTS;
 
   const AuthService = {
+    async getRegistrationOptions() {
+      return ApiClient.get(AUTH.REGISTRATION_OPTIONS);
+    },
+
     async register(data) {
       return ApiClient.post(AUTH.REGISTER, data);
     },

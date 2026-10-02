@@ -1,10 +1,22 @@
-(function (global) {
+ (function (global) {
   'use strict';
   const { RESULTS } = ENOCH_ENDPOINTS;
   global.ResultsService = {
     async list(params = {}) {
       const path = window.CurrentUser?.role === 'TEACHER' ? RESULTS.TEACHER : RESULTS.BASE;
       const payload = await ApiClient.get(path, params);
+      return ApiClient.unwrapList(payload);
+    },
+    async termEntry(params = {}) {
+      const payload = await ApiClient.get(RESULTS.TERM_ENTRY, params);
+      return ApiClient.unwrapItem(payload);
+    },
+    async saveTermEntries(data) {
+      const payload = await ApiClient.put(RESULTS.TERM_ENTRY_BATCH, data);
+      return ApiClient.unwrapItem(payload);
+    },
+    async termReports(params = {}) {
+      const payload = await ApiClient.get(RESULTS.TERM_REPORTS, params);
       return ApiClient.unwrapList(payload);
     },
     async get(id) {
@@ -28,7 +40,7 @@
       return ApiClient.unwrapItem(payload);
     },
     async publish(id) {
-      const payload = await ApiClient.patch(RESULTS.PUBLISH(id), {});
+      const payload = await ApiClient.patch(RESULTS.PUBLISH(id), { published: true });
       return ApiClient.unwrapItem(payload);
     },
     async delete(id) {

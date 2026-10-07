@@ -11,8 +11,8 @@
       const payload = await ApiClient.get(REPORT_CARDS.BY_ID(id));
       return ApiClient.unwrapItem(payload);
     },
-    async publish(id, published) {
-      const payload = await ApiClient.patch(REPORT_CARDS.PUBLICATION(id), { published });
+    async publish(id, published, portal) {
+      const payload = await ApiClient.patch(REPORT_CARDS.PUBLICATION(id), { published, ...(portal ? { portal } : {}) });
       return ApiClient.unwrapItem(payload);
     },
     async publishClassTerm(data) {

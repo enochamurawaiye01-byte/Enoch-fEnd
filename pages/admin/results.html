@@ -43,7 +43,7 @@
       </div>
       <section class="section">
         <div class="section__head">
-          <div><h2 style="margin:0;">Term Results</h2><p class="text-muted text-small">Review submissions and activate complete class results for students and linked parents.</p></div>
+          <div><h2 style="margin:0;">Term Results</h2><p class="text-muted text-small">Review submissions and release complete class results separately to student and parent portals.</p></div>
         </div>
         <div class="filter-bar">
           <div class="form-group"><label for="term-report-session">Session</label><select id="term-report-session"><option value="">All sessions</option></select></div>
@@ -52,7 +52,8 @@
           <div class="form-group"><label for="term-report-subject">Subject</label><select id="term-report-subject"><option value="">All subjects</option></select></div>
           <div class="form-group"><label for="term-report-teacher">Teacher</label><select id="term-report-teacher"><option value="">All teachers</option></select></div>
           <button type="button" class="btn btn-secondary" id="load-term-reports-btn">Apply filters</button>
-          <button type="button" class="btn btn-primary" id="activate-class-term-results-btn" disabled>Activate class results</button>
+          <button type="button" class="btn btn-primary" id="activate-class-term-student-results-btn" disabled>Activate for students</button>
+          <button type="button" class="btn btn-primary" id="activate-class-term-parent-results-btn" disabled>Activate for parents</button>
         </div>
         <p id="term-result-completion" class="form-help" aria-live="polite"></p>
         <div class="table-scroll">

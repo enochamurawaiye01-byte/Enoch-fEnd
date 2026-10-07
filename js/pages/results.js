@@ -166,10 +166,13 @@
     const tbody = document.getElementById('term-reports-tbody');
     const summary = document.getElementById('term-result-completion');
     const loadButton = document.getElementById('load-term-reports-btn');
-    const activateClassTermButton = document.getElementById('activate-class-term-results-btn');
+    const activateClassTermStudentButton = document.getElementById('activate-class-term-student-results-btn');
+    const activateClassTermParentButton = document.getElementById('activate-class-term-parent-results-btn');
     if (!tbody || !loadButton) return;
     const updateBulkControl = () => {
-      if (activateClassTermButton) activateClassTermButton.disabled = !(controls.sessionId.value && controls.termId.value && controls.classId.value);
+      const disabled = !(controls.sessionId.value && controls.termId.value && controls.classId.value);
+      if (activateClassTermStudentButton) activateClassTermStudentButton.disabled = disabled;
+      if (activateClassTermParentButton) activateClassTermParentButton.disabled = disabled;
     };
     const setOptions = (select, placeholder, rows) => {
       select.innerHTML = `<option value="">${escapeHtml(placeholder)}</option>${rows.map((item) => `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`).join('')}`;
@@ -211,8 +214,11 @@
             <td data-label="Grade"><strong>${escapeHtml(entry.grade || '—')}</strong></td>
             <td data-label="Remark">${escapeHtml(entry.remark || '—')}</td>
             <td data-label="Teacher">${escapeHtml(entry.teacher ? `${entry.teacher.firstName} ${entry.teacher.lastName}`.trim() : '—')}</td>
-            <td data-label="Status"><span class="badge ${report.published ? 'badge-success' : 'badge-warning'}">${report.published ? 'Published' : 'Submitted'}</span></td>
-            <td data-label="Action"><button type="button" class="btn ${report.published ? 'btn-secondary' : 'btn-primary'} btn-sm" data-report-id="${escapeHtml(report.id)}" data-published="${report.published}">${report.published ? 'Deactivate' : 'Activate Result'}</button></td>
+            <td data-label="Status"><span class="badge ${report.studentPublished ? 'badge-success' : 'badge-warning'}">Student: ${report.studentPublished ? 'Published' : 'Hidden'}</span> <span class="badge ${report.parentPublished ? 'badge-success' : 'badge-warning'}">Parent: ${report.parentPublished ? 'Published' : 'Hidden'}</span></td>
+            <td data-label="Action">
+              <button type="button" class="btn ${report.studentPublished ? 'btn-secondary' : 'btn-primary'} btn-sm" data-report-id="${escapeHtml(report.id)}" data-portal="student" data-published="${report.studentPublished}">${report.studentPublished ? 'Hide from student' : 'Show to student'}</button>
+              <button type="button" class="btn ${report.parentPublished ? 'btn-secondary' : 'btn-primary'} btn-sm" data-report-id="${escapeHtml(report.id)}" data-portal="parent" data-published="${report.parentPublished}">${report.parentPublished ? 'Hide from parent' : 'Show to parent'}</button>
+            </td>
           </tr>`).join('') : '<tr><td colspan="14">No term results match these filters.</td></tr>';
 
         if (filters.classId && filters.subjectId && filters.sessionId && filters.termId) {
@@ -230,44 +236,48 @@
     }
 
     loadButton.addEventListener('click', loadReports);
-    activateClassTermButton?.addEventListener('click', () => {
+    const publishClassTerm = (portal) => {
       const filters = Object.fromEntries(Object.entries(controls).map(([key, select]) => [key, select.value]));
       if (!filters.sessionId || !filters.termId || !filters.classId) return;
       ConfirmDialog.open({
-        title: 'Activate class results',
-        message: 'Are you sure you want to publish all complete results for this class, session, and term? Every enrolled student must have a result for each registered subject. Students and linked parents will be able to view published results.',
-        confirmLabel: 'Activate complete results',
+        title: `Activate class results for ${portal}s`,
+        message: `Are you sure you want to publish all complete results for this class, session, and term to the ${portal} portal? Every enrolled student must have a result for each registered subject. This will not change visibility on the other portal.`,
+        confirmLabel: `Activate for ${portal}s`,
         tone: 'primary',
         onConfirm: async () => {
-          activateClassTermButton.disabled = true;
+          const button = portal === 'student' ? activateClassTermStudentButton : activateClassTermParentButton;
+          button.disabled = true;
           try {
-            const result = await ReportCardsService.publishClassTerm({ classId: filters.classId, sessionId: filters.sessionId, termId: filters.termId, published: true });
-            Toast.success(`${result.count} student result(s) activated.`);
+            const result = await ReportCardsService.publishClassTerm({ classId: filters.classId, sessionId: filters.sessionId, termId: filters.termId, published: true, portal });
+            Toast.success(`${result.count} student result(s) activated for the ${portal} portal.`);
             await loadReports();
           } catch (error) {
-            Toast.error(error.message || 'Unable to activate class results. Resolve pending subjects first.');
+            Toast.error(error.message || `Unable to activate class results for the ${portal} portal. Resolve pending subjects first.`);
           } finally {
             updateBulkControl();
           }
         },
       });
-    });
+    };
+    activateClassTermStudentButton?.addEventListener('click', () => publishClassTerm('student'));
+    activateClassTermParentButton?.addEventListener('click', () => publishClassTerm('parent'));
     tbody.addEventListener('click', async (event) => {
       const button = event.target.closest('[data-report-id]');
       if (!button) return;
       const reportId = button.dataset.reportId;
+      const portal = button.dataset.portal;
       const nextPublished = button.dataset.published !== 'true';
       ConfirmDialog.open({
-        title: nextPublished ? 'Activate result' : 'Deactivate result',
+        title: `${nextPublished ? 'Activate' : 'Deactivate'} result for ${portal}s`,
         message: nextPublished
-          ? 'Are you sure you want to publish this result? The student and their linked parent will be able to view it.'
-          : 'Are you sure you want to deactivate this result? The student and their linked parent will no longer be able to view it.',
-        confirmLabel: nextPublished ? 'Activate Result' : 'Deactivate Result',
+          ? `Are you sure you want to publish this result to the ${portal} portal? The other portal's visibility will not change.`
+          : `Are you sure you want to hide this result from the ${portal} portal? The other portal's visibility will not change.`,
+        confirmLabel: nextPublished ? `Activate for ${portal}s` : `Deactivate for ${portal}s`,
         tone: nextPublished ? 'primary' : 'danger',
         onConfirm: async () => {
           try {
-            await ReportCardsService.publish(reportId, nextPublished);
-            Toast.success(nextPublished ? 'Result activated.' : 'Result deactivated.');
+            await ReportCardsService.publish(reportId, nextPublished, portal);
+            Toast.success(nextPublished ? `Result activated for the ${portal} portal.` : `Result deactivated for the ${portal} portal.`);
             await loadReports();
           } catch (error) {
             Toast.error(error.message || 'Unable to update publication status.');

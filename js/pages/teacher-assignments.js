@@ -27,7 +27,7 @@
       service: TeacherAssignmentsService,
       modalSize: 'md',
       columns: [
-        { key: 'teacherName', label: 'Teacher', render: (r) => escapeHtml(r.teacherName || r.teacher?.name || '—') },
+        { key: 'teacherName', label: 'Teacher', render: (r) => `<a href="teacher-details.html?id=${encodeURIComponent(r.staffId || r.staff?.id || '')}">${escapeHtml(r.teacherName || r.staff?.user?.fullName || r.teacher?.name || '—')}</a>` },
         { key: 'subjectName', label: 'Subject', render: (r) => escapeHtml(r.subjectName || r.subject?.name || '—') },
         { key: 'className', label: 'Class', render: (r) => escapeHtml(r.className || r.class?.name || '—') },
       ],
@@ -54,7 +54,7 @@
         classTeacherBody.innerHTML = items.map((assignment) => `
           <tr data-class-teacher-id="${escapeHtml(assignment.id)}">
             <td data-label="Class">${escapeHtml(assignment.class?.name || '—')}</td>
-            <td data-label="Teacher">${escapeHtml(assignment.staff?.user?.fullName || `${assignment.staff?.firstName || ''} ${assignment.staff?.lastName || ''}`.trim() || '—')}</td>
+            <td data-label="Teacher"><a href="teacher-details.html?id=${encodeURIComponent(assignment.staff?.id || assignment.staffId || '')}">${escapeHtml(assignment.staff?.user?.fullName || `${assignment.staff?.firstName || ''} ${assignment.staff?.lastName || ''}`.trim() || '—')}</a></td>
             <td data-label="Academic session">${escapeHtml(assignment.session?.name || '—')}</td>
             <td data-label="Actions" class="cell-actions"><button type="button" class="btn btn-outline-danger btn-sm" data-action="remove-class-teacher">Remove</button></td>
           </tr>

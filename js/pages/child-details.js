@@ -17,9 +17,10 @@
         <div class="card">
           <div class="card__head">
             <div class="avatar-cell">
-              <span class="avatar" style="width:48px;height:48px;font-size:1rem;">${escapeHtml(initials(`${student.firstName || ''} ${student.lastName || ''}`))}</span>
+              <span class="avatar" style="width:48px;height:48px;font-size:1rem;overflow:hidden;">${student.profileImageUrl ? `<img src="${escapeHtml(student.profileImageUrl)}" alt="Student profile" style="width:100%;height:100%;object-fit:cover;">` : escapeHtml(initials(`${student.firstName || ''} ${student.lastName || ''}`))}</span>
               <div>
                 <div class="name" style="font-size:1.1rem;">${escapeHtml(`${student.firstName || ''} ${student.lastName || ''}`)}</div>
+                <span class="badge badge-outline">STUDENT</span>
                 <div class="sub">${escapeHtml(student.regNumber || '—')}</div>
               </div>
             </div>

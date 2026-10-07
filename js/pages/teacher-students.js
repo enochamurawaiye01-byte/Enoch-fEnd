@@ -47,8 +47,8 @@
           <tr>
             <td>
               <div class="avatar-cell">
-                <span class="avatar">${escapeHtml(initials(`${s.firstName || ''} ${s.lastName || ''}`))}</span>
-                <div><div class="name">${escapeHtml(`${s.firstName || ''} ${s.lastName || ''}`)}</div><div class="sub">${escapeHtml(s.regNumber || '—')}</div></div>
+                <span class="avatar" style="overflow:hidden;">${s.profileImageUrl ? `<img src="${escapeHtml(s.profileImageUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;">` : escapeHtml(initials(`${s.firstName || ''} ${s.lastName || ''}`))}</span>
+                <div><a class="name" href="../../pages/admin/student-details.html?id=${encodeURIComponent(s.id)}">${escapeHtml(`${s.firstName || ''} ${s.lastName || ''}`)}</a><div class="sub">${escapeHtml(s.regNumber || '—')}</div></div>
               </div>
             </td>
             <td>${escapeHtml(s.email || '—')}</td>

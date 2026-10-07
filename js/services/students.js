@@ -33,6 +33,10 @@
       const payload = await ApiClient.upload(STUDENTS.PROFILE_PICTURE, formData);
       return ApiClient.unwrapItem(payload)?.student || ApiClient.unwrapItem(payload);
     },
+    async removeProfilePicture() {
+      const payload = await ApiClient.delete(STUDENTS.REMOVE_PROFILE_PICTURE);
+      return normalizeStudent(ApiClient.unwrapItem(payload)?.student || ApiClient.unwrapItem(payload));
+    },
     async list({ page = 1, pageSize = 20, search = '', classId = '', classArmId = '', status = '' } = {}) {
       const payload = await ApiClient.get(STUDENTS.BASE, {
         page,

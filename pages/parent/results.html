@@ -36,11 +36,15 @@
           <span class="page-head__desc">View your child's published academic results.</span>
         </div>
       </div>
-      <div class="child-picker"><select id="child-select"><option value="">Loading…</option></select></div>
+      <div class="filter-bar">
+        <div class="child-picker"><select id="child-select"><option value="">Loading…</option></select></div>
+        <select id="filter-session" aria-label="Academic session"><option value="">All sessions</option></select>
+        <select id="filter-term" aria-label="Term"><option value="">All terms</option></select>
+      </div>
       <div class="table-wrap">
         <div class="table-scroll">
           <table class="data-table">
-            <thead><tr><th>Subject</th><th>Term</th><th>Score</th><th>Grade</th><th>Remarks</th></tr></thead>
+            <thead><tr><th>Subject</th><th>Term</th><th>1st CA</th><th>2nd CA</th><th>Exam</th><th>Total</th><th>Grade</th><th>Remark</th></tr></thead>
             <tbody id="results-tbody"></tbody>
           </table>
         </div>
@@ -63,6 +67,8 @@
 <script src="../../js/api/api-client.js"></script>
 <script src="../../js/services/parents.js"></script>
 <script src="../../js/services/results.js"></script>
+<script src="../../js/services/academic-sessions.js"></script>
+<script src="../../js/services/terms.js"></script>
 <script src="../../js/services/auth.js"></script>
 <script src="../../js/components/toast.js"></script>
 <script src="../../js/components/loader.js"></script>

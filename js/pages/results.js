@@ -166,7 +166,11 @@
     const tbody = document.getElementById('term-reports-tbody');
     const summary = document.getElementById('term-result-completion');
     const loadButton = document.getElementById('load-term-reports-btn');
+    const activateClassTermButton = document.getElementById('activate-class-term-results-btn');
     if (!tbody || !loadButton) return;
+    const updateBulkControl = () => {
+      if (activateClassTermButton) activateClassTermButton.disabled = !(controls.sessionId.value && controls.termId.value && controls.classId.value);
+    };
     const setOptions = (select, placeholder, rows) => {
       select.innerHTML = `<option value="">${escapeHtml(placeholder)}</option>${rows.map((item) => `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`).join('')}`;
     };
@@ -183,6 +187,8 @@
     } catch (error) {
       Toast.error(error.message || 'Unable to load result filters.');
     }
+
+    Object.values(controls).forEach((control) => control.addEventListener('change', updateBulkControl));
 
     async function loadReports() {
       loadButton.disabled = true;
@@ -205,8 +211,8 @@
             <td data-label="Grade"><strong>${escapeHtml(entry.grade || '—')}</strong></td>
             <td data-label="Remark">${escapeHtml(entry.remark || '—')}</td>
             <td data-label="Teacher">${escapeHtml(entry.teacher ? `${entry.teacher.firstName} ${entry.teacher.lastName}`.trim() : '—')}</td>
-            <td data-label="Status"><span class="badge ${report.published ? 'badge-success' : 'badge-warning'}">${report.published ? 'Published' : 'Draft'}</span></td>
-            <td data-label="Action"><button type="button" class="btn ${report.published ? 'btn-secondary' : 'btn-primary'} btn-sm" data-report-id="${escapeHtml(report.id)}" data-published="${report.published}">${report.published ? 'Unpublish' : 'Publish'}</button></td>
+            <td data-label="Status"><span class="badge ${report.published ? 'badge-success' : 'badge-warning'}">${report.published ? 'Published' : 'Submitted'}</span></td>
+            <td data-label="Action"><button type="button" class="btn ${report.published ? 'btn-secondary' : 'btn-primary'} btn-sm" data-report-id="${escapeHtml(report.id)}" data-published="${report.published}">${report.published ? 'Deactivate' : 'Activate Result'}</button></td>
           </tr>`).join('') : '<tr><td colspan="14">No term results match these filters.</td></tr>';
 
         if (filters.classId && filters.subjectId && filters.sessionId && filters.termId) {
@@ -224,18 +230,50 @@
     }
 
     loadButton.addEventListener('click', loadReports);
+    activateClassTermButton?.addEventListener('click', () => {
+      const filters = Object.fromEntries(Object.entries(controls).map(([key, select]) => [key, select.value]));
+      if (!filters.sessionId || !filters.termId || !filters.classId) return;
+      ConfirmDialog.open({
+        title: 'Activate class results',
+        message: 'Are you sure you want to publish all complete results for this class, session, and term? Every enrolled student must have a result for each registered subject. Students and linked parents will be able to view published results.',
+        confirmLabel: 'Activate complete results',
+        tone: 'primary',
+        onConfirm: async () => {
+          activateClassTermButton.disabled = true;
+          try {
+            const result = await ReportCardsService.publishClassTerm({ classId: filters.classId, sessionId: filters.sessionId, termId: filters.termId, published: true });
+            Toast.success(`${result.count} student result(s) activated.`);
+            await loadReports();
+          } catch (error) {
+            Toast.error(error.message || 'Unable to activate class results. Resolve pending subjects first.');
+          } finally {
+            updateBulkControl();
+          }
+        },
+      });
+    });
     tbody.addEventListener('click', async (event) => {
       const button = event.target.closest('[data-report-id]');
       if (!button) return;
       const reportId = button.dataset.reportId;
       const nextPublished = button.dataset.published !== 'true';
-      try {
-        await ReportCardsService.publish(reportId, nextPublished);
-        Toast.success(nextPublished ? 'Report card published.' : 'Report card unpublished.');
-        await loadReports();
-      } catch (error) {
-        Toast.error(error.message || 'Unable to update publication status.');
-      }
+      ConfirmDialog.open({
+        title: nextPublished ? 'Activate result' : 'Deactivate result',
+        message: nextPublished
+          ? 'Are you sure you want to publish this result? The student and their linked parent will be able to view it.'
+          : 'Are you sure you want to deactivate this result? The student and their linked parent will no longer be able to view it.',
+        confirmLabel: nextPublished ? 'Activate Result' : 'Deactivate Result',
+        tone: nextPublished ? 'primary' : 'danger',
+        onConfirm: async () => {
+          try {
+            await ReportCardsService.publish(reportId, nextPublished);
+            Toast.success(nextPublished ? 'Result activated.' : 'Result deactivated.');
+            await loadReports();
+          } catch (error) {
+            Toast.error(error.message || 'Unable to update publication status.');
+          }
+        },
+      });
     });
     await loadReports();
   }

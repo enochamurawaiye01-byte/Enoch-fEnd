@@ -24,8 +24,8 @@
         {
           key: 'name', label: 'Teacher', render: (r) => `
           <div class="avatar-cell">
-            <span class="avatar">${escapeHtml(initials(`${r.firstName || ''} ${r.lastName || ''}`))}</span>
-            <div><div class="name">${escapeHtml(`${r.firstName || ''} ${r.lastName || ''}`)}</div><div class="sub">${escapeHtml(r.email || '—')}</div></div>
+            <span class="avatar" style="overflow:hidden;">${r.profileImageUrl ? `<img src="${escapeHtml(r.profileImageUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;">` : escapeHtml(initials(`${r.firstName || ''} ${r.lastName || ''}`))}</span>
+            <div><a class="name" href="teacher-details.html?id=${encodeURIComponent(r.id)}">${escapeHtml(`${r.firstName || ''} ${r.lastName || ''}`)}</a><div class="sub">${escapeHtml(r.email || r.user?.email || '—')}</div></div>
           </div>`,
         },
         { key: 'department', label: 'Department', render: (r) => escapeHtml(r.departmentName || r.department?.name || '—') },

@@ -12,6 +12,11 @@
 
     const displayName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.name || user.username : 'User';
     const roleLabel = user ? titleCaseFromEnum(user.role) : '';
+    const profileRoute = user?.role === 'STUDENT' ? 'pages/student/profile.html'
+      : user?.role === 'TEACHER' ? 'pages/teacher/profile.html'
+        : user?.role === 'PARENT' ? 'pages/parent/settings.html'
+          : 'pages/admin/settings.html';
+    const profileLabel = ['STUDENT', 'TEACHER'].includes(user?.role) ? 'My Profile' : 'Profile and Settings';
 
     const header = document.createElement('header');
     header.className = 'topbar';
@@ -57,9 +62,9 @@
             </div>
           </div>
           <div class="dropdown-panel" data-dropdown-panel>
-            <a href="settings.html" class="dropdown-panel__item">
+            <a href="${rootPrefix()}${profileRoute}" class="dropdown-panel__item">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="3"/></svg>
-              Profile Settings
+              ${escapeHtml(profileLabel)}
             </a>
             <div class="dropdown-panel__divider"></div>
             <a href="#" class="dropdown-panel__item danger" data-action="logout" style="color:#A33B45;">

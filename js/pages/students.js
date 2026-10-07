@@ -267,9 +267,9 @@
           label: 'Student',
           render: (row) => `
             <div class="avatar-cell">
-              <span class="avatar">${escapeHtml(initials(`${row.firstName || ''} ${row.lastName || ''}`))}</span>
+              <span class="avatar" style="overflow:hidden;">${row.profileImageUrl ? `<img src="${escapeHtml(row.profileImageUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;">` : escapeHtml(initials(`${row.firstName || ''} ${row.lastName || ''}`))}</span>
               <div>
-                <div class="name">${escapeHtml(`${row.firstName || ''} ${row.lastName || ''}`)}</div>
+                <a class="name" href="student-details.html?id=${encodeURIComponent(row.id)}">${escapeHtml(`${row.firstName || ''} ${row.lastName || ''}`)}</a>
                 <div class="sub">${escapeHtml(row.regNumber || '—')}</div>
               </div>
             </div>`,

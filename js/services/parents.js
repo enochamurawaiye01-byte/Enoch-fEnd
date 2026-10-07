@@ -29,5 +29,9 @@
       const payload = await ApiClient.get(`/parents/me/children/${encodeURIComponent(id)}`);
       return ApiClient.unwrapItem(payload);
     },
+    async childResults(id, params = {}) {
+      const payload = await ApiClient.get(`/parents/me/children/${encodeURIComponent(id)}/results`, params);
+      return ApiClient.unwrapList(payload);
+    },
   };
 })(window);

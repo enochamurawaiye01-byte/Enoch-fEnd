@@ -16,7 +16,7 @@
             .map(
               (c) => `
             <a class="child-card" href="child-details.html?id=${encodeURIComponent(c.id)}">
-              <span class="avatar" style="width:44px;height:44px;font-size:15px;">${escapeHtml(initials(`${c.firstName || ''} ${c.lastName || ''}`))}</span>
+              <span class="avatar" style="width:44px;height:44px;font-size:15px;overflow:hidden;">${c.profileImageUrl ? `<img src="${escapeHtml(c.profileImageUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;">` : escapeHtml(initials(`${c.firstName || ''} ${c.lastName || ''}`))}</span>
               <div>
                 <div class="name">${escapeHtml(`${c.firstName || ''} ${c.lastName || ''}`)}</div>
                 <div class="sub">${escapeHtml(c.className || c.class?.name || '—')} &middot; ${escapeHtml(c.regNumber || '—')}</div>

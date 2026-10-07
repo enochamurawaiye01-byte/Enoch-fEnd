@@ -31,7 +31,7 @@
         })));
         return { items, total: items.length, page, pageSize: 20 };
       },
-      emptyMessage: 'No published results yet.',
+      emptyMessage: 'Result Not Available — The result for this term has not been published yet.',
     });
     table.load();
 

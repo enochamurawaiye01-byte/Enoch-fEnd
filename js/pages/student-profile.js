@@ -25,39 +25,76 @@
       return;
     }
 
-    container.innerHTML = `
-      <div class="card">
-        <div class="card__head">
-          <div class="avatar-cell">
-            <label for="profile-picture" class="avatar" style="width:48px;height:48px;font-size:1rem;cursor:pointer;overflow:hidden;">${student.profileImageUrl ? `<img src="${escapeHtml(student.profileImageUrl)}" alt="Profile picture" style="width:100%;height:100%;object-fit:cover;">` : escapeHtml(initials(`${student.firstName || ''} ${student.lastName || ''}`))}</label>
-            <div>
-              <div class="name" style="font-size:1.1rem;">${escapeHtml(`${student.firstName || ''} ${student.lastName || ''}`)}</div>
-              <div class="sub">${escapeHtml(student.regNumber || '—')}</div>
+    const renderProfile = () => {
+      const enrollment = (student.enrollments || []).find((item) => item.status === 'ACTIVE' && item.session?.isActive) || student.enrollments?.[0];
+      const currentClass = enrollment?.class || student.currentClass;
+      const department = enrollment?.department || student.desiredDepartment;
+      container.innerHTML = `
+        <section class="card">
+          <div class="card__head">
+            <div class="avatar-cell">
+              <span class="avatar" style="width:64px;height:64px;font-size:1.1rem;overflow:hidden;">${student.profileImageUrl ? `<img src="${escapeHtml(student.profileImageUrl)}" alt="Student profile" style="width:100%;height:100%;object-fit:cover;">` : escapeHtml(initials(`${student.firstName || ''} ${student.lastName || ''}`))}</span>
+              <div><div class="name">${escapeHtml(`${student.firstName || ''} ${student.lastName || ''}`)}</div><div class="sub">${escapeHtml(student.user?.email || student.email || '—')}</div><div><span class="badge ${statusBadgeClass(student.status)}">STUDENT · ${escapeHtml(titleCaseFromEnum(student.status))}</span></div></div>
             </div>
           </div>
-        </div>
-        <div class="profile-grid">
-          <div style="grid-column:1/-1;"><label class="form-label" for="profile-picture">Profile picture</label><input type="file" id="profile-picture" accept="image/jpeg,image/png,image/webp"></div>
-          <div><span class="form-label">Class</span><p>${escapeHtml(student.className || student.class?.name || '—')}</p></div>
-          <div><span class="form-label">Class Arm</span><p>${escapeHtml(student.classArmName || student.classArm?.name || '—')}</p></div>
-          <div><span class="form-label">Email</span><p>${escapeHtml(student.email || '—')}</p></div>
-          <div><span class="form-label">Phone</span><p>${escapeHtml(student.phone || '—')}</p></div>
-          <div><span class="form-label">Date of Birth</span><p>${student.dateOfBirth ? formatDate(student.dateOfBirth) : '—'}</p></div>
-          <div><span class="form-label">Gender</span><p>${escapeHtml(titleCaseFromEnum(student.gender || '')) || '—'}</p></div>
-          <div style="grid-column:1/-1;"><span class="form-label">Address</span><p>${escapeHtml(student.address || '—')}</p></div>
-        </div>
-      </div>
-    `;
+          <div class="form-section-title">Academic Information</div>
+          <div class="profile-grid">
+            <div><span class="form-label">Registration number</span><p>${escapeHtml(student.registrationNumber || student.regNumber || '—')}</p></div>
+            <div><span class="form-label">Class / Arm</span><p>${escapeHtml(currentClass?.name || student.className || '—')}</p></div>
+            <div><span class="form-label">Department</span><p>${escapeHtml(department?.name || '—')}</p></div>
+            <div><span class="form-label">Academic session</span><p>${escapeHtml(enrollment?.session?.name || '—')}</p></div>
+            <div><span class="form-label">Term</span><p>${escapeHtml(titleCaseFromEnum(enrollment?.term?.name || enrollment?.term?.type || '')) || '—'}</p></div>
+            <div><span class="form-label">Admission status</span><p>${escapeHtml(titleCaseFromEnum(student.status || '')) || '—'}</p></div>
+          </div>
+          <div class="form-section-title">Personal Information</div>
+          <div class="profile-grid">
+            <div><span class="form-label">Phone</span><p>${escapeHtml(student.user?.phoneNumber || student.phone || '—')}</p></div>
+            <div><span class="form-label">Date of birth</span><p>${student.dateOfBirth ? formatDate(student.dateOfBirth) : '—'}</p></div>
+            <div><span class="form-label">Gender</span><p>${escapeHtml(titleCaseFromEnum(student.gender || '')) || '—'}</p></div>
+            <div><span class="form-label">Address</span><p>${escapeHtml(student.address || '—')}</p></div>
+          </div>
+          <div class="form-group" style="margin-top:16px;">
+            <label class="form-label" for="profile-picture">Profile picture</label>
+            <input type="file" id="profile-picture" accept="image/jpeg,image/png,image/webp">
+            <div class="row" style="gap:8px;margin-top:8px;">
+              ${student.profileImageUrl ? '<button type="button" class="btn btn-secondary btn-sm" id="remove-profile-picture">Remove picture</button>' : ''}
+              <span class="form-help" id="profile-picture-status" aria-live="polite"></span>
+            </div>
+          </div>
+        </section>
+      `;
 
-    const pictureInput = document.getElementById('profile-picture');
-    pictureInput?.addEventListener('change', async () => {
-      if (!pictureInput.files[0]) return;
-      try {
-        await StudentsService.uploadProfilePicture(pictureInput.files[0]);
-        window.location.reload();
-      } catch (error) {
-        pictureInput.insertAdjacentHTML('afterend', `<span class="form-error" style="display:block;">${escapeHtml(error.message)}</span>`);
-      }
-    });
+      const pictureInput = document.getElementById('profile-picture');
+      pictureInput?.addEventListener('change', async () => {
+        if (!pictureInput.files[0]) return;
+        const status = document.getElementById('profile-picture-status');
+        status.textContent = 'Uploading…';
+        pictureInput.disabled = true;
+        try {
+          await StudentsService.uploadProfilePicture(pictureInput.files[0]);
+          student = await StudentsService.me();
+          Toast.success('Profile picture updated.');
+          renderProfile();
+        } catch (error) {
+          status.textContent = error.message || 'Unable to upload profile picture. Please try again.';
+        } finally {
+          pictureInput.disabled = false;
+        }
+      });
+      document.getElementById('remove-profile-picture')?.addEventListener('click', async (event) => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        try {
+          await StudentsService.removeProfilePicture();
+          student = await StudentsService.me();
+          Toast.success('Profile picture removed.');
+          renderProfile();
+        } catch (error) {
+          Toast.error(error.message || 'Unable to remove profile picture.');
+          button.disabled = false;
+        }
+      });
+    };
+    renderProfile();
   });
 })();

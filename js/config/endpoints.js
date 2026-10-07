@@ -39,6 +39,7 @@
       ME: '/students/me',
       BY_ID: (studentId) => `/students/${studentId}`,
       PROFILE_PICTURE: '/students/me/profile-picture',
+      REMOVE_PROFILE_PICTURE: '/students/me/profile-picture',
       DEACTIVATE: (studentId) => `/students/${studentId}/deactivate`,
       PROFILE: (studentId) => `/students/${studentId}/profile`,
     },
@@ -52,7 +53,9 @@
     TEACHERS: {
       BASE: '/teachers',
       BY_ID: (teacherId) => `/teachers/${teacherId}`,
+      ME: '/teachers/me',
       MY_ASSIGNMENTS: '/teachers/me/assignments',
+      PROFILE_PICTURE: '/teachers/me/profile-picture',
       ASSIGNMENTS: (teacherId) => `/teachers/${teacherId}/assignments`,
     },
 
@@ -180,6 +183,7 @@
       BASE: '/report-cards',
       BY_ID: (id_) => `/report-cards/${id_}`,
       PUBLICATION: (id_) => `/report-cards/${id_}/publication`,
+      CLASS_TERM_PUBLICATION: '/report-cards/publication/class-term',
       CONFIGURATION: '/report-cards/configuration',
     },
 

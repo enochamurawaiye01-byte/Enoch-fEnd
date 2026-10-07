@@ -15,6 +15,10 @@
       const payload = await ApiClient.patch(REPORT_CARDS.PUBLICATION(id), { published });
       return ApiClient.unwrapItem(payload);
     },
+    async publishClassTerm(data) {
+      const payload = await ApiClient.post(REPORT_CARDS.CLASS_TERM_PUBLICATION, data);
+      return ApiClient.unwrapItem(payload);
+    },
     async getConfiguration() {
       const payload = await ApiClient.get(REPORT_CARDS.CONFIGURATION);
       return ApiClient.unwrapItem(payload);

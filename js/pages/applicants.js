@@ -43,7 +43,15 @@
       rowActions: (row) => {
         const st = (row.status || 'INACTIVE').toUpperCase();
         if (['ACTIVE', 'APPROVED', 'CONVERTED'].includes(st)) {
-          return `<span class="text-success font-weight-bold" style="color:var(--color-deep-navy); font-weight:bold;"><i class="fas fa-check-circle"></i> Approved</span>`;
+          const approvalUserId = row.source === 'admission' ? row.convertedStudent?.userId : row.id;
+          const isStudentOrTeacher = row.source === 'admission'
+            ? Boolean(row.convertedStudent?.userId)
+            : row.role === 'STUDENT' || row.role === 'TEACHER';
+          const canResendEmail = row.email && isStudentOrTeacher && approvalUserId;
+          const resendButton = canResendEmail
+            ? `<button type="button" class="btn btn-secondary btn-sm" data-action="resend-email" data-user-id="${escapeHtml(approvalUserId)}">Resend approval email</button>`
+            : '';
+          return `<span class="text-success font-weight-bold" style="color:var(--color-deep-navy); font-weight:bold;"><i class="fas fa-check-circle"></i> Approved</span>${resendButton}`;
         } else if (['REJECTED', 'DEACTIVATED', 'SUSPENDED'].includes(st)) {
           return `<span class="text-danger font-weight-bold" style="color:var(--color-brand-red); font-weight:bold;"><i class="fas fa-times-circle"></i> Rejected</span>`;
         }
@@ -117,7 +125,7 @@
     const tbody = document.getElementById('applicants-tbody');
 
     // Click handler for opening Full User Profile Modal
-    tbody.addEventListener('click', (event) => {
+    tbody.addEventListener('click', async (event) => {
       const nameLink = event.target.closest('.view-user-details');
       if (nameLink) {
         event.preventDefault();
@@ -141,6 +149,21 @@
       const rowData = cachedRowsMap.get(rowId);
       const targetName = rowData ? (rowData.fullName || `${rowData.firstName || ''} ${rowData.lastName || ''}`) : 'applicant';
 
+      if (action === 'resend-email') {
+        try {
+          const result = await UsersService.resendApprovalEmail(button.dataset.userId || rowId);
+          if (result?.email === true) {
+            Toast.success(`Approval email was accepted by the mail server for ${rowData?.email}. If it is not in the inbox, ask them to check Spam or Junk.`);
+          } else {
+            const reason = result?.errors?.join(' ') || 'The mail server did not confirm acceptance.';
+            Toast.error(`The account is approved, but the email was not sent: ${reason}`);
+          }
+        } catch (error) {
+          Toast.error(error.message || 'Unable to resend the approval email.');
+        }
+        return;
+      }
+
       ConfirmDialog.open({
         title: isApprove ? `Approve ${targetName}` : `Reject ${targetName}`,
         message: isApprove
@@ -154,7 +177,12 @@
               if (isApprove) {
                 const approved = await AdmissionsService.update(rowId, { status: 'APPROVED' });
                 const registrationNumber = approved.convertedStudent?.registrationNumber;
-                Toast.success(`Admission approved! ${registrationNumber ? `Official Reg No: ${registrationNumber}.` : ''} Approval email dispatched.`);
+                if (approved.communication?.email === true) {
+                  Toast.success(`Admission approved! ${registrationNumber ? `Official Reg No: ${registrationNumber}. ` : ''}The congratulatory email was accepted by the mail server. Ask the family to check Spam or Junk if it is not in the inbox.`);
+                } else {
+                  const reason = approved.communication?.errors?.join(' ') || 'The mail server did not confirm acceptance.';
+                  Toast.error(`Admission approved, but the congratulatory email was not sent: ${reason}`);
+                }
               } else {
                 await AdmissionsService.update(rowId, { status: 'REJECTED' });
                 Toast.success(`Admission application rejected. Rejection email dispatched.`);
@@ -163,7 +191,12 @@
               if (isApprove) {
                 const result = await UsersService.activate(rowId);
                 const regNo = result.communication?.registrationNumber || result.registrationNumber || '';
-                Toast.success(`Application approved! ${regNo ? `Registration Number: ${regNo}.` : ''} Approval email dispatched.`);
+                if (result.communication?.email === true) {
+                  Toast.success(`Application approved! ${regNo ? `Registration Number: ${regNo}. ` : ''}The approval email was accepted by the mail server. Ask the applicant to check Spam or Junk if it is not in the inbox.`);
+                } else {
+                  const reason = result.communication?.errors?.join(' ') || 'The mail server did not confirm acceptance.';
+                  Toast.error(`Application approved, but the approval email was not sent: ${reason}`);
+                }
               } else {
                 await UsersService.reject(rowId);
                 Toast.success(`Application rejected. Rejection email dispatched.`);

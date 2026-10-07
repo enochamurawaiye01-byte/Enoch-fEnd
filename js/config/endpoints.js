@@ -32,6 +32,7 @@
       BASE: '/users',
       BY_ID: (userId) => `/users/${userId}`,
       STATUS: (userId) => `/users/${userId}/status`,
+      APPROVAL_EMAIL: (userId) => `/users/${userId}/approval-email`,
     },
 
     STUDENTS: {
@@ -357,4 +358,3 @@
     },
   };
 })(window);
-

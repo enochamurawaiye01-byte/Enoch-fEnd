@@ -30,6 +30,10 @@
       const payload = await ApiClient.patch(USERS.STATUS(id), { status: 'DEACTIVATED' });
       return ApiClient.unwrapItem(payload);
     },
+    async resendApprovalEmail(id) {
+      const payload = await ApiClient.post(USERS.APPROVAL_EMAIL(id), {});
+      return ApiClient.unwrapItem(payload);
+    },
     async delete(id) {
       const payload = await ApiClient.delete(USERS.BY_ID(id));
       return ApiClient.unwrapItem(payload);

@@ -439,6 +439,7 @@
       rowActions: (row) => {
         const isActive = (row.status || '').toUpperCase() === 'ACTIVE';
         const isStudent = isStudentAccount(row);
+        const canResendApprovalEmail = isActive && row.email && ['STUDENT', 'TEACHER'].includes((row.role || '').toUpperCase());
         return `
           ${isStudent
             ? '<a class="btn btn-outline btn-sm" href="prefects.html">Manage Prefects</a>'
@@ -449,6 +450,7 @@
             ? `<button type="button" class="btn btn-secondary btn-sm" data-action="deactivate">Deactivate</button>`
             : `<button type="button" class="btn btn-primary btn-sm" data-action="activate">Activate</button>`
           }
+          ${canResendApprovalEmail ? '<button type="button" class="btn btn-outline btn-sm" data-action="resend-approval-email">Resend approval email</button>' : ''}
           <button type="button" class="btn btn-danger btn-sm" data-action="delete">Delete</button>
         `;
       },
@@ -534,13 +536,33 @@
             try {
               const res = await UsersService.activate(userId);
               const regNo = res.registrationNumber || res.communication?.registrationNumber || '';
-              Toast.success(`Account activated! ${regNo ? `Official Reg No: ${regNo}` : ''}`);
+              if (res.communication?.email === true) {
+                Toast.success(`Account activated! ${regNo ? `Official Reg No: ${regNo}. ` : ''}The approval email was accepted by the mail server for ${rowData?.email}.`);
+              } else if (res.communication?.errors?.length) {
+                Toast.error(`Account activated${regNo ? ` (Reg No: ${regNo})` : ''}, but the approval email was not sent: ${res.communication.errors.join(' ')}`);
+              } else {
+                Toast.success(`Account activated! ${regNo ? `Official Reg No: ${regNo}` : ''}`);
+              }
               userTable.reload();
             } catch (err) {
               Toast.error(err.message || 'Failed to activate user account.');
             }
           },
         });
+      }
+
+      if (action === 'resend-approval-email') {
+        try {
+          const result = await UsersService.resendApprovalEmail(userId);
+          if (result?.email === true) {
+            Toast.success(`Approval email was accepted by the mail server for ${rowData?.email}. Ask the recipient to check Spam or Junk if it is not in the inbox.`);
+          } else {
+            const reason = result?.errors?.join(' ') || 'The mail server did not confirm acceptance.';
+            Toast.error(`The account remains active, but the approval email was not sent: ${reason}`);
+          }
+        } catch (err) {
+          Toast.error(err.message || 'Failed to resend the approval email.');
+        }
       }
 
       if (action === 'deactivate') {

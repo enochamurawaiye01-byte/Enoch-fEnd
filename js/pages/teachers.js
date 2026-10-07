@@ -45,9 +45,9 @@
         if (event.target.closest('[data-action="activate"]')) {
           const result = await TeachersService.activate(id);
           if (result.communication?.email === true) {
-            Toast.success('Teacher activated. The employment appointment email was accepted by the mail server.');
+            Toast.success('Teacher activated. Klaviyo accepted the employment approval event for flow processing.');
           } else if (result.communication?.errors?.length) {
-            Toast.error(`Teacher activated, but the employment email was not sent: ${result.communication.errors.join(' ')}`);
+            Toast.error(`Teacher activated, but Klaviyo did not accept the employment approval event: ${result.communication.errors.join(' ')}`);
           } else {
             Toast.success('Teacher activated.');
           }

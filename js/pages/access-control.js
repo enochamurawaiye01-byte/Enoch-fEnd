@@ -244,7 +244,7 @@
       { key: 'inventory', label: 'Inventory & Stock', desc: 'Track textbooks, uniforms, stationary, and school equipment' },
       { key: 'invoices', label: 'Fee Invoices', desc: 'Generate and issue billing invoices for student tuition' },
       { key: 'jobs', label: 'Background Jobs', desc: 'Execute scheduled email broadcasts, result calculations, and backups' },
-      { key: 'klaviyo', label: 'Legacy Marketing Integration (Disabled)', desc: 'Legacy integration is disabled; approval email is sent directly through the server mailer' },
+      { key: 'klaviyo', label: 'Klaviyo Approval Notifications', desc: 'Trigger approved student and teacher messages through the Application Approved flow' },
       { key: 'lessons', label: 'Lesson Notes & Plans', desc: 'Submit and approve teacher weekly lesson plans and schemes of work' },
       { key: 'library', label: 'Library & Book Loans', desc: 'Catalog library books, issue loans, and track overdue returns' },
       { key: 'management', label: 'Executive Management', desc: 'Access high-level administrative overviews and board metrics' },
@@ -537,9 +537,9 @@
               const res = await UsersService.activate(userId);
               const regNo = res.registrationNumber || res.communication?.registrationNumber || '';
               if (res.communication?.email === true) {
-                Toast.success(`Account activated! ${regNo ? `Official Reg No: ${regNo}. ` : ''}The approval email was accepted by the mail server for ${rowData?.email}.`);
+                Toast.success(`Account activated! ${regNo ? `Official Reg No: ${regNo}. ` : ''}Klaviyo accepted the approval event for flow processing.`);
               } else if (res.communication?.errors?.length) {
-                Toast.error(`Account activated${regNo ? ` (Reg No: ${regNo})` : ''}, but the approval email was not sent: ${res.communication.errors.join(' ')}`);
+                Toast.error(`Account activated${regNo ? ` (Reg No: ${regNo})` : ''}, but Klaviyo did not accept the approval event: ${res.communication.errors.join(' ')}`);
               } else {
                 Toast.success(`Account activated! ${regNo ? `Official Reg No: ${regNo}` : ''}`);
               }
@@ -555,10 +555,10 @@
         try {
           const result = await UsersService.resendApprovalEmail(userId);
           if (result?.email === true) {
-            Toast.success(`Approval email was accepted by the mail server for ${rowData?.email}. Ask the recipient to check Spam or Junk if it is not in the inbox.`);
+            Toast.success(`Klaviyo accepted the approval event for ${rowData?.email}; the Application Approved flow will process the email.`);
           } else {
-            const reason = result?.errors?.join(' ') || 'The mail server did not confirm acceptance.';
-            Toast.error(`The account remains active, but the approval email was not sent: ${reason}`);
+            const reason = result?.errors?.join(' ') || 'Klaviyo did not accept the approval event.';
+            Toast.error(`The account remains active, but Klaviyo did not accept the event: ${reason}`);
           }
         } catch (err) {
           Toast.error(err.message || 'Failed to resend the approval email.');

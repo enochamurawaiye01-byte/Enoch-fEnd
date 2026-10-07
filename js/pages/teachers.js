@@ -43,8 +43,14 @@
       deleteMessage: (row) => `Delete teacher "${row.firstName} ${row.lastName}"? Existing assignments will need reassignment.`,
       onRowAction: async (event, id) => {
         if (event.target.closest('[data-action="activate"]')) {
-          await TeachersService.activate(id);
-          Toast.success('Teacher activated.');
+          const result = await TeachersService.activate(id);
+          if (result.communication?.email === true) {
+            Toast.success('Teacher activated. The employment appointment email was accepted by the mail server.');
+          } else if (result.communication?.errors?.length) {
+            Toast.error(`Teacher activated, but the employment email was not sent: ${result.communication.errors.join(' ')}`);
+          } else {
+            Toast.success('Teacher activated.');
+          }
           table.reload();
         } else if (event.target.closest('[data-action="deactivate"]')) {
           await TeachersService.deactivate(id);

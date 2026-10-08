@@ -153,10 +153,10 @@
         try {
           const result = await UsersService.resendApprovalEmail(button.dataset.userId || rowId);
           if (result?.email === true) {
-            Toast.success(`Klaviyo accepted the approval event for ${rowData?.email}; the Application Approved flow will process the email.`);
+            Toast.success(`Approval email accepted by the email provider for ${rowData?.email}.`);
           } else {
-            const reason = result?.errors?.join(' ') || 'Klaviyo did not accept the approval event.';
-            Toast.error(`The account is approved, but Klaviyo did not accept the event: ${reason}`);
+            const reason = result?.errors?.join(' ') || 'The email provider rejected the message.';
+            Toast.error(`The account is approved, but the email could not be sent: ${reason}`);
           }
         } catch (error) {
           Toast.error(error.message || 'Unable to resend the approval email.');
@@ -167,7 +167,7 @@
       ConfirmDialog.open({
         title: isApprove ? `Approve ${targetName}` : `Reject ${targetName}`,
         message: isApprove
-          ? `Approving will activate ${targetName}'s account, generate their official registration number, and trigger the Klaviyo Application Approved flow for their email.`
+          ? `Approving will activate ${targetName}'s account, generate their official registration number, and send the appropriate approval email.`
           : `Rejecting will deny access to ${targetName} and send a polite notice of rejection to their email.`,
         confirmLabel: isApprove ? 'Confirm Approval' : 'Confirm Rejection',
         tone: isApprove ? 'primary' : 'danger',
@@ -178,10 +178,10 @@
                 const approved = await AdmissionsService.update(rowId, { status: 'APPROVED' });
                 const registrationNumber = approved.convertedStudent?.registrationNumber;
                 if (approved.communication?.email === true) {
-                  Toast.success(`Admission approved! ${registrationNumber ? `Official Reg No: ${registrationNumber}. ` : ''}Klaviyo accepted the approval event for flow processing.`);
+                  Toast.success(`Admission approved! ${registrationNumber ? `Official Reg No: ${registrationNumber}. ` : ''}The congratulatory email was accepted for delivery.`);
                 } else {
-                  const reason = approved.communication?.errors?.join(' ') || 'Klaviyo did not accept the approval event.';
-                  Toast.error(`Admission approved, but Klaviyo did not accept the event: ${reason}`);
+                  const reason = approved.communication?.errors?.join(' ') || 'The email provider rejected the message.';
+                  Toast.error(`Admission approved, but the email could not be sent: ${reason}`);
                 }
               } else {
                 await AdmissionsService.update(rowId, { status: 'REJECTED' });
@@ -192,10 +192,10 @@
                 const result = await UsersService.activate(rowId);
                 const regNo = result.communication?.registrationNumber || result.registrationNumber || '';
                 if (result.communication?.email === true) {
-                  Toast.success(`Application approved! ${regNo ? `Registration Number: ${regNo}. ` : ''}Klaviyo accepted the approval event for flow processing.`);
+                  Toast.success(`Application approved! ${regNo ? `Registration Number: ${regNo}. ` : ''}The approval email was accepted for delivery.`);
                 } else {
-                  const reason = result.communication?.errors?.join(' ') || 'Klaviyo did not accept the approval event.';
-                  Toast.error(`Application approved, but Klaviyo did not accept the event: ${reason}`);
+                  const reason = result.communication?.errors?.join(' ') || 'The email provider rejected the message.';
+                  Toast.error(`Application approved, but the email could not be sent: ${reason}`);
                 }
               } else {
                 await UsersService.reject(rowId);

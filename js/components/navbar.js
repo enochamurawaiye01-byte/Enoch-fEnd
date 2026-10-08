@@ -32,7 +32,7 @@
               <strong>${escapeHtml(roleLabel || 'Unassigned')}</strong>
             </span>
           </div>
-          <span class="topbar__breadcrumb">Mercy T International College (MIC)</span>
+          <span class="topbar__breadcrumb" style="font-size:12px; color:#A33B45; font-weight:bold; font-style:italic;">Mercy T International College — Motto: "Knowledge is Light"</span>
         </div>
       </div>
 

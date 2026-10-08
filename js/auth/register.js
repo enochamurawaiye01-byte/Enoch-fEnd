@@ -62,6 +62,13 @@
         });
       } catch (error) {
         currentClassSelect.innerHTML = '<option value="">Classes unavailable</option>';
+        const classError = qs('#error-currentClassId');
+        if (classError) {
+          classError.textContent = error.message || 'Unable to load classes and departments. Please refresh and try again.';
+          classError.style.display = 'block';
+        }
+        currentClassSelect.disabled = true;
+        departmentSelect.innerHTML = '<option value="">Departments unavailable</option>';
       }
     };
     loadRegistrationOptions();

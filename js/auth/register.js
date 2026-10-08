@@ -13,7 +13,7 @@
     const currentClassSelect = qs('#currentClassId');
     const departmentGroup = qs('#department-group');
     const departmentSelect = qs('#desiredDepartmentId');
-    const classLevelsById = new Map();
+    const departmentRequirementByClassId = new Map();
     const passwordInput = qs('#password');
     const pwContainer = qs('#pw-strength-container');
     const pwBar = qs('#pw-strength-bar');
@@ -35,10 +35,10 @@
     roleSelect.dispatchEvent(new Event('change'));
 
     const updateDepartmentRequirement = () => {
-      const seniorSecondary = (classLevelsById.get(currentClassSelect.value) || '').startsWith('SS');
-      departmentGroup.hidden = !seniorSecondary;
-      departmentSelect.required = seniorSecondary;
-      if (!seniorSecondary) departmentSelect.value = '';
+      const requiresDepartment = departmentRequirementByClassId.get(currentClassSelect.value) === true;
+      departmentGroup.hidden = !requiresDepartment;
+      departmentSelect.required = requiresDepartment;
+      if (!requiresDepartment) departmentSelect.value = '';
     };
     currentClassSelect.addEventListener('change', updateDepartmentRequirement);
 
@@ -48,7 +48,7 @@
         const options = payload.data || payload;
         currentClassSelect.innerHTML = '<option value="">Select Current Class</option>';
         (options.classes || []).forEach((schoolClass) => {
-          classLevelsById.set(schoolClass.id, schoolClass.classLevel?.code || '');
+          departmentRequirementByClassId.set(schoolClass.id, schoolClass.requiresDepartment === true);
           const option = document.createElement('option');
           option.value = schoolClass.id;
           option.textContent = `${schoolClass.classLevel?.name || ''} ${schoolClass.arm || schoolClass.name}`.trim();
@@ -167,8 +167,8 @@
         setFieldError('currentClassId', 'Select a class from the available classes.');
         hasError = true;
       }
-      if (rawData.role === 'STUDENT' && (classLevelsById.get(rawData.currentClassId) || '').startsWith('SS') && !rawData.desiredDepartmentId) {
-        setFieldError('desiredDepartmentId', 'Select a department for senior secondary classes.');
+      if (rawData.role === 'STUDENT' && departmentRequirementByClassId.get(rawData.currentClassId) === true && !rawData.desiredDepartmentId) {
+        setFieldError('desiredDepartmentId', 'Select a department for this class.');
         hasError = true;
       }
 

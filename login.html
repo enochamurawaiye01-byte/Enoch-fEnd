@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sign In — Mercy T College Nursery and Primary School</title>
+<title>Sign In — Mercy T International College</title>
 <link rel="stylesheet" href="css/style.css" />
 <link rel="stylesheet" href="css/responsive.css" />
 <link rel="stylesheet" href="css/components/buttons.css" />
@@ -18,43 +18,44 @@
   <!-- Left-Side Brand Panel -->
   <section class="auth-brand-panel">
     <div class="auth-brand-mark">
-      <img src="logo.png" alt="Mercy T College Logo" class="auth-brand-logo-img" />
+      <span class="auth-logo-monogram" role="img" aria-label="Mercy T International College">MIC</span>
     </div>
     <div class="auth-brand-copy">
-      <h2>Mercy T College</h2>
-      <p class="auth-brand-subtitle">Nursery and Primary School</p>
-      <div class="auth-brand-motto">MOTTO: "Knowledge is Light"</div>
-      <p>School Management Portal for Nursery, Primary, Academic & Administrative Workspaces.</p>
+      <h2>Mercy T International College</h2>
+      <p class="auth-brand-subtitle">MIC</p>
+
+      <p>School management portal for students, parents, teachers and administrators.</p>
       <div class="auth-brand-highlights">
         <div class="auth-brand-highlight">Nurturing Leaders with Character, Discipline & Excellence.</div>
         <div class="auth-brand-highlight">Live class management, attendance tracking & report cards.</div>
         <div class="auth-brand-highlight">Secure access for Teachers, Parents, Students and Admins.</div>
       </div>
     </div>
-    <div class="auth-brand-foot">&copy; <span id="year-brand"></span> Mercy T College Nursery and Primary School. All rights reserved.</div>
+    <div class="auth-brand-foot">&copy; <span id="year-brand"></span> Mercy T International College. All rights reserved.</div>
   </section>
 
   <!-- Right-Side Form Panel -->
   <section class="auth-form-panel">
     <div class="auth-card">
       <div class="auth-card-intro">
-        <img src="logo.png" alt="MTC Logo" />
+        <span class="auth-logo-monogram" role="img" aria-label="Mercy T International College">MIC</span>
         <div class="auth-card-intro__meta">
-          <strong class="auth-card-intro__name">Mercy T College Portal</strong>
-          <div class="auth-card-intro__tag">"Knowledge is Light"</div>
+          <strong class="auth-card-intro__name">Mercy T International College Portal</strong>
+          <div class="auth-card-intro__tag">MIC</div>
         </div>
       </div>
 
       <div class="auth-card-head">
         <h1>Welcome Back</h1>
-        <p>Sign in with your registered email address and password.</p>
+        <p>Students: use your email for the first completed login, then your MIC registration number for later logins. Teachers, parents and administrators continue using email.</p>
       </div>
 
       <form id="login-form" class="auth-form" novalidate>
         <div class="form-group">
-          <label for="email" class="form-label">Email Address <span class="required">*</span></label>
-          <input type="email" id="email" name="email" autocomplete="email" placeholder="e.g. user@mercytcollege.edu.ng" required />
-          <span class="form-error" id="error-email"></span>
+          <label for="login-identifier" class="form-label">Email or MIC Registration Number <span class="required">*</span></label>
+          <input type="text" id="login-identifier" name="loginIdentifier" autocomplete="username" placeholder="Email address or student registration number" aria-describedby="login-identifier-help error-identifier" required />
+          <span class="form-help" id="login-identifier-help">Non-student accounts should enter their registered email address.</span>
+          <span class="form-error" id="error-identifier"></span>
         </div>
 
         <div class="form-group">
@@ -97,8 +98,6 @@
 <script>
   document.getElementById('year-brand').textContent = new Date().getFullYear();
 </script>
-<script src="js/config/api.js?v=20260919"></script>
-
 <script src="js/config/api.js?v=20260919"></script>
 <script src="js/config/endpoints.js?v=20260919"></script>
 <script src="js/utils/storage.js"></script>

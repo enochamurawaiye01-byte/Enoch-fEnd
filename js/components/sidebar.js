@@ -1,7 +1,6 @@
 /**
  * Sidebar component — builds role-aware navigation and handles
  * collapse/expand + active-link highlighting + mobile toggle.
- * Rebranded for Mercy T College Nursery and Primary School.
  */
 (function (global) {
   'use strict';
@@ -311,8 +310,8 @@
     aside.id = containerId;
     aside.innerHTML = `
       <div class="sidebar__brand">
-        <img src="${rootPrefix()}logo.png" alt="MTC Logo" style="width:36px; height:36px; object-fit:contain; flex-shrink:0;" />
-        <span class="sidebar__name">Mercy T College<small style="color:#A33B45; font-weight:bold; font-style:italic;">Knowledge is Light</small></span>
+        <img src="${rootPrefix()}logo.png" alt="MIC logo" style="width:36px; height:36px; object-fit:contain; flex-shrink:0;" />
+        <span class="sidebar__name">Mercy T International College<small>MIC</small></span>
       </div>
       <button type="button" class="sidebar__collapse-btn" id="sidebar-collapse-btn" aria-label="Collapse sidebar">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>

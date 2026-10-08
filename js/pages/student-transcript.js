@@ -7,11 +7,28 @@
     container.innerHTML = Loader.spinnerHtml('Loading your transcript…');
 
     try {
-      const [student, transcript] = await Promise.all([
-        StudentsService.get(window.CurrentUser.id).catch(() => null),
-        TranscriptsService.byStudent(window.CurrentUser.id),
-      ]);
+      const student = await StudentsService.me().catch(() => null);
+      const transcript = await TranscriptsService.byStudent(student?.id || window.CurrentUser.id);
       const records = (transcript && (transcript.records || transcript.results)) || [];
+      const enrollment = student && (student.enrollments || []).find(
+        (item) => item.status === 'ACTIVE' && item.session?.isActive
+      );
+      const currentClass = (enrollment && enrollment.class) || (student && (student.currentClass || student.class)) || {};
+      const department = (enrollment && enrollment.department) || (student && (student.desiredDepartment || student.department));
+      const classArm = currentClass.arm || currentClass.classArm?.name || (student && (student.classArm?.name || student.classArmName));
+      const classTeacher = currentClass.classTeacher || currentClass.teacher ||
+        currentClass.classTeacherAssignment?.staff?.user ||
+        currentClass.classTeacherAssignment?.teacher;
+      const classTeacherName = typeof classTeacher === 'string'
+        ? classTeacher
+        : classTeacher?.fullName || [classTeacher?.firstName, classTeacher?.lastName].filter(Boolean).join(' ');
+      const identity = [
+        ['Registration number', student && (student.registrationNumber || student.regNumber)],
+        ['Class', currentClass.name || (student && student.className)],
+        ['Department', department?.name],
+        ['Section / arm', classArm],
+        ['Class teacher', classTeacherName],
+      ].filter(([, value]) => value);
       const groupedByTerm = records.reduce((acc, r) => {
         const key = r.termName || r.term?.name || 'Unspecified Term';
         (acc[key] = acc[key] || []).push(r);
@@ -22,8 +39,9 @@
         <div class="transcript-sheet">
           <div class="transcript-head">
             <div>
+              <p class="text-muted">Mercy T International College (MIC)</p>
               <h2>${escapeHtml(student ? `${student.firstName || ''} ${student.lastName || ''}` : window.CurrentUser.firstName || '')}</h2>
-              <p class="text-muted">Reg. No: ${escapeHtml((student && student.regNumber) || '—')} &middot; Class: ${escapeHtml((student && (student.className || student.class?.name)) || '—')}</p>
+              <div class="profile-grid">${identity.map(([label, value]) => `<div><span class="form-label">${escapeHtml(label)}</span><p>${escapeHtml(value)}</p></div>`).join('')}</div>
             </div>
             <button type="button" class="btn btn-secondary no-print" id="print-transcript-btn">Print</button>
           </div>

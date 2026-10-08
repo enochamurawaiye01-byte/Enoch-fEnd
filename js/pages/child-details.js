@@ -13,6 +13,7 @@
     container.innerHTML = Loader.spinnerHtml('Loading student details…');
     try {
       const student = await ParentsService.child(childId);
+      const classArm = student.classArmName || student.classArm?.name;
       container.innerHTML = `
         <div class="card">
           <div class="card__head">
@@ -21,13 +22,13 @@
               <div>
                 <div class="name" style="font-size:1.1rem;">${escapeHtml(`${student.firstName || ''} ${student.lastName || ''}`)}</div>
                 <span class="badge badge-outline">STUDENT</span>
-                <div class="sub">${escapeHtml(student.regNumber || '—')}</div>
+                <div class="sub">${escapeHtml(student.registrationNumber || student.regNumber || '—')}</div>
               </div>
             </div>
           </div>
           <div class="profile-grid">
             <div><span class="form-label">Class</span><p>${escapeHtml(student.className || student.class?.name || '—')}</p></div>
-            <div><span class="form-label">Class Arm</span><p>${escapeHtml(student.classArmName || student.classArm?.name || '—')}</p></div>
+            ${classArm ? `<div><span class="form-label">Section / arm</span><p>${escapeHtml(classArm)}</p></div>` : ''}
             <div><span class="form-label">Email</span><p>${escapeHtml(student.email || '—')}</p></div>
             <div><span class="form-label">Phone</span><p>${escapeHtml(student.phone || '—')}</p></div>
             <div><span class="form-label">Status</span><p><span class="badge ${statusBadgeClass(student.status || 'ACTIVE')}">${escapeHtml(titleCaseFromEnum(student.status || 'ACTIVE'))}</span></p></div>

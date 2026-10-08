@@ -13,6 +13,9 @@
   function rowActionsHtml(row) {
     return `
       <div class="row" style="gap:4px; justify-content:flex-end;">
+        <button type="button" class="icon-link" data-action="details" title="View Class Details">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        </button>
         <button type="button" class="icon-link" data-action="arms" title="Manage Arms">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M10 4v16"/></svg>
         </button>
@@ -186,6 +189,47 @@
     });
   }
 
+  function openClassDetailsModal(classRow) {
+    Modal.open({
+      title: classRow.name,
+      size: 'lg',
+      bodyHtml: Loader.spinnerHtml('Loading class details…'),
+      footerHtml: '<button type="button" class="btn btn-primary" data-action="close">Close</button>',
+      onMount: async (modalEl) => {
+        modalEl.querySelector('[data-action="close"]').addEventListener('click', Modal.close);
+        try {
+          const [schoolClass, studentResult, subjectResult, teacherResult] = await Promise.all([
+            ClassesService.get(classRow.id),
+            ClassesService.students(classRow.id),
+            ClassSubjectsService.list({ classId: classRow.id }),
+            TeacherAssignmentsService.list({ classId: classRow.id }),
+          ]);
+          const students = studentResult.items || [];
+          const subjects = subjectResult.items || [];
+          const assignments = teacherResult.items || [];
+          const teachers = new Map(assignments.map((assignment) => [
+            assignment.staffId || assignment.staff?.id,
+            assignment.staff?.user?.fullName
+              || `${assignment.staff?.firstName || ''} ${assignment.staff?.lastName || ''}`.trim(),
+          ]));
+          const studentNames = students.map((student) => `${student.firstName || ''} ${student.lastName || ''}`.trim()).filter(Boolean);
+
+          modalEl.querySelector('.modal__body').innerHTML = `
+            <div class="profile-grid">
+              <div><span class="form-label">Class</span><p>${escapeHtml(schoolClass.name || classRow.name)}</p></div>
+              <div><span class="form-label">Class teacher</span><p>${escapeHtml(schoolClass.classTeacher?.fullName || 'Not Assigned')}</p></div>
+              <div><span class="form-label">Students (${students.length})</span><p>${studentNames.length ? studentNames.map(escapeHtml).join(', ') : 'No students assigned.'}</p></div>
+              <div><span class="form-label">Subjects</span><p>${subjects.length ? subjects.map((item) => escapeHtml(item.subject?.name || '—')).join(', ') : 'No subjects assigned.'}</p></div>
+              <div><span class="form-label">Subject teachers</span><p>${teachers.size ? [...teachers.values()].map((name) => escapeHtml(name || '—')).join(', ') : 'No subject teachers assigned.'}</p></div>
+            </div>
+          `;
+        } catch (error) {
+          modalEl.querySelector('.modal__body').innerHTML = `<p class="text-danger">${escapeHtml(error.message || 'Unable to load class details.')}</p>`;
+        }
+      },
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', async () => {
     if (!window.CurrentUser) return;
     canManage = Permissions.canAccessModule(window.CurrentUser.role, 'academics');
@@ -208,6 +252,7 @@
         { key: 'name', label: 'Class', render: (r) => `<strong>${escapeHtml(r.name)}</strong>` },
         { key: 'level', label: 'Level', render: (r) => escapeHtml(r.classLevel?.name || '—') },
         { key: 'arm', label: 'Arm / Stream', render: (r) => escapeHtml(r.arm || '—') },
+        { key: 'classTeacher', label: 'Class Teacher', render: (r) => `${r.classTeacher ? escapeHtml(r.classTeacher.fullName || '—') : '<span class="text-muted">Not Assigned</span>'}${canManage ? ` <a href="teacher-assignments.html#class-teachers">Manage</a>` : ''}` },
         { key: 'studentCount', label: 'Students', render: (r) => escapeHtml(String(r._count?.students ?? '0')) },
       ],
       rowActions: rowActionsHtml,
@@ -245,6 +290,8 @@
       } else if (e.target.closest('[data-action="arms"]')) {
         const row = await ClassesService.get(id);
         openArmsModal(row);
+      } else if (e.target.closest('[data-action="details"]')) {
+        openClassDetailsModal({ id, name: rowEl.querySelector('td')?.textContent?.trim() || 'Class details' });
       }
     });
 

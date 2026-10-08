@@ -6,7 +6,7 @@
       <div class="invoice-sheet">
         <div class="invoice-head">
           <div>
-            <h2>Enoch International College</h2>
+            <h2>Mercy T International College</h2>
             <p class="text-muted">Official Receipt #${escapeHtml(receipt.receiptNumber || receipt.id)}</p>
           </div>
           <div class="text-right"><p><strong>Date:</strong> ${formatDate(receipt.createdAt || receipt.date)}</p></div>

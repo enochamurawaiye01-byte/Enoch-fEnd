@@ -1,5 +1,5 @@
 /**
- * ENOCH INTERNATIONAL COLLEGE ERP
+ * MERCY T INTERNATIONAL COLLEGE (MIC) ERP
  * Frontend role-based access helpers.
  *
  * IMPORTANT: This module improves UX (hiding irrelevant nav/actions,

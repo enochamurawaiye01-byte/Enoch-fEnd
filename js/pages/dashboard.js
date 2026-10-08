@@ -125,6 +125,50 @@
     `;
   }
 
+  async function loadStudentIdentity(container) {
+    if (!container || !window.StudentsService) return;
+    try {
+      const student = await StudentsService.me();
+      const enrollment = (student.enrollments || []).find(
+        (item) => item.status === 'ACTIVE' && item.session?.isActive
+      );
+      const currentClass = enrollment?.class || student.currentClass || student.class || {};
+      const department = enrollment?.department || student.desiredDepartment || student.department;
+      const teacher = student.currentClass?.classTeacher || currentClass.classTeacher || currentClass.teacher ||
+        currentClass.classTeacherAssignment?.staff?.user ||
+        currentClass.classTeacherAssignment?.teacher;
+      const teacherName = typeof teacher === 'string'
+        ? teacher
+        : teacher?.fullName || teacher?.name || teacher?.user?.fullName ||
+          [teacher?.firstName || teacher?.user?.firstName, teacher?.lastName || teacher?.user?.lastName].filter(Boolean).join(' ');
+      const identity = [
+        ['Student', [student.firstName, student.middleName, student.lastName].filter(Boolean).join(' ') || student.fullName || student.user?.fullName],
+        ['Registration number', student.registrationNumber || student.regNumber],
+        ['Current class', currentClass.name || student.className],
+        ['Department', department?.name],
+        ['Section / arm', currentClass.arm || currentClass.classArm?.name || student.classArmName],
+        ['Class teacher', teacherName],
+      ].filter(([, value]) => value);
+
+      if (!identity.length) return;
+      container.innerHTML = `
+        <section class="card" aria-label="Student identity">
+          <div class="card__head"><h3>Student Information</h3></div>
+          <div class="profile-grid">
+            ${identity.map(([label, value]) => `<div><span class="form-label">${escapeHtml(label)}</span><p>${escapeHtml(value)}</p></div>`).join('')}
+          </div>
+        </section>
+      `;
+    } catch (error) {
+      container.innerHTML = `
+        <section class="card" aria-label="Student identity">
+          <div class="card__head"><h3>Student Information</h3></div>
+          <div class="table-state table-state--error"><p>${escapeHtml(error.message || 'Unable to load student information.')}</p></div>
+        </section>
+      `;
+    }
+  }
+
   async function loadRecentActivity(container) {
     if (!container) return;
     container.innerHTML = Loader.spinnerHtml('Loading recent activity…');
@@ -155,12 +199,14 @@
     const statGrid = document.getElementById('dashboard-stats');
     const quickLinksEl = document.getElementById('dashboard-quick-links');
     const activityEl = document.getElementById('dashboard-activity');
+    const studentIdentityEl = document.getElementById('dashboard-student-identity');
     if (!statGrid) return;
 
     const workspace = document.body.dataset.workspace || 'admin';
     const config = WORKSPACE_CONFIG[workspace] || WORKSPACE_CONFIG.admin;
 
     if (quickLinksEl) quickLinksEl.innerHTML = renderQuickLinks(config.quickLinks);
+    if (workspace === 'student') loadStudentIdentity(studentIdentityEl);
     loadRecentActivity(activityEl);
 
     statGrid.innerHTML = Loader.spinnerHtml('Loading dashboard…');

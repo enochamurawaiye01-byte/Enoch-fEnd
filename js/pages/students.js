@@ -75,7 +75,7 @@
             </select>
           </div>
         </div>
-        <div class="form-group" id="student-department-group" ${String(s.classLevel?.code || '').startsWith('SS') || String(s.className || '').startsWith('SS') ? '' : 'hidden'}>
+        <div class="form-group" id="student-department-group" hidden>
           <label class="form-label">Department <span class="required">*</span></label>
           <select name="desiredDepartmentId" id="student-department-select" ${s.id ? 'disabled' : ''}>
             <option value="">Select department…</option>
@@ -142,10 +142,10 @@
         const departmentSelect = form.querySelector('#student-department-select');
         const updateDepartmentVisibility = () => {
           const schoolClass = classesCache.find((item) => item.id === classSelect.value);
-          const seniorSecondary = (schoolClass?.classLevel?.code || '').startsWith('SS');
-          departmentGroup.hidden = !seniorSecondary;
-          departmentSelect.required = seniorSecondary;
-          if (!seniorSecondary) departmentSelect.value = '';
+          const requiresDepartment = schoolClass?.requiresDepartment === true;
+          departmentGroup.hidden = !requiresDepartment;
+          departmentSelect.required = requiresDepartment;
+          if (!requiresDepartment) departmentSelect.value = '';
         };
         classSelect.addEventListener('change', updateDepartmentVisibility);
         updateDepartmentVisibility();
@@ -162,7 +162,7 @@
             phone: [(v) => Validators.phone(v)],
           };
           if (!isEdit) validationRules.currentClassId = [(v) => Validators.required(v, 'Class')];
-          if (!isEdit && (selectedClass?.classLevel?.code || '').startsWith('SS')) {
+          if (!isEdit && selectedClass?.requiresDepartment === true) {
             validationRules.desiredDepartmentId = [(v) => Validators.required(v, 'Department')];
           }
           const { valid, errors } = Validators.validateForm(values, validationRules);

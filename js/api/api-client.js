@@ -1,5 +1,5 @@
 /**
- * ENOCH INTERNATIONAL COLLEGE ERP
+ * MERCY T INTERNATIONAL COLLEGE (MIC) ERP
  * Centralized API client.
  *
  * Every HTTP request in the application must go through this module.

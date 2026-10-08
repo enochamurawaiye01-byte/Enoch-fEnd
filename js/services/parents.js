@@ -1,6 +1,18 @@
 (function (global) {
   'use strict';
   const { PARENTS } = ENOCH_ENDPOINTS;
+
+  function normalizeChild(student) {
+    if (!student) return student;
+    const currentClass = student.currentClass || student.class || {};
+    return {
+      ...student,
+      regNumber: student.registrationNumber || student.regNumber,
+      className: currentClass.name || student.className || '',
+      classArmName: currentClass.arm || currentClass.classArm?.name || student.classArm?.name || student.classArmName || '',
+    };
+  }
+
   global.ParentsService = {
     async list(params = {}) {
       const payload = await ApiClient.get(PARENTS.BASE, params);
@@ -23,11 +35,12 @@
     },
     async children() {
       const payload = await ApiClient.get('/parents/me/children');
-      return ApiClient.unwrapList(payload);
+      const result = ApiClient.unwrapList(payload);
+      return { ...result, items: result.items.map(normalizeChild) };
     },
     async child(id) {
       const payload = await ApiClient.get(`/parents/me/children/${encodeURIComponent(id)}`);
-      return ApiClient.unwrapItem(payload);
+      return normalizeChild(ApiClient.unwrapItem(payload));
     },
     async childResults(id, params = {}) {
       const payload = await ApiClient.get(`/parents/me/children/${encodeURIComponent(id)}/results`, params);

@@ -29,6 +29,13 @@
       const enrollment = (student.enrollments || []).find((item) => item.status === 'ACTIVE' && item.session?.isActive) || student.enrollments?.[0];
       const currentClass = enrollment?.class || student.currentClass;
       const department = enrollment?.department || student.desiredDepartment;
+      const classArm = currentClass?.arm || currentClass?.classArm?.name || student.classArm?.name || student.classArmName;
+      const classTeacher = student.currentClass?.classTeacher || currentClass?.classTeacher || currentClass?.teacher ||
+        currentClass?.classTeacherAssignment?.staff?.user ||
+        currentClass?.classTeacherAssignment?.teacher;
+      const classTeacherName = typeof classTeacher === 'string'
+        ? classTeacher
+        : classTeacher?.fullName || [classTeacher?.firstName, classTeacher?.lastName].filter(Boolean).join(' ');
       container.innerHTML = `
         <section class="card">
           <div class="card__head">
@@ -40,8 +47,10 @@
           <div class="form-section-title">Academic Information</div>
           <div class="profile-grid">
             <div><span class="form-label">Registration number</span><p>${escapeHtml(student.registrationNumber || student.regNumber || '—')}</p></div>
-            <div><span class="form-label">Class / Arm</span><p>${escapeHtml(currentClass?.name || student.className || '—')}</p></div>
-            <div><span class="form-label">Department</span><p>${escapeHtml(department?.name || '—')}</p></div>
+            <div><span class="form-label">Current class</span><p>${escapeHtml(currentClass?.name || student.className || '—')}</p></div>
+            ${department?.name ? `<div><span class="form-label">Department</span><p>${escapeHtml(department.name)}</p></div>` : ''}
+            ${classArm ? `<div><span class="form-label">Section / arm</span><p>${escapeHtml(classArm)}</p></div>` : ''}
+            ${classTeacherName ? `<div><span class="form-label">Class teacher</span><p>${escapeHtml(classTeacherName)}</p></div>` : ''}
             <div><span class="form-label">Academic session</span><p>${escapeHtml(enrollment?.session?.name || '—')}</p></div>
             <div><span class="form-label">Term</span><p>${escapeHtml(titleCaseFromEnum(enrollment?.term?.name || enrollment?.term?.type || '')) || '—'}</p></div>
             <div><span class="form-label">Admission status</span><p>${escapeHtml(titleCaseFromEnum(student.status || '')) || '—'}</p></div>

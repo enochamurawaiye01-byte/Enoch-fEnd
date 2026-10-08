@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LOGIN & AUTH SCREENS — Mercy T College Nursery and Primary School
+   LOGIN & AUTH SCREENS — Mercy T International College
    Aesthetic: Minimalist, clean, structured (Cream, Deep Navy, Black)
    ========================================================================== */
 
@@ -31,6 +31,31 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+.auth-logo-monogram {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+  border: 2px solid var(--color-deep-navy);
+  border-radius: 12px;
+  background: var(--color-deep-navy);
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.auth-brand-mark .auth-logo-monogram {
+  width: 88px;
+  height: 88px;
+  font-size: 1.5rem;
+}
+.auth-card-intro .auth-logo-monogram {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  font-size: 0.85rem;
 }
 .auth-brand-logo-img {
   max-width: 140px;

@@ -1,5 +1,5 @@
 /**
- * ENOCH INTERNATIONAL COLLEGE ERP
+ * MERCY T INTERNATIONAL COLLEGE (MIC) ERP
  * Centralized endpoint registry.
  *
  * All paths are relative to ENOCH_CONFIG.API_BASE_URL (which already

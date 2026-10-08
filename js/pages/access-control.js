@@ -229,7 +229,7 @@
       { key: 'audit_logs', label: 'System Audit Logs', desc: 'Track all user actions, system modifications, timestamps, and security events' },
       { key: 'auth', label: 'Authentication & Tokens', desc: 'Configure login protocols, token lifetimes, and security settings' },
       { key: 'class_subjects', label: 'Class Subjects Link', desc: 'Map academic subjects to specific class levels and streams' },
-      { key: 'classes', label: 'Classes & Arms', desc: 'Create Nursery, Primary, and Secondary class structures' },
+      { key: 'classes', label: 'Classes & Arms', desc: 'Create class levels and arms/sections configured by the school' },
       { key: 'dashboards', label: 'Dashboard Workspaces', desc: 'Access role-tailored workspace overviews' },
       { key: 'departments', label: 'Academic Departments', desc: 'Manage Sciences, Humanities, Commercial, and Vocational departments' },
       { key: 'discipline', label: 'Discipline Records', desc: 'Log behavioral incidents, sanctions, and student conduct notes' },

@@ -1,5 +1,5 @@
 /**
- * ENOCH INTERNATIONAL COLLEGE ERP
+ * MERCY T INTERNATIONAL COLLEGE (MIC) ERP
  * Centralized API configuration.
  *
  * This is the ONLY file where the backend host should ever be defined.

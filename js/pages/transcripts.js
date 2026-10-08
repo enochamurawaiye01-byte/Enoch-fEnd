@@ -3,6 +3,25 @@
 
   function renderTranscript(container, student, transcript) {
     const records = transcript.records || transcript.results || [];
+    const enrollment = (student.enrollments || []).find(
+      (item) => item.status === 'ACTIVE' && item.session?.isActive
+    );
+    const currentClass = enrollment?.class || student.currentClass || student.class || {};
+    const department = enrollment?.department || student.desiredDepartment || student.department;
+    const classArm = currentClass.arm || currentClass.classArm?.name || student.classArm?.name || student.classArmName;
+    const classTeacher = currentClass.classTeacher || currentClass.teacher ||
+      currentClass.classTeacherAssignment?.staff?.user ||
+      currentClass.classTeacherAssignment?.teacher;
+    const classTeacherName = typeof classTeacher === 'string'
+      ? classTeacher
+      : classTeacher?.fullName || [classTeacher?.firstName, classTeacher?.lastName].filter(Boolean).join(' ');
+    const identity = [
+      ['Registration number', student.registrationNumber || student.regNumber],
+      ['Class', currentClass.name || student.className],
+      ['Department', department?.name],
+      ['Section / arm', classArm],
+      ['Class teacher', classTeacherName],
+    ].filter(([, value]) => value);
     const groupedByTerm = records.reduce((acc, r) => {
       const key = r.termName || r.term?.name || 'Unspecified Term';
       (acc[key] = acc[key] || []).push(r);
@@ -13,8 +32,9 @@
       <div class="transcript-sheet">
         <div class="transcript-head">
           <div>
+            <p class="text-muted">Mercy T International College (MIC)</p>
             <h2>${escapeHtml(`${student.firstName || ''} ${student.lastName || ''}`)}</h2>
-            <p class="text-muted">Reg. No: ${escapeHtml(student.regNumber || '—')} &middot; Class: ${escapeHtml(student.className || student.class?.name || '—')}</p>
+            <div class="profile-grid">${identity.map(([label, value]) => `<div><span class="form-label">${escapeHtml(label)}</span><p>${escapeHtml(value)}</p></div>`).join('')}</div>
           </div>
           <button type="button" class="btn btn-secondary no-print" id="print-transcript-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -81,7 +101,7 @@
             (s) => `
           <button type="button" class="search-result-item" data-student-id="${escapeHtml(s.id)}">
             <strong>${escapeHtml(`${s.firstName || ''} ${s.lastName || ''}`)}</strong>
-            <span class="text-muted text-small">${escapeHtml(s.regNumber || '')} &middot; ${escapeHtml(s.className || s.class?.name || '')}</span>
+            <span class="text-muted text-small">${escapeHtml(s.registrationNumber || s.regNumber || '')} &middot; ${escapeHtml(s.className || s.class?.name || '')}</span>
           </button>`
           )
           .join('');

@@ -24,12 +24,12 @@
     }
 
     const form = qs('#login-form');
-    const emailInput = qs('#email');
+    const identifierInput = qs('#login-identifier');
     const passwordInput = qs('#password');
     const togglePasswordBtn = qs('#toggle-password');
     const submitBtn = qs('#login-submit');
     const errorBox = qs('#login-error');
-    const fieldErrorEmail = qs('#error-email');
+    const fieldErrorIdentifier = qs('#error-identifier');
     const fieldErrorPassword = qs('#error-password');
 
     const params = new URLSearchParams(window.location.search);
@@ -61,15 +61,15 @@
         errorBox.hidden = true;
         errorBox.textContent = '';
       }
-      if (fieldErrorEmail) {
-        fieldErrorEmail.textContent = '';
-        fieldErrorEmail.style.display = 'none';
+      if (fieldErrorIdentifier) {
+        fieldErrorIdentifier.textContent = '';
+        fieldErrorIdentifier.style.display = 'none';
       }
       if (fieldErrorPassword) {
         fieldErrorPassword.textContent = '';
         fieldErrorPassword.style.display = 'none';
       }
-      if (emailInput) emailInput.classList.remove('input-error');
+      if (identifierInput) identifierInput.classList.remove('input-error');
       if (passwordInput) passwordInput.classList.remove('input-error');
     }
 
@@ -95,19 +95,23 @@
       e.preventDefault();
       clearErrors();
 
-      const email = emailInput.value.trim();
+      const identifier = identifierInput.value.trim();
       const password = passwordInput.value;
+      const isEmail = identifier.includes('@');
 
       const { valid, errors } = Validators.validateForm(
-        { email, password },
+        { identifier, password },
         {
-          email: [(v) => Validators.required(v, 'Email address'), (v) => Validators.email(v)],
+          identifier: [
+            (v) => Validators.required(v, 'Email address or MIC registration number'),
+            (v) => isEmail ? Validators.email(v) : null,
+          ],
           password: [(v) => Validators.required(v, 'Password')],
         }
       );
 
       if (!valid) {
-        if (errors.email) setFieldError(emailInput, fieldErrorEmail, errors.email);
+        if (errors.identifier) setFieldError(identifierInput, fieldErrorIdentifier, errors.identifier);
         if (errors.password) setFieldError(passwordInput, fieldErrorPassword, errors.password);
         showError('Please fix the highlighted errors before signing in.');
         return;
@@ -115,11 +119,19 @@
 
       setLoading(true);
       try {
-        const user = await AuthService.login({ email, password });
+        const credentials = isEmail
+          ? { email: identifier, password }
+          : { registrationNumber: identifier, password };
+        const user = await AuthService.login(credentials);
         Toast.show('success', `Welcome back, ${user.firstName || user.name || user.fullName || 'there'}.`);
         window.location.href = getRedirectPath(user);
       } catch (err) {
-        showError(err.message || 'Unable to sign in. Please check your credentials.');
+        const errorCode = err.payload?.code || err.payload?.error?.code || err.payload?.data?.code;
+        if (errorCode === 'STUDENT_REGISTRATION_LOGIN_REQUIRED') {
+          showError('Your student account has completed its first login. Sign in with your MIC registration number and password.');
+        } else {
+          showError(err.message || 'Unable to sign in. Please check your credentials.');
+        }
       } finally {
         setLoading(false);
       }

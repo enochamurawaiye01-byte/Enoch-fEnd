@@ -1,6 +1,6 @@
 /**
  * Students service — all student-related API calls.
- * Registration numbers (e.g. EIC-2026-00001) are backend-generated;
+ * Registration numbers (e.g. MIC/2026/000001) are backend-generated;
  * this service never fabricates or edits them client-side.
  */
 (function (global) {
@@ -10,15 +10,20 @@
 
   function normalizeStudent(student) {
     if (!student) return student;
+    const currentClass = student.currentClass || student.class || {};
+    const activeEnrollment = (student.enrollments || []).find(
+      (enrollment) => enrollment.status === 'ACTIVE' && enrollment.session?.isActive
+    );
     return {
       ...student,
-      regNumber: student.registrationNumber,
+      regNumber: student.registrationNumber || student.regNumber,
       email: student.user?.email || student.email || '',
       phone: student.user?.phoneNumber || student.phoneNumber || '',
       phoneNumber: student.user?.phoneNumber || student.phoneNumber || '',
       classId: student.currentClassId || student.classId || '',
-      className: student.currentClass?.name || student.className || '',
-      classArmName: student.currentClass?.arm || student.classArmName || '',
+      className: activeEnrollment?.class?.name || currentClass.name || student.className || '',
+      classArmName: activeEnrollment?.class?.arm || currentClass.arm || currentClass.classArm?.name || student.classArm?.name || student.classArmName || '',
+      departmentName: activeEnrollment?.department?.name || student.desiredDepartment?.name || student.department?.name || '',
     };
   }
 

@@ -1,7 +1,5 @@
 /**
  * Top navigation bar — matches css/components/navbar.css
- * Rebranded for Mercy T College Nursery and Primary School
- * Motto: "Knowledge is Light"
  */
 (function (global) {
   'use strict';
@@ -34,7 +32,7 @@
               <strong>${escapeHtml(roleLabel || 'Unassigned')}</strong>
             </span>
           </div>
-          <span class="topbar__breadcrumb" style="font-size:12px; color:#A33B45; font-weight:bold; font-style:italic;">Mercy T College — Motto: "Knowledge is Light"</span>
+          <span class="topbar__breadcrumb">Mercy T International College (MIC)</span>
         </div>
       </div>
 

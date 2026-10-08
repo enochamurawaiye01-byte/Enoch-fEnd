@@ -6,7 +6,7 @@
       <div id="invoice-print-area" class="invoice-sheet">
         <div class="invoice-head">
           <div>
-            <h2>Enoch International College</h2>
+            <h2>Mercy T International College</h2>
             <p class="text-muted">Invoice #${escapeHtml(invoice.invoiceNumber || invoice.id)}</p>
           </div>
           <div class="text-right">

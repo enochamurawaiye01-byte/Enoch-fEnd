@@ -22,8 +22,8 @@
         pwContainer.style.display = 'block';
 
         let score = 0;
-        if (val.length >= 6) score += 20;
         if (val.length >= 8) score += 20;
+        if (/[a-z]/.test(val)) score += 20;
         if (/[A-Z]/.test(val)) score += 20;
         if (/[0-9]/.test(val)) score += 20;
         if (/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(val)) score += 20;
@@ -108,8 +108,9 @@
       else if (!/\S+@\S+\.\S+/.test(rawData.email)) { setFieldError('email', 'Please enter a valid email address.'); hasError = true; }
       if (!rawData.phoneNumber) { setFieldError('phoneNumber', 'Phone number is required.'); hasError = true; }
 
+      const passwordError = Validators.passwordStrength(rawData.password);
       if (!rawData.password) { setFieldError('password', 'Password is required.'); hasError = true; }
-      else if (rawData.password.length < 8) { setFieldError('password', 'Password must be at least 8 characters.'); hasError = true; }
+      else if (passwordError) { setFieldError('password', passwordError); hasError = true; }
 
       if (rawData.password !== rawData.confirmPassword) {
         setFieldError('confirmPassword', 'Passwords do not match.');

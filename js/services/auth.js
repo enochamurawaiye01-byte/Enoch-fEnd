@@ -12,6 +12,7 @@
     },
 
     async register(data) {
+      if (data instanceof FormData) return ApiClient.upload(AUTH.REGISTER, data);
       return ApiClient.post(AUTH.REGISTER, data);
     },
 

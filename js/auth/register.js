@@ -13,6 +13,7 @@
     const currentClassSelect = qs('#currentClassId');
     const departmentGroup = qs('#department-group');
     const departmentSelect = qs('#desiredDepartmentId');
+    const applicationLetterInput = qs('#applicationLetter');
     const departmentRequirementByClassId = new Map();
     const passwordInput = qs('#password');
     const pwContainer = qs('#pw-strength-container');
@@ -28,6 +29,7 @@
       parentFields.hidden = !isParent;
       studentFields.hidden = !isStudent;
       currentClassSelect.required = isStudent;
+      if (applicationLetterInput) applicationLetterInput.required = isTeacher;
       const childRegistrationNumber = qs('#childRegistrationNumber');
       if (childRegistrationNumber) childRegistrationNumber.required = isParent;
       submitButton.textContent = isTeacher ? 'Submit Teacher Application' : isParent ? 'Submit Parent Application' : 'Submit Student Application';
@@ -158,7 +160,8 @@
       if (successBox) successBox.hidden = true;
 
       const rawData = Object.fromEntries(
-        Array.from(new FormData(form).entries()).filter(([, value]) => String(value).trim() !== '')
+        Array.from(new FormData(form).entries())
+          .filter(([, value]) => typeof value === 'string' && value.trim() !== '')
       );
 
       // Validate required fields
@@ -176,6 +179,14 @@
       }
       if (rawData.role === 'STUDENT' && departmentRequirementByClassId.get(rawData.currentClassId) === true && !rawData.desiredDepartmentId) {
         setFieldError('desiredDepartmentId', 'Select a department for this class.');
+        hasError = true;
+      }
+      const applicationLetter = applicationLetterInput?.files?.[0];
+      if (rawData.role === 'TEACHER' && !applicationLetter) {
+        setFieldError('applicationLetter', 'Upload your application letter to continue.');
+        hasError = true;
+      } else if (rawData.role === 'TEACHER' && applicationLetter.size > 115 * 1024) {
+        setFieldError('applicationLetter', 'Application letter must not exceed 115 KB.');
         hasError = true;
       }
 
@@ -203,7 +214,14 @@
       submitButton.textContent = 'Submitting application...';
 
       try {
-        await AuthService.register(rawData);
+        if (rawData.role === 'TEACHER') {
+          const application = new FormData();
+          Object.entries(rawData).forEach(([key, value]) => application.append(key, value));
+          application.append('applicationLetter', applicationLetter);
+          await AuthService.register(application);
+        } else {
+          await AuthService.register(rawData);
+        }
         form.hidden = true;
         if (successBox) {
           successBox.textContent = 'Application submitted successfully! Your account is pending administrator approval before you can sign in.';

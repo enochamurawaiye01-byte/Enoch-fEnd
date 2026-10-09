@@ -53,6 +53,7 @@
             <div><span class="form-label">Staff number</span><p>${escapeHtml(teacher.staffNumber || '—')}</p></div>
             <div><span class="form-label">Status</span><p>${escapeHtml(titleCaseFromEnum(teacher.status || '')) || '—'}</p></div>
             <div><span class="form-label">Qualification</span><p>${escapeHtml(teacher.qualification || '—')}</p></div>
+            ${teacher.applicationLetterUrl ? `<div><span class="form-label">Application letter</span><p><a class="auth-card-link" href="${escapeHtml(teacher.applicationLetterUrl)}" target="_blank" rel="noopener noreferrer">View submitted letter</a></p></div>` : ''}
           </div>
           ${isSelf ? `<div class="form-group" style="margin-top:16px;"><label class="form-label" for="teacher-profile-picture">Profile picture</label><input id="teacher-profile-picture" type="file" accept="image/jpeg,image/png,image/webp"><div class="row" style="gap:8px;margin-top:8px;"><button type="button" id="remove-teacher-picture" class="btn btn-secondary btn-sm" ${teacher.profileImageUrl ? '' : 'hidden'}>Remove picture</button><span id="teacher-picture-status" class="form-help" aria-live="polite"></span></div></div>` : ''}
         </section>

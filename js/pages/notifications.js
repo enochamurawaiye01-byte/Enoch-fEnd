@@ -14,7 +14,7 @@
           key: 'title', label: 'Notification', render: (r) => `
           <div>
             <div class="${r.readAt || r.isRead ? '' : 'text-strong'}">${escapeHtml(r.title || r.message || 'Notification')}</div>
-            ${r.body ? `<div class="text-muted text-small">${escapeHtml(r.body)}</div>` : ''}
+            ${r.message ? `<div class="text-muted text-small">${escapeHtml(r.message)}</div>` : ''}
           </div>`,
         },
         { key: 'status', label: 'Status', render: (r) => (r.readAt || r.isRead ? '<span class="badge badge-outline">Read</span>' : '<span class="badge badge-warning">Unread</span>') },
@@ -44,6 +44,7 @@
           Toast.success('Role activated. Your access is updated.');
         } else if (actionButton.dataset.action === 'mark-read') {
           await NotificationsService.markRead(rowEl.dataset.rowId);
+          Toast.success('Notification marked as read.');
         }
         table.reload();
       } catch (error) {

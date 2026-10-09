@@ -8,6 +8,25 @@
     const placeholder = document.getElementById(containerId);
     if (!placeholder) return;
 
+    if (!document.querySelector('link[rel="manifest"]')) {
+      const manifest = document.createElement('link');
+      manifest.rel = 'manifest';
+      manifest.href = `${rootPrefix()}manifest.webmanifest`;
+      document.head.appendChild(manifest);
+    }
+    if (!document.querySelector('meta[name="apple-mobile-web-app-capable"]')) {
+      const appleWebApp = document.createElement('meta');
+      appleWebApp.name = 'apple-mobile-web-app-capable';
+      appleWebApp.content = 'yes';
+      document.head.appendChild(appleWebApp);
+    }
+    if (!document.querySelector('link[rel="apple-touch-icon"]')) {
+      const appleIcon = document.createElement('link');
+      appleIcon.rel = 'apple-touch-icon';
+      appleIcon.href = `${rootPrefix()}logo.png`;
+      document.head.appendChild(appleIcon);
+    }
+
     const displayName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.name || user.username : 'User';
     const roleLabel = user ? titleCaseFromEnum(user.role) : '';
     const profileRoute = user?.role === 'STUDENT' ? 'pages/student/profile.html'
@@ -47,6 +66,11 @@
               <strong class="text-small" style="color:#13283E;">Notifications</strong>
               <button type="button" class="link-btn" id="mark-all-read-btn" style="background:none;border:none;color:#13283E;font-size:12px;font-weight:600;cursor:pointer;">Mark all read</button>
             </div>
+            ${['ADMIN', 'SUPER_ADMIN'].includes(user?.role) ? `
+            <div class="notif-panel__head" style="padding-top:0;">
+              <button type="button" class="link-btn" id="toggle-notif-sound" aria-pressed="false"></button>
+              <button type="button" class="link-btn" id="phone-alerts-btn">Enable phone alerts</button>
+            </div>` : ''}
             <div id="notif-list"></div>
           </div>
         </div>
@@ -84,11 +108,56 @@
     Dropdown.init(header);
 
     const dot = document.getElementById('notif-dot');
-    NotificationPanel.loadUnreadCount(dot);
+    NotificationPanel.startUnreadPolling(dot);
+    const recentList = document.getElementById('notif-list');
+    NotificationPanel.attachRecentActions(recentList, dot);
+    window.addEventListener('notifications:changed', () => {
+      NotificationPanel.loadUnreadCount(dot);
+      if (document.getElementById('notif-list')) NotificationPanel.loadRecent(recentList);
+    });
 
     const notifTrigger = header.querySelector('.notif-panel')?.closest('[data-dropdown]')?.querySelector('[data-dropdown-trigger]');
     if (notifTrigger) {
       notifTrigger.addEventListener('click', () => NotificationPanel.loadRecent(document.getElementById('notif-list')));
+    }
+    const soundButton = document.getElementById('toggle-notif-sound');
+    if (soundButton) {
+      const updateSoundButton = () => {
+        const enabled = NotificationPanel.isSoundEnabled();
+        soundButton.textContent = `Sound: ${enabled ? 'On' : 'Off'}`;
+        soundButton.setAttribute('aria-pressed', String(enabled));
+      };
+      updateSoundButton();
+      soundButton.addEventListener('click', () => {
+        NotificationPanel.setSoundEnabled(!NotificationPanel.isSoundEnabled());
+        updateSoundButton();
+      });
+    }
+    const phoneAlertsButton = document.getElementById('phone-alerts-btn');
+    if (phoneAlertsButton) {
+      NotificationPanel.phoneAlertsEnabled().then((enabled) => {
+        phoneAlertsButton.textContent = enabled ? 'Phone alerts enabled' : 'Enable phone alerts';
+      }).catch((error) => console.warn('[Notifications] Unable to inspect phone-alert status:', error.message));
+      phoneAlertsButton.addEventListener('click', async () => {
+        phoneAlertsButton.disabled = true;
+        try {
+          const enabled = await NotificationPanel.phoneAlertsEnabled();
+          if (enabled) {
+            await NotificationPanel.disablePhoneAlerts();
+            phoneAlertsButton.textContent = 'Enable phone alerts';
+            Toast.success('Phone alerts disabled.');
+          } else {
+            await NotificationPanel.enablePhoneAlerts();
+            NotificationPanel.setSoundEnabled(true);
+            phoneAlertsButton.textContent = 'Phone alerts enabled';
+            Toast.success('Phone alerts enabled on this device.');
+          }
+        } catch (error) {
+          Toast.error(error.message || 'Unable to update phone alert settings.');
+        } finally {
+          phoneAlertsButton.disabled = false;
+        }
+      });
     }
 
     const markAllBtn = document.getElementById('mark-all-read-btn');
@@ -97,7 +166,7 @@
         e.stopPropagation();
         const ok = await NotificationPanel.markAllRead();
         if (ok) {
-          if (dot) dot.hidden = true;
+          await NotificationPanel.loadUnreadCount(dot);
           NotificationPanel.loadRecent(document.getElementById('notif-list'));
         }
       });

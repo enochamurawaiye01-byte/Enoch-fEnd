@@ -274,6 +274,9 @@
       UNREAD_COUNT: '/notifications/unread-count',
       MARK_READ: (id_) => `/notifications/${id_}/read`,
       MARK_ALL_READ: '/notifications/mark-all-read',
+      PUSH_KEY: '/notifications/push/key',
+      PUSH_SUBSCRIPTION: '/notifications/push/subscription',
+      REMOVE_PUSH_SUBSCRIPTION: '/notifications/push/subscription/remove',
     },
 
     MESSAGES: {

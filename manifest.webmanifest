@@ -1,0 +1,17 @@
+{
+  "name": "Mercy T International College ERP",
+  "short_name": "Mercy T College",
+  "start_url": "/login.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FBFCD9",
+  "theme_color": "#13283E",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

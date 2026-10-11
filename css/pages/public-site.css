@@ -356,3 +356,100 @@ body.public-site { min-height: 100%; height: auto; color: var(--text-primary); b
   [data-reveal] { opacity: 1; transform: none; transition: none; }
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
+
+/* Keep the public pages calm, readable, and close to the existing ERP palette. */
+body.public-site { font-size: 17px; line-height: 1.72; }
+.announcement { min-height: 38px; font-size: 12px; }
+.public-header__inner { min-height: 76px; }
+.public-nav a, .login-link { font-size: 12px; }
+.site-button { min-height: 48px; font-size: 13px; }
+.site-button--small { min-height: 42px; font-size: 12px; }
+.text-action { font-size: 14px; }
+.eyebrow, .section-kicker { font-size: 12px; }
+.section-heading { font-size: clamp(35px, 4vw, 52px); }
+.section-intro { font-size: 16px; line-height: 1.8; }
+.home-hero { min-height: min(690px, calc(100svh - 114px)); }
+.home-hero h1 { max-width: 770px; font-size: clamp(50px, 6.2vw, 82px); line-height: .98; }
+.home-hero__copy { max-width: 520px; font-size: 17px; line-height: 1.75; }
+.home-hero__secondary { font-size: 14px; }
+.home-hero__milestone { max-width: 270px; font-size: 12px; }
+.home-hero__milestone strong { font-size: 11px; }
+.facility-stack { grid-template-columns: 1.15fr .85fr; align-items: stretch; }
+.facility-stack figure { min-height: 300px; }
+.facility-stack--supporting { margin-top: 12px; grid-template-columns: .75fr 1.25fr; }
+.facility-stack--supporting figure { min-height: 230px; }
+.facility-stack figcaption { padding: 45px 22px 18px; font-size: 16px; }
+.photo-note { font-size: 12px; line-height: 1.7; }
+.leader-feature__copy h3 { font-size: clamp(24px, 2.2vw, 32px); }
+.leader-feature__copy p:not(.eyebrow) { font-size: 14px; line-height: 1.7; }
+.leadership-preview__link { margin-top: 22px; }
+.cta-panel h2 { font-size: clamp(34px, 4.2vw, 53px); }
+.cta-panel p { font-size: 15px; }
+.public-footer__identity > p, .public-footer__column a, .public-footer__column p { font-size: 13px; }
+.public-footer__column h2 { font-size: 11px; }
+.public-footer__bottom { font-size: 11px; }
+.page-hero--plain { min-height: 360px; background: var(--color-cream-bg); }
+.page-hero--plain .page-hero__image, .page-hero--plain .page-hero__shade { display: none; }
+.page-hero--plain .page-hero__content { padding-block: 62px; }
+.page-hero--plain .eyebrow { color: var(--color-brand-red); }
+.page-hero--plain h1 { max-width: 780px; color: var(--color-deep-navy); }
+.page-hero--plain h1 em { color: var(--color-brand-red); }
+.page-hero--plain .page-hero__intro { color: var(--text-secondary); font-size: 16px; }
+.facility-feature__copy p { font-size: 15px; }
+.admission-step h3 { font-size: 26px; }
+.admission-step p { font-size: 14px; }
+.principle p { font-size: 14px; }
+.contact-item p, .contact-item a { font-size: 17px; }
+.public-footer__main { padding-bottom: 34px; }
+[data-reveal], .has-reveal-support [data-reveal]:not(.is-visible), .has-reveal-support [data-reveal].is-visible { opacity: 1; transform: none; transition: none; }
+
+.home-hero { min-height: 0; padding-inline: var(--public-gutter); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 600px); align-items: center; gap: clamp(24px, 4vw, 58px); background: var(--color-deep-navy); }
+.home-hero__image { position: relative; inset: auto; grid-column: 2; grid-row: 1; justify-self: end; width: min(100%, 600px); height: auto; max-height: 420px; aspect-ratio: 12 / 7; object-fit: contain; object-position: center; }
+.home-hero__shade { display: none; }
+.home-hero__inner { grid-column: 1; grid-row: 1; width: 100%; max-width: 700px; margin: 0; padding: 76px 0 96px; }
+.home-hero h1 { font-size: clamp(48px, 5.5vw, 74px); }
+.home-hero__milestone { right: var(--public-gutter); bottom: 18px; }
+.facility-feature__image { object-fit: contain; background: var(--color-cream-alt); }
+
+@media (max-width: 1120px) {
+  .public-nav a, .login-link { font-size: 11px; }
+}
+
+@media (max-width: 850px) {
+  .public-nav a { font-size: 14px; }
+  .public-header__actions .login-link { font-size: 14px; }
+  .home-hero { min-height: 0; padding-inline: var(--public-gutter); grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .home-hero__image { grid-column: 1; grid-row: 1; justify-self: center; }
+  .home-hero__inner { grid-column: 1; grid-row: 2; justify-self: center; padding: 44px 0 100px; }
+  .section-intro { font-size: 15px; }
+  .facility-stack figure { min-height: 240px; }
+}
+
+@media (max-width: 560px) {
+  body.public-site { font-size: 16px; }
+  .announcement { font-size: 10px; }
+  .announcement a { font-size: 10px; }
+  .home-hero { min-height: 0; padding-inline: 0; grid-template-columns: minmax(0, 1fr); gap: 0; align-items: start; }
+  .home-hero__image { grid-column: 1; grid-row: 1; justify-self: center; width: min(100%, 600px); max-height: none; aspect-ratio: 12 / 7; }
+  .home-hero__inner { grid-column: 1; grid-row: 2; max-width: none; padding: 40px 20px 115px; }
+  .home-hero h1 { font-size: clamp(43px, 10.8vw, 58px); }
+  .home-hero__copy { font-size: 16px; }
+  .home-hero__secondary { font-size: 13px; }
+  .home-hero__milestone { right: 20px; bottom: 14px; max-width: 220px; font-size: 11px; }
+  .home-hero__milestone strong { font-size: 10px; }
+  .section-heading { font-size: clamp(34px, 9vw, 45px); }
+  .section-intro { font-size: 15px; }
+  .home-hero__copy, .principle p, .leader-profile__copy p:not(.eyebrow), .admission-step p, .page-hero__intro, .copy-flow p, .map-panel p, .detail-list li { font-size: 15px; }
+  .contact-note, .public-footer__identity > p, .public-footer__column a, .public-footer__column p { font-size: 13px; }
+  .announcement, .announcement a { font-size: 11px; }
+  .facility-stack, .facility-stack--supporting { grid-template-columns: 1fr; }
+  .facility-stack figure, .facility-stack--supporting figure { min-height: 220px; }
+  .facility-stack--supporting { margin-top: 8px; }
+  .facility-stack figcaption { font-size: 15px; }
+  .photo-note { font-size: 11px; }
+  .leader-feature__copy p:not(.eyebrow) { font-size: 13px; }
+  .cta-panel h2 { font-size: 38px; }
+  .cta-panel p { font-size: 14px; }
+  .page-hero--plain { min-height: 310px; }
+  .page-hero--plain .page-hero__content { padding-block: 45px; }
+}

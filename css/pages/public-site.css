@@ -1,11 +1,12 @@
 :root {
-  --public-display: "Newsreader", Georgia, serif;
+  --public-display: "Cormorant Garamond", Georgia, serif;
+  --public-body: "Manrope", "Segoe UI", sans-serif;
   --public-content-width: 1240px;
   --public-gutter: clamp(22px, 5.2vw, 76px);
 }
 
 html { scroll-behavior: smooth; scroll-padding-top: 92px; }
-body.public-site { min-height: 100%; height: auto; color: var(--text-primary); background: var(--color-cream-surface); font-family: var(--font-body); font-size: 15px; line-height: 1.7; }
+body.public-site { min-height: 100%; height: auto; color: var(--text-primary); background: var(--color-cream-surface); font-family: var(--public-body); font-size: 15px; line-height: 1.7; }
 .public-site *, .public-site *::before, .public-site *::after { box-sizing: border-box; }
 .public-site h1, .public-site h2, .public-site h3, .public-site p, .public-site figure { margin: 0; }
 .public-site h1, .public-site h2, .public-site h3 { color: var(--color-deep-navy); }

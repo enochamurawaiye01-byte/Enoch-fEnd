@@ -735,11 +735,15 @@
             updateRolePickerLabel(grantRoleSelect);
             grantRoleSelect.addEventListener('change', () => updateRolePickerLabel(grantRoleSelect));
             grantRoleButton.addEventListener('click', async () => {
+              if (grantRoleButton.disabled) return;
               const roleIds = getSelectedRoles(grantRoleSelect);
               if (!roleIds.length) {
                 Toast.error('Select one or more roles to grant access.');
                 return;
               }
+              grantRoleButton.disabled = true;
+              const originalLabel = grantRoleButton.textContent;
+              grantRoleButton.textContent = 'Granting...';
               try {
                 const result = await RolesService.assign({ userId, roleIds });
                 Toast.success(`Assigned ${roleIds.length} role(s) to ${userName}; access is pending staff activation.`);
@@ -749,6 +753,9 @@
                 userTable.reload();
               } catch (err) {
                 Toast.error(err.message || 'Failed to grant role permissions.');
+              } finally {
+                grantRoleButton.disabled = false;
+                grantRoleButton.textContent = originalLabel;
               }
             });
           },

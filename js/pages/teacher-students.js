@@ -12,19 +12,29 @@
     const classSelect = document.getElementById('my-class-select');
     const tbody = document.getElementById('my-students-tbody');
 
-    let classOptions = [];
+    const classOptionsById = new Map();
     try {
-      const { items } = await TeachersService.assignments(window.CurrentUser.id);
-      const seen = new Set();
+      const [{ items }, teacher] = await Promise.all([
+        TeachersService.assignments(window.CurrentUser.id),
+        TeachersService.getCurrent(),
+      ]);
       items.forEach((a) => {
         const classId = a.classId || a.class?.id;
-        if (classId && !seen.has(classId)) {
-          seen.add(classId);
-          classOptions.push({ value: classId, label: a.className || a.class?.name || '—' });
-        }
+        if (classId) classOptionsById.set(classId, a.className || a.class?.name || '—');
       });
-    } catch (e) { /* non-fatal */ }
+      (teacher.classTeacherAssignments || [])
+        .filter((assignment) => assignment.session?.isActive)
+        .forEach((assignment) => {
+          const classId = assignment.classId || assignment.class?.id;
+          if (classId) classOptionsById.set(classId, assignment.class?.name || '—');
+        });
+    } catch (error) {
+      classSelect.innerHTML = '<option value="">Could not load your classes</option>';
+      Loader.tableError(tbody, 3, error.message || 'Could not load your class assignments.');
+      return;
+    }
 
+    const classOptions = Array.from(classOptionsById, ([value, label]) => ({ value, label }));
     classSelect.innerHTML = classOptions.length
       ? '<option value="">Select a class…</option>' + classOptions.map((o) => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join('')
       : '<option value="">No classes assigned</option>';

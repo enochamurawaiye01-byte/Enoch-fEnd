@@ -27,7 +27,8 @@
   function renderField(field, values) {
     const value = values ? values[field.name] ?? '' : (field.default ?? '');
     const required = field.required ? '<span class="required">*</span>' : '';
-    const commonAttrs = `name="${field.name}" id="field-${field.name}" ${field.required ? 'required' : ''}`;
+    const commonAttrs = `name="${field.name}" id="field-${field.name}" ${field.required ? 'required' : ''} ${field.disabled ? 'disabled' : ''}`;
+    const checkedValues = Array.isArray(value) ? value.map(String) : [];
 
     let control;
     if (field.type === 'select') {
@@ -40,6 +41,13 @@
     } else if (field.type === 'checkbox') {
       control = `<label class="checkbox-field"><input type="checkbox" name="${field.name}" id="field-${field.name}" ${value ? 'checked' : ''} /><span>${escapeHtml(field.checkboxLabel || field.label)}</span></label>`;
       return `<div class="form-group" data-field="${field.name}">${control}<span class="form-error"></span></div>`;
+    } else if (field.type === 'checkboxGroup') {
+      control = `<div class="row" style="gap:12px;flex-wrap:wrap;">${(field.options || []).map((option, index) => `
+        <label class="checkbox-field">
+          <input type="checkbox" name="${field.name}" value="${escapeHtml(option.value)}" ${checkedValues.includes(String(option.value)) ? 'checked' : ''} ${field.disabled ? 'disabled' : ''} />
+          <span>${escapeHtml(option.label)}</span>
+        </label>`).join('')}</div>`;
+      return `<div class="form-group" data-field="${field.name}"><span class="form-label">${escapeHtml(field.label)} ${required}</span>${control}${field.help ? `<span class="form-help">${escapeHtml(field.help)}</span>` : ''}<span class="form-error"></span></div>`;
     } else {
       control = `<input type="${field.type || 'text'}" ${commonAttrs} value="${escapeHtml(field.type === 'date' ? (toInputDate(value) || '') : value)}" placeholder="${escapeHtml(field.placeholder || '')}" />`;
     }
@@ -109,13 +117,14 @@
           const form = modalEl.querySelector('#crud-form');
           form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = new FormData(form);
             let values = {};
             formFields.forEach((f) => {
               if (f.type === 'checkbox') {
                 values[f.name] = form.querySelector(`[name="${f.name}"]`).checked;
+              } else if (f.type === 'checkboxGroup') {
+                values[f.name] = [...form.querySelectorAll(`[name="${f.name}"]:checked`)].map((input) => input.value);
               } else {
-                values[f.name] = formData.get(f.name) || '';
+                values[f.name] = form.querySelector(`[name="${f.name}"]`)?.value || '';
               }
             });
             if (onFormValues) values = onFormValues(values, row) || values;
@@ -123,7 +132,9 @@
             const schema = {};
             formFields.forEach((f) => {
               const rules = [];
-              if (f.required) rules.push((v) => Validators.required(v, f.label));
+              const required = f.required && (!config.requiredWhen || config.requiredWhen(f.name, values, row));
+              if (required) rules.push((v) => Validators.required(v, f.label));
+              if (required && f.type === 'checkboxGroup') rules.push((v) => v.length ? null : `Select at least one ${f.label.toLowerCase()}.`);
               if (f.type === 'email') rules.push((v) => Validators.email(v));
               if (rules.length) schema[f.name] = rules;
             });
@@ -170,8 +181,8 @@
         confirmLabel: 'Delete',
         tone: 'danger',
         onConfirm: async () => {
-          await service.delete(row.id);
-          Toast.success(`${entityLabel} deleted.`);
+          const result = await service.delete(row.id);
+          Toast.success(config.deleteSuccessMessage ? config.deleteSuccessMessage(row, result) : `${entityLabel} deleted.`);
           table.reload();
         },
       });

@@ -41,7 +41,11 @@
       try {
         if (actionButton.dataset.action === 'activate-role') {
           await RolesService.activateRole(actionButton.dataset.assignmentId);
-          Toast.success('Role activated. Your access is updated.');
+          const user = await AuthService.fetchCurrentUser();
+          window.CurrentUser = user;
+          Toast.success('Role activated. Opening your updated workspace…');
+          window.location.replace(`${rootPrefix()}${Permissions.dashboardPathForRole(user.role)}`);
+          return;
         } else if (actionButton.dataset.action === 'mark-read') {
           await NotificationsService.markRead(rowEl.dataset.rowId);
           Toast.success('Notification marked as read.');

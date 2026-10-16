@@ -176,6 +176,12 @@
     if (moduleKey === 'dashboards') {
       return Object.prototype.hasOwnProperty.call(ROLE_WORKSPACE, role);
     }
+    if (moduleKey === 'notifications') {
+      return Object.prototype.hasOwnProperty.call(ROLE_WORKSPACE, role);
+    }
+    if (moduleKey === 'results' && role === ROLES.STUDENT) {
+      return true;
+    }
     if (moduleKey === 'teacher_classes' || moduleKey === 'teacher_students' || moduleKey === 'teacher_results') {
       return MODULE_ACCESS[moduleKey].includes(role);
     }

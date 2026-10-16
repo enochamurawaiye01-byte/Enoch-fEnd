@@ -18,7 +18,8 @@
 
   function redirectToLogin() {
     const prefix = rootPrefix();
-    window.location.href = `${prefix}login.html`;
+    const returnTo = `${window.location.pathname}${window.location.search}`;
+    window.location.href = `${prefix}login.html?returnTo=${encodeURIComponent(returnTo)}`;
   }
 
   (function guard() {
@@ -42,7 +43,9 @@
         : [currentUser.role];
       const allowedWorkspaces = new Set(activeRoles.map((role) => Permissions.getWorkspaceForRole(role)));
       const actualWorkspace = currentWorkspaceFromPath();
-      if (actualWorkspace && !allowedWorkspaces.has(actualWorkspace)) {
+      const activationNotifications = window.location.pathname.endsWith('/notifications.html')
+        && new URLSearchParams(window.location.search).has('assignmentId');
+      if (actualWorkspace && !allowedWorkspaces.has(actualWorkspace) && !activationNotifications) {
         window.location.replace(`${rootPrefix()}${Permissions.dashboardPathForRole(currentUser.role)}`);
         return currentUser;
       }

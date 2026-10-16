@@ -27,6 +27,7 @@
       const fullName = `${teacher.firstName || ''} ${teacher.lastName || ''}`.trim();
       const subjectAssignments = teacher.teacherAssignments || [];
       const classAssignments = teacher.classTeacherAssignments || [];
+      const activeClassTeacherAssignments = classAssignments.filter((assignment) => assignment.session?.isActive);
       const assignedClassMap = new Map();
       [...subjectAssignments, ...classAssignments].forEach((assignment) => {
         const schoolClass = assignment.class;
@@ -44,6 +45,7 @@
               <div>
                 <h2 style="margin:0;">${escapeHtml(fullName || teacher.user?.fullName || 'Teacher')}</h2>
                 <span class="badge badge-outline">${escapeHtml(titleCaseFromEnum(teacher.user?.role || 'TEACHER'))}</span>
+                ${activeClassTeacherAssignments.map((assignment) => `<span class="badge badge-info">${escapeHtml(assignment.class?.name || 'Class')} Class Teacher</span>`).join('')}
               </div>
             </div>
           </div>

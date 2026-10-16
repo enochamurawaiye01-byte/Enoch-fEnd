@@ -3,7 +3,9 @@
   const { RESULTS } = ENOCH_ENDPOINTS;
   global.ResultsService = {
     async list(params = {}) {
-      const path = window.CurrentUser?.role === 'TEACHER' ? RESULTS.TEACHER : RESULTS.BASE;
+      const path = ['TEACHER', 'CLASS_TEACHER', 'SUBJECT_TEACHER', 'SENIOR_TEACHER'].includes(window.CurrentUser?.role)
+        ? RESULTS.TEACHER
+        : RESULTS.BASE;
       const payload = await ApiClient.get(path, params);
       return ApiClient.unwrapList(payload);
     },

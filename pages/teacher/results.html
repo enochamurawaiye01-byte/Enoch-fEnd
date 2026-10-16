@@ -32,28 +32,45 @@
       <div class="page-head">
         <div class="page-head__title">
           <h1>Results</h1>
-          <span class="page-head__desc">Enter scores only for your assigned classes and subjects.</span>
+          <span class="page-head__desc">Choose one of your assigned classes and subjects, then enter each student’s assessment scores.</span>
         </div>
         <div class="page-head__actions">
           <button type="button" class="btn btn-primary" id="save-term-results-btn">Save scores</button>
         </div>
       </div>
-      <div class="table-wrap">
-        <div class="table-toolbar">
-          <select id="filter-session" aria-label="Academic session"><option value="">Select session</option></select>
-          <select id="filter-term" aria-label="Term" disabled><option value="">Select term</option></select>
-          <select id="filter-class" aria-label="Assigned class"><option value="">Select class</option></select>
-          <select id="filter-subject" aria-label="Assigned subject"><option value="">Select subject</option></select>
-          <button type="button" class="btn btn-secondary btn-sm" id="load-result-sheet-btn">Load students</button>
+      <section class="section">
+        <div class="section__head">
+          <div>
+            <h2 style="margin:0;">Select a class and subject</h2>
+            <p class="text-muted text-small">Your class and subject choices come from your active teacher assignments.</p>
+          </div>
         </div>
-        <div class="table-scroll">
-          <table class="data-table">
-            <thead><tr><th>Student</th><th>Registration No.</th><th>1st CA</th><th>2nd CA</th><th>Examination</th><th>Total</th><th>Teacher remark</th></tr></thead>
-            <tbody id="results-tbody"><tr><td colspan="7">Select session, term, class and subject to load the roster.</td></tr></tbody>
-          </table>
+        <div class="filter-bar">
+          <div class="form-group"><label for="filter-session">Academic session</label><select id="filter-session"><option value="">Select session</option></select></div>
+          <div class="form-group"><label for="filter-term">Term</label><select id="filter-term" disabled><option value="">Select term</option></select></div>
+          <div class="form-group"><label for="filter-class">Assigned class</label><select id="filter-class"><option value="">Select class</option></select></div>
+          <div class="form-group"><label for="filter-subject">Subject</label><select id="filter-subject"><option value="">Select subject</option></select></div>
+          <button type="button" class="btn btn-secondary" id="load-result-sheet-btn">Load students</button>
         </div>
-        <div id="results-pagination"></div>
-      </div>
+      </section>
+      <section class="section">
+        <div class="section__head">
+          <div>
+            <h2 style="margin:0;">Student assessment scores</h2>
+            <p class="text-muted text-small">Enter 1st CA, 2nd CA and Exam. Students outside the selected class roster cannot be added.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead><tr><th>Student</th><th>Registration No.</th><th>1st CA</th><th>2nd CA</th><th>Exam</th><th>Total</th><th>Teacher remark</th></tr></thead>
+              <tbody id="results-tbody"><tr><td colspan="7">Select a session, term, class and subject, then load the student list.</td></tr></tbody>
+            </table>
+          </div>
+          <div id="results-pagination"></div>
+        </div>
+        <p class="form-help">Only students enrolled in your selected class, session, term and subject are shown. Scores are checked against the school’s assessment settings before saving.</p>
+      </section>
     </main>
 
     <div class="app-footer-note">Mercy T International College (MIC) ERP</div>

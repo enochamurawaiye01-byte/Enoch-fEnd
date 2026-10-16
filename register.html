@@ -134,11 +134,11 @@
               <span class="form-error" id="error-currentClassId"></span>
             </div>
             <div class="form-group" id="department-group" style="margin-bottom:0;" hidden>
-              <label class="form-label" for="desiredDepartmentId">Department <span class="required">*</span></label>
-              <select id="desiredDepartmentId" name="desiredDepartmentId">
-                <option value="">Select Department</option>
+              <label class="form-label" for="desiredDepartmentIds">Departments / course combinations <span class="required">*</span></label>
+              <select id="desiredDepartmentIds" name="desiredDepartmentIds" multiple size="4" aria-describedby="department-help">
               </select>
-              <span class="form-error" id="error-desiredDepartmentId"></span>
+              <span class="form-help" id="department-help">Select one or more departments for SSS. Hold Ctrl (Windows) or Command (Mac) to select multiple.</span>
+              <span class="form-error" id="error-desiredDepartmentIds"></span>
             </div>
           </div>
         </div>

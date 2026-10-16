@@ -4,7 +4,8 @@
   document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById('teacher-profile-content');
     const teacherId = new URLSearchParams(window.location.search).get('id');
-    const selfProfile = !teacherId && window.CurrentUser?.role === 'TEACHER';
+    const teachingRoles = ['TEACHER', 'CLASS_TEACHER', 'SUBJECT_TEACHER', 'SENIOR_TEACHER'];
+    const selfProfile = !teacherId && teachingRoles.includes(window.CurrentUser?.role);
     if (!teacherId && !selfProfile) {
       container.innerHTML = '<div class="table-state table-state--error">No teacher was selected.</div>';
       return;
@@ -20,7 +21,7 @@
     }
 
     const currentUserId = window.CurrentUser?.userId || window.CurrentUser?.id;
-    const isSelf = selfProfile || (window.CurrentUser?.role === 'TEACHER' && currentUserId === teacher.userId);
+    const isSelf = selfProfile || (teachingRoles.includes(window.CurrentUser?.role) && currentUserId === teacher.userId);
 
     const render = () => {
       const fullName = `${teacher.firstName || ''} ${teacher.lastName || ''}`.trim();
@@ -79,7 +80,7 @@
         status.textContent = 'Uploading…';
         try {
           await TeachersService.uploadProfilePicture(input.files[0]);
-          teacher = await TeachersService.get(teacherId);
+          teacher = await TeachersService.getCurrent();
           Toast.success('Profile picture updated.');
           render();
         } catch (error) {
@@ -92,7 +93,7 @@
         event.currentTarget.disabled = true;
         try {
           await TeachersService.removeProfilePicture();
-          teacher = await TeachersService.get(teacherId);
+          teacher = await TeachersService.getCurrent();
           Toast.success('Profile picture removed.');
           render();
         } catch (error) {

@@ -42,8 +42,9 @@
     };
 
     try {
-      const [{ items: assignmentRows }, { items: sessions }, currentConfiguration] = await Promise.all([
+      const [{ items: assignmentRows }, { items: classTeacherRows }, { items: sessions }, currentConfiguration] = await Promise.all([
         TeacherAssignmentsService.list(),
+        TeacherAssignmentsService.listClassTeachers(),
         AcademicSessionsService.list({ pageSize: 100 }),
         ReportCardsService.getConfiguration()
       ]);
@@ -54,8 +55,11 @@
       if (activeSession) sessionSelect.value = activeSession.id;
       const classes = new Map();
       assignments.forEach((assignment) => { if (assignment.class) classes.set(assignment.classId, assignment.class.name); });
+      classTeacherRows.forEach((assignment) => { if (assignment.class) classes.set(assignment.classId, assignment.class.name); });
       setOptions(classSelect, 'Select assigned class', [...classes].map(([value, label]) => ({ value, label })));
-      if (!assignments.length) Toast.show('info', 'No class/subject assignments are available for your account.');
+      if (!assignments.length) Toast.show('info', classes.size
+        ? 'Your class-teacher classes are available, but result entry requires a subject assignment.'
+        : 'No class/subject assignments are available for your account.');
     } catch (error) {
       Toast.error(error.message || 'Unable to load your assigned classes and subjects.');
       loadButton.disabled = true;
@@ -86,12 +90,12 @@
       }
       loadButton.disabled = true;
       saveButton.disabled = true;
-      tbody.innerHTML = '<tr><td colspan="6">Loading enrolled students…</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7">Loading enrolled students…</td></tr>';
       try {
         const sheet = await ResultsService.termEntry({ sessionId: sessionSelect.value, termId: termSelect.value, classId: classSelect.value, subjectId: subjectSelect.value });
         configuration = sheet.configuration;
         if (!sheet.students.length) {
-          tbody.innerHTML = '<tr><td colspan="6">No active students are enrolled for this class, term, and subject.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="7">No active students are enrolled for this class, term, and subject.</td></tr>';
           dirty = false;
           return;
         }
@@ -103,11 +107,12 @@
             <td data-label="Second CA"><input class="score-input" data-score="secondTest" type="number" min="0" max="${escapeHtml(String(configuration.secondTestMax))}" step="0.01" value="${student.scores ? escapeHtml(String(student.scores.secondTest)) : ''}" aria-label="Second CA for ${escapeHtml(student.fullName)}" /></td>
             <td data-label="Examination"><input class="score-input" data-score="exam" type="number" min="0" max="${escapeHtml(String(configuration.examMax))}" step="0.01" value="${student.scores ? escapeHtml(String(student.scores.exam)) : ''}" aria-label="Examination score for ${escapeHtml(student.fullName)}" /></td>
             <td data-label="Total"><strong data-score-total>${student.scores ? escapeHtml(String(student.scores.total)) : '—'}</strong></td>
+            <td data-label="Teacher remark"><textarea class="teacher-comment-input" maxlength="500" aria-label="Teacher remark for ${escapeHtml(student.fullName)}">${escapeHtml(student.scores?.teacherComment || '')}</textarea></td>
           </tr>`).join('');
         dirty = false;
         saveButton.disabled = false;
       } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-danger">${escapeHtml(error.message || 'Unable to load this result sheet.')}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-danger">${escapeHtml(error.message || 'Unable to load this result sheet.')}</td></tr>`;
       } finally {
         loadButton.disabled = false;
       }
@@ -118,9 +123,10 @@
     classSelect.addEventListener('change', updateSubjects);
     loadButton.addEventListener('click', loadRoster);
     tbody.addEventListener('input', (event) => {
-      const input = event.target.closest('.score-input');
+      const input = event.target.closest('.score-input, .teacher-comment-input');
       if (!input) return;
       dirty = true;
+      if (input.matches('.teacher-comment-input')) return;
       const row = input.closest('tr');
       const values = [...row.querySelectorAll('.score-input')].map((field) => Number(field.value || 0));
       row.querySelector('[data-score-total]').textContent = values.reduce((total, value) => total + value, 0).toFixed(2).replace(/\.00$/, '');
@@ -133,8 +139,10 @@
     saveButton.addEventListener('click', async () => {
       const entries = [...tbody.querySelectorAll('tr[data-student-id]')].map((row) => {
         const fields = [...row.querySelectorAll('.score-input')];
+        const teacherComment = row.querySelector('.teacher-comment-input').value.trim();
+        if (fields.every((field) => field.value === '') && !teacherComment) return null;
         if (fields.every((field) => field.value === '')) return null;
-        return { studentId: row.dataset.studentId, firstTest: Number(fields[0].value || 0), secondTest: Number(fields[1].value || 0), exam: Number(fields[2].value || 0) };
+        return { studentId: row.dataset.studentId, firstTest: Number(fields[0].value || 0), secondTest: Number(fields[1].value || 0), exam: Number(fields[2].value || 0), teacherComment };
       }).filter(Boolean);
       if (!entries.length) {
         Toast.error('Enter at least one student score before saving.');
@@ -451,7 +459,7 @@
 
   document.addEventListener('DOMContentLoaded', async () => {
     if (!window.CurrentUser) return;
-    if (window.CurrentUser.role === 'TEACHER') {
+    if (['TEACHER', 'CLASS_TEACHER', 'SUBJECT_TEACHER', 'SENIOR_TEACHER'].includes(window.CurrentUser.role)) {
       await initializeTeacherResultEntry();
       return;
     }

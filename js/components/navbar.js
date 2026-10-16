@@ -29,11 +29,11 @@
 
     const displayName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.name || user.username : 'User';
     const roleLabel = user ? titleCaseFromEnum(user.role) : '';
+    const teachingRoles = ['TEACHER', 'CLASS_TEACHER', 'SUBJECT_TEACHER', 'SENIOR_TEACHER'];
     const profileRoute = user?.role === 'STUDENT' ? 'pages/student/profile.html'
-      : user?.role === 'TEACHER' ? 'pages/teacher/profile.html'
-        : user?.role === 'PARENT' ? 'pages/parent/settings.html'
-          : 'pages/admin/settings.html';
-    const profileLabel = ['STUDENT', 'TEACHER'].includes(user?.role) ? 'My Profile' : 'Profile and Settings';
+      : teachingRoles.includes(user?.role) ? 'pages/teacher/profile.html'
+        : 'profile.html';
+    const profileLabel = 'My Profile';
 
     const header = document.createElement('header');
     header.className = 'topbar';

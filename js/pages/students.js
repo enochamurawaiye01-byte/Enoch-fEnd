@@ -18,9 +18,10 @@
       .join('');
   }
 
-  function departmentOptionsHtml(selectedId) {
+  function departmentOptionsHtml(selectedIds = []) {
+    const selected = new Set(Array.isArray(selectedIds) ? selectedIds : [selectedIds].filter(Boolean));
     return departmentsCache
-      .map((department) => `<option value="${escapeHtml(department.id)}" ${String(department.id) === String(selectedId) ? 'selected' : ''}>${escapeHtml(department.name)}</option>`)
+      .map((department) => `<option value="${escapeHtml(department.id)}" ${selected.has(department.id) ? 'selected' : ''}>${escapeHtml(department.name)}</option>`)
       .join('');
   }
 
@@ -76,11 +77,11 @@
           </div>
         </div>
         <div class="form-group" id="student-department-group" hidden>
-          <label class="form-label">Department <span class="required">*</span></label>
-          <select name="desiredDepartmentId" id="student-department-select" ${s.id ? 'disabled' : ''}>
-            <option value="">Select department…</option>
-            ${departmentOptionsHtml(s.desiredDepartmentId)}
+          <label class="form-label">Department(s) <span class="required">*</span></label>
+          <select name="desiredDepartmentIds" id="student-department-select" multiple size="4" ${s.id ? 'disabled' : ''}>
+            ${departmentOptionsHtml(s.desiredDepartmentIds || [s.desiredDepartmentId])}
           </select>
+          <span class="form-help">Select one or more SSS departments/courses for this student.</span>
           <span class="form-error"></span>
         </div>
 
@@ -152,8 +153,10 @@
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
           const formData = new FormData(form);
-          const values = Object.fromEntries([...formData.entries()].filter(([, value]) => String(value).trim() !== ''));
+          const values = Object.fromEntries([...formData.entries()].filter(([key, value]) => key !== 'desiredDepartmentIds' && String(value).trim() !== ''));
+          const selectedDepartmentIds = formData.getAll('desiredDepartmentIds').filter((value) => String(value).trim() !== '');
           const selectedClass = classesCache.find((item) => item.id === values.currentClassId);
+          if (!isEdit && selectedDepartmentIds.length) values.desiredDepartmentIds = selectedDepartmentIds;
 
           const validationRules = {
             firstName: [(v) => Validators.required(v, 'First name')],
@@ -162,13 +165,13 @@
             phone: [(v) => Validators.phone(v)],
           };
           if (!isEdit) validationRules.currentClassId = [(v) => Validators.required(v, 'Class')];
-          if (!isEdit && selectedClass?.requiresDepartment === true) {
-            validationRules.desiredDepartmentId = [(v) => Validators.required(v, 'Department')];
-          }
+          const departmentError = !isEdit && selectedClass?.requiresDepartment === true && selectedDepartmentIds.length === 0
+            ? 'Select at least one department.'
+            : '';
           const { valid, errors } = Validators.validateForm(values, validationRules);
 
           form.querySelectorAll('.form-group').forEach((g) => g.classList.remove('has-error'));
-          if (!valid) {
+          if (!valid || departmentError) {
             Object.entries(errors).forEach(([field, message]) => {
               const input = form.querySelector(`[name="${field}"]`);
               const group = input && input.closest('.form-group');
@@ -178,6 +181,10 @@
                 if (err) err.textContent = message;
               }
             });
+            if (departmentError) {
+              departmentGroup.classList.add('has-error');
+              departmentGroup.querySelector('.form-error').textContent = departmentError;
+            }
             return;
           }
 

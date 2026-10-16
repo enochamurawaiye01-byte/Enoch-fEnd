@@ -129,6 +129,7 @@
       {
         group: 'My Teaching',
         items: [
+          { label: 'My Profile', href: 'profile.html', icon: 'user' },
           { label: 'My Classes', href: 'classes.html', icon: 'building' },
           { label: 'My Students', href: 'students.html', icon: 'graduation' },
           { label: 'My Subjects', href: 'subjects.html', icon: 'book' },

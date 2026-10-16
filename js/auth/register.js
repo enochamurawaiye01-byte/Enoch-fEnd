@@ -12,7 +12,7 @@
     const parentFields = qs('#parent-fields');
     const currentClassSelect = qs('#currentClassId');
     const departmentGroup = qs('#department-group');
-    const departmentSelect = qs('#desiredDepartmentId');
+    const departmentSelect = qs('#desiredDepartmentIds');
     const applicationLetterInput = qs('#applicationLetter');
     const departmentRequirementByClassId = new Map();
     const passwordInput = qs('#password');
@@ -40,7 +40,7 @@
       const requiresDepartment = departmentRequirementByClassId.get(currentClassSelect.value) === true;
       departmentGroup.hidden = !requiresDepartment;
       departmentSelect.required = requiresDepartment;
-      if (!requiresDepartment) departmentSelect.value = '';
+      if (!requiresDepartment) Array.from(departmentSelect.options).forEach((option) => { option.selected = false; });
     };
     currentClassSelect.addEventListener('change', updateDepartmentRequirement);
 
@@ -70,7 +70,7 @@
           classError.style.display = 'block';
         }
         currentClassSelect.disabled = true;
-        departmentSelect.innerHTML = '<option value="">Departments unavailable</option>';
+        departmentSelect.innerHTML = '';
       }
     };
     loadRegistrationOptions();
@@ -159,10 +159,13 @@
       clearErrors();
       if (successBox) successBox.hidden = true;
 
+      const formData = new FormData(form);
       const rawData = Object.fromEntries(
-        Array.from(new FormData(form).entries())
-          .filter(([, value]) => typeof value === 'string' && value.trim() !== '')
+        Array.from(formData.entries())
+          .filter(([key, value]) => key !== 'desiredDepartmentIds' && typeof value === 'string' && value.trim() !== '')
       );
+      const desiredDepartmentIds = formData.getAll('desiredDepartmentIds').filter((value) => typeof value === 'string' && value.trim() !== '');
+      if (desiredDepartmentIds.length) rawData.desiredDepartmentIds = desiredDepartmentIds;
 
       // Validate required fields
       let hasError = false;
@@ -177,8 +180,8 @@
         setFieldError('currentClassId', 'Select a class from the available classes.');
         hasError = true;
       }
-      if (rawData.role === 'STUDENT' && departmentRequirementByClassId.get(rawData.currentClassId) === true && !rawData.desiredDepartmentId) {
-        setFieldError('desiredDepartmentId', 'Select a department for this class.');
+      if (rawData.role === 'STUDENT' && departmentRequirementByClassId.get(rawData.currentClassId) === true && !rawData.desiredDepartmentIds.length) {
+        setFieldError('desiredDepartmentIds', 'Select at least one department for this class.');
         hasError = true;
       }
       const applicationLetter = applicationLetterInput?.files?.[0];
@@ -216,7 +219,10 @@
       try {
         if (rawData.role === 'TEACHER') {
           const application = new FormData();
-          Object.entries(rawData).forEach(([key, value]) => application.append(key, value));
+          Object.entries(rawData).forEach(([key, value]) => {
+            if (Array.isArray(value)) value.forEach((item) => application.append(key, item));
+            else application.append(key, value);
+          });
           application.append('applicationLetter', applicationLetter);
           await AuthService.register(application);
         } else {

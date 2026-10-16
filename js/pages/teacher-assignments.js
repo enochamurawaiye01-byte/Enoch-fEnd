@@ -11,11 +11,16 @@
         TeachersService.list({ pageSize: 200 }),
         AcademicSessionsService.list({ pageSize: 50 }),
       ]);
-      classOptions = classes.map((c) => ({ value: c.id, label: c.name }));
+      classOptions = classes.map((c) => {
+        const levelCode = String(c.classLevel?.code || '').toUpperCase();
+        return { value: c.id, label: c.name, level: levelCode.startsWith('SS') ? 'SSS' : levelCode.startsWith('JSS') ? 'JSS' : '' };
+      });
       subjectOptions = subjects.map((s) => ({ value: s.id, label: s.name }));
       teacherOptions = teachers.map((t) => ({ value: t.id, label: `${t.firstName || t.user?.fullName || ''} ${t.lastName || ''}`.trim() || t.name }));
       sessionOptions = sessions.map((session) => ({ value: session.id, label: session.name }));
-    } catch (e) { /* non-fatal */ }
+    } catch (error) {
+      Toast.error(error.message || 'Unable to load teacher assignment options.');
+    }
 
     SimpleCrudPage.init({
       tbody: document.getElementById('assignments-tbody'),
@@ -34,7 +39,11 @@
       formFields: [
         { name: 'staffId', label: 'Teacher', type: 'select', required: true, options: teacherOptions },
         { name: 'subjectId', label: 'Subject', type: 'select', required: true, options: subjectOptions },
-        { name: 'classId', label: 'Class', type: 'select', required: true, options: classOptions },
+        { name: 'classLevel', label: 'Teaching level', type: 'select', default: 'BOTH', options: [
+          { value: 'JSS', label: 'JSS' },
+          { value: 'SSS', label: 'SSS' },
+          { value: 'BOTH', label: 'Both JSS and SSS' },
+        ], required: true },
       ],
       deleteMessage: () => 'Remove this teacher assignment?',
       buildRowActions: () => `<div class="row" style="gap:4px;justify-content:flex-end;"><button type="button" class="icon-link" data-action="delete" title="Remove">×</button></div>`,

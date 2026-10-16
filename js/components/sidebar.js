@@ -130,7 +130,7 @@
         group: 'My Teaching',
         items: [
           { label: 'My Profile', href: 'profile.html', icon: 'user' },
-          { label: 'My Classes', href: 'classes.html', icon: 'building' },
+          { label: 'My Classes', href: 'classes.html', icon: 'building', moduleKey: 'teacher_classes' },
           { label: 'My Students', href: 'students.html', icon: 'graduation' },
           { label: 'My Subjects', href: 'subjects.html', icon: 'book' },
           { label: 'Timetable', href: 'timetable.html', icon: 'clock' },
@@ -144,7 +144,7 @@
           { label: 'Assignments', href: 'assignments.html', icon: 'file-text' },
           { label: 'Examinations', href: 'examinations.html', icon: 'file-check' },
           { label: 'Question Bank', href: 'questions.html', icon: 'help-circle' },
-          { label: 'Results', href: 'results.html', icon: 'award' },
+          { label: 'Results', href: 'results.html', icon: 'award', moduleKey: 'teacher_results' },
         ],
       },
       { group: 'System', items: [{ label: 'Settings', href: 'settings.html', icon: 'settings' }] },
@@ -281,7 +281,7 @@
     groups = groups.map((group) => ({
       ...group,
       items: group.items.filter((item) => {
-        const moduleKey = Permissions.getPageModule(item.href);
+        const moduleKey = item.moduleKey || Permissions.getPageModule(item.href);
         return !moduleKey || Permissions.canAccessModule(window.CurrentUser?.role, moduleKey);
       })
     })).filter((group) => group.items.length);

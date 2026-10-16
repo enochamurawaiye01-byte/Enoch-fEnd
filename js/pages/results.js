@@ -23,8 +23,11 @@
     const saveButton = document.getElementById('save-term-results-btn');
     const tbody = document.getElementById('results-tbody');
     let assignments = [];
+    let classTeacherRows = [];
     let configuration = null;
     let dirty = false;
+    let subjectUpdateId = 0;
+    const classSubjectCache = new Map();
 
     const setOptions = (select, placeholder, values) => {
       select.innerHTML = `<option value="">${escapeHtml(placeholder)}</option>${values.map((item) => `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`).join('')}`;
@@ -32,23 +35,46 @@
     const matchingAssignments = () => assignments.filter((assignment) => assignment.classId === classSelect.value
       && (!assignment.sessionId || assignment.sessionId === sessionSelect.value)
       && (!assignment.termId || assignment.termId === termSelect.value));
-    const updateSubjects = () => {
+    const updateSubjects = async () => {
+      const updateId = ++subjectUpdateId;
       const subjects = new Map();
       matchingAssignments().forEach((assignment) => {
         if (assignment.subject) subjects.set(assignment.subjectId, assignment.subject.name);
       });
+      const isClassTeacher = classTeacherRows.some((assignment) =>
+        assignment.classId === classSelect.value && assignment.sessionId === sessionSelect.value
+      );
+      subjectSelect.disabled = true;
+      if (isClassTeacher && classSelect.value) {
+        try {
+          if (!classSubjectCache.has(classSelect.value)) {
+            classSubjectCache.set(classSelect.value, ClassSubjectsService.list({ classId: classSelect.value }));
+          }
+          const { items } = await classSubjectCache.get(classSelect.value);
+          items.forEach((classSubject) => {
+            if (classSubject.subject?.isActive !== false) {
+              subjects.set(classSubject.subjectId, classSubject.subject?.name || 'Subject');
+            }
+          });
+        } catch (error) {
+          classSubjectCache.delete(classSelect.value);
+          if (updateId === subjectUpdateId) Toast.error(error.message || 'Unable to load subjects for your class.');
+        }
+      }
+      if (updateId !== subjectUpdateId) return;
       setOptions(subjectSelect, 'Select subject', [...subjects].map(([value, label]) => ({ value, label })));
-      subjectSelect.disabled = !classSelect.value;
+      subjectSelect.disabled = !classSelect.value || !subjects.size;
     };
 
     try {
-      const [{ items: assignmentRows }, { items: classTeacherRows }, { items: sessions }, currentConfiguration] = await Promise.all([
+      const [{ items: assignmentRows }, { items: classTeacherAssignmentRows }, { items: sessions }, currentConfiguration] = await Promise.all([
         TeacherAssignmentsService.list(),
         TeacherAssignmentsService.listClassTeachers(),
         AcademicSessionsService.list({ pageSize: 100 }),
         ReportCardsService.getConfiguration()
       ]);
       assignments = assignmentRows || [];
+      classTeacherRows = classTeacherAssignmentRows || [];
       configuration = currentConfiguration;
       const activeSession = sessions.find((session) => session.isActive);
       setOptions(sessionSelect, 'Select session', sessions.map((session) => ({ value: session.id, label: session.name })));
@@ -58,7 +84,7 @@
       classTeacherRows.forEach((assignment) => { if (assignment.class) classes.set(assignment.classId, assignment.class.name); });
       setOptions(classSelect, 'Select assigned class', [...classes].map(([value, label]) => ({ value, label })));
       if (!assignments.length) Toast.show('info', classes.size
-        ? 'Your class-teacher classes are available, but result entry requires a subject assignment.'
+        ? 'Your assigned class is available for class-teacher result entry.'
         : 'No class/subject assignments are available for your account.');
     } catch (error) {
       Toast.error(error.message || 'Unable to load your assigned classes and subjects.');
@@ -73,14 +99,14 @@
       classSelect.disabled = !sessionId;
       if (!sessionId) {
         setOptions(termSelect, 'Select session first', []);
-        updateSubjects();
+        await updateSubjects();
         return;
       }
       const { items: terms } = await TermsService.list({ sessionId, pageSize: 50 });
       setOptions(termSelect, 'Select term', terms.map((term) => ({ value: term.id, label: titleCaseFromEnum(term.name || term.type) })));
       const activeTerm = terms.find((term) => term.isActive);
       if (activeTerm) termSelect.value = activeTerm.id;
-      updateSubjects();
+      await updateSubjects();
     }
 
     async function loadRoster() {
@@ -119,8 +145,8 @@
     }
 
     sessionSelect.addEventListener('change', () => updateTerms().catch((error) => Toast.error(error.message)));
-    termSelect.addEventListener('change', updateSubjects);
-    classSelect.addEventListener('change', updateSubjects);
+    termSelect.addEventListener('change', () => updateSubjects().catch((error) => Toast.error(error.message)));
+    classSelect.addEventListener('change', () => updateSubjects().catch((error) => Toast.error(error.message)));
     loadButton.addEventListener('click', loadRoster);
     tbody.addEventListener('input', (event) => {
       const input = event.target.closest('.score-input, .teacher-comment-input');

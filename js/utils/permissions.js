@@ -91,6 +91,7 @@
     users: [ROLES.SUPER_ADMIN, ROLES.ADMIN],
     students: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.MANAGEMENT, ROLES.PRINCIPAL, ROLES.VICE_PRINCIPAL, ROLES.HEAD_TEACHER, ROLES.TEACHER, 'CLASS_TEACHER', 'SUBJECT_TEACHER', 'SENIOR_TEACHER'],
     teacher_classes: [ROLES.TEACHER, 'CLASS_TEACHER', 'SUBJECT_TEACHER', 'SENIOR_TEACHER'],
+    teacher_students: [ROLES.TEACHER, 'CLASS_TEACHER', 'SUBJECT_TEACHER', 'SENIOR_TEACHER'],
     teacher_results: [ROLES.TEACHER, 'CLASS_TEACHER', 'SUBJECT_TEACHER', 'SENIOR_TEACHER'],
     parents: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.MANAGEMENT],
     teachers: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.MANAGEMENT, ROLES.PRINCIPAL],
@@ -172,7 +173,7 @@
   };
 
   function canAccessModule(role, moduleKey) {
-    if (moduleKey === 'teacher_classes' || moduleKey === 'teacher_results') {
+    if (moduleKey === 'teacher_classes' || moduleKey === 'teacher_students' || moduleKey === 'teacher_results') {
       return MODULE_ACCESS[moduleKey].includes(role);
     }
     const currentUser = global.CurrentUser || (global.Storage && Storage.getUser());
@@ -187,6 +188,7 @@
   function getPageModule(pathname) {
     const normalizedPath = String(pathname || '').split('?')[0].replace(/\\/g, '/').toLowerCase();
     if (normalizedPath.endsWith('/pages/teacher/classes.html')) return 'teacher_classes';
+    if (normalizedPath.endsWith('/pages/teacher/students.html')) return 'teacher_students';
     if (normalizedPath.endsWith('/pages/teacher/results.html')) return 'teacher_results';
     const filename = String(pathname || '').split('/').pop();
     return PAGE_MODULES[filename] || null;

@@ -131,7 +131,7 @@
         items: [
           { label: 'My Profile', href: 'profile.html', icon: 'user' },
           { label: 'My Classes', href: 'classes.html', icon: 'building', moduleKey: 'teacher_classes' },
-          { label: 'My Students', href: 'students.html', icon: 'graduation' },
+          { label: 'My Students', href: 'students.html', icon: 'graduation', moduleKey: 'teacher_students' },
           { label: 'My Subjects', href: 'subjects.html', icon: 'book' },
           { label: 'Timetable', href: 'timetable.html', icon: 'clock' },
           { label: 'Lessons', href: 'lessons.html', icon: 'book-open' },

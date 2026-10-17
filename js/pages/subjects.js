@@ -16,7 +16,7 @@
       paginationEl: document.getElementById('subjects-pagination'),
       searchInput: document.getElementById('subjects-search'),
       addBtn: document.getElementById('add-subject-btn'),
-      moduleKey: 'academics',
+      moduleKey: 'subjects',
       entityLabel: 'Subject',
       service: SubjectsService,
       columns: [

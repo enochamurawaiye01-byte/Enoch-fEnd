@@ -7,7 +7,7 @@
       paginationEl: document.getElementById('departments-pagination'),
       searchInput: document.getElementById('departments-search'),
       addBtn: document.getElementById('add-department-btn'),
-      moduleKey: 'academics',
+      moduleKey: 'departments',
       entityLabel: 'Department',
       service: DepartmentsService,
       columns: [

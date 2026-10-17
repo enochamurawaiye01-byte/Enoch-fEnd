@@ -143,6 +143,65 @@
     });
   }
 
+  async function bindModuleAccess() {
+    const container = document.getElementById('module-access-list');
+    if (!container) return;
+    container.innerHTML = '<p class="text-muted">Loading portal modules…</p>';
+    try {
+      const [policies, modulesPayload] = await Promise.all([
+        SettingsService.getModuleAccess(),
+        ApiClient.get(ENOCH_ENDPOINTS.PERMISSIONS.MODULES),
+      ]);
+      const globalPolicies = policies.filter((policy) => !policy.classLevelId);
+      const modules = ApiClient.unwrapList(modulesPayload).items
+        .filter((module) => module.apiRoute)
+        .map((module) => ({ ...module, moduleKey: module.apiRoute.replace(/^\//, '') }))
+        .filter((module) => globalPolicies.some((policy) => policy.module === module.moduleKey))
+        .sort((a, b) => a.displayName.localeCompare(b.displayName));
+      const policyByModule = new Map(globalPolicies.map((policy) => [policy.module, policy]));
+      if (!modules.length) {
+        container.innerHTML = '<p class="text-muted">No configurable portal modules were returned.</p>';
+        return;
+      }
+      container.innerHTML = modules.map((module) => {
+        const policy = policyByModule.get(module.moduleKey);
+        return `<div class="card" style="margin:12px 0;padding:16px;">
+          <label class="checkbox-field" style="justify-content:space-between;gap:16px;">
+            <span><strong>${escapeHtml(module.displayName)}</strong><br><small class="text-muted">${escapeHtml(module.moduleKey)}</small></span>
+            <input type="checkbox" data-module="${escapeHtml(module.moduleKey)}" aria-label="Enable ${escapeHtml(module.displayName)}" ${policy.enabled ? 'checked' : ''} />
+          </label>
+        </div>`;
+      }).join('');
+      const policyRows = new Map(modules.map((module) => [module.moduleKey, policyByModule.get(module.moduleKey)]));
+      container.addEventListener('change', async (event) => {
+        const input = event.target.closest('input[data-module]');
+        if (!input) return;
+        const previous = !input.checked;
+        const policy = policyRows.get(input.dataset.module);
+        input.disabled = true;
+        try {
+          await SettingsService.updateModuleAccess({
+            module: policy.module,
+            classLevelId: null,
+            enabled: input.checked,
+            blockUnpaid: Boolean(policy.blockUnpaid),
+            startsAt: policy.startsAt || null,
+            endsAt: policy.endsAt || null,
+          });
+          if (window.CurrentModuleAccess) window.CurrentModuleAccess[policy.module] = input.checked;
+          Toast.success(`${input.checked ? 'Enabled' : 'Disabled'} ${modules.find((module) => module.moduleKey === policy.module).displayName}.`);
+        } catch (error) {
+          input.checked = previous;
+          Toast.error(error.message || 'Unable to update module access.');
+        } finally {
+          input.disabled = false;
+        }
+      });
+    } catch (error) {
+      container.innerHTML = `<p class="text-danger">${escapeHtml(error.message || 'Unable to load portal modules.')}</p>`;
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     if (!window.CurrentUser) return;
     initTabs();
@@ -150,6 +209,11 @@
     const schoolTabBtn = document.querySelector('[data-tab-target="tab-school"]');
     const canManageSchool = Permissions.canAccessModule(window.CurrentUser.role, 'users');
     if (schoolTabBtn && !canManageSchool) schoolTabBtn.hidden = true;
+    const moduleAccessTab = document.getElementById('module-access-tab');
+    if (moduleAccessTab && window.CurrentUser.role === 'SUPER_ADMIN') {
+      moduleAccessTab.hidden = false;
+      bindModuleAccess();
+    }
 
     loadProfile();
     bindProfileForm();

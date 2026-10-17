@@ -19,6 +19,9 @@
     const termSelect = document.getElementById('filter-term');
     const classSelect = document.getElementById('filter-class');
     const subjectSelect = document.getElementById('filter-subject');
+    const sessionLabel = document.getElementById('current-session-label');
+    const termLabel = document.getElementById('current-term-label');
+    const classLabel = document.getElementById('assigned-class-label');
     const loadButton = document.getElementById('load-result-sheet-btn');
     const saveButton = document.getElementById('save-term-results-btn');
     const tbody = document.getElementById('results-tbody');
@@ -50,8 +53,8 @@
       });
       setOptions(classSelect, 'Select assigned class', [...classes].map(([value, label]) => ({ value, label })));
       classSelect.disabled = !sessionId || !classes.size;
-      if (classes.has(classSelect.value)) return;
-      classSelect.value = classes.size === 1 ? classes.keys().next().value : '';
+      if (!classes.has(classSelect.value)) classSelect.value = classes.keys().next().value || '';
+      classLabel.textContent = classes.get(classSelect.value) || 'No class assigned for the active session';
     };
     const updateSubjects = async () => {
       const updateId = ++subjectUpdateId;
@@ -82,25 +85,34 @@
       if (updateId !== subjectUpdateId) return;
       setOptions(subjectSelect, 'Select subject', [...subjects].map(([value, label]) => ({ value, label })));
       subjectSelect.disabled = !classSelect.value || !subjects.size;
+      if (!subjects.has(subjectSelect.value)) subjectSelect.value = subjects.size === 1 ? subjects.keys().next().value : '';
+      if (subjectSelect.value && termSelect.value) await loadRoster();
+      else if (!subjects.size) {
+        tbody.innerHTML = '<tr><td colspan="7">No subjects are assigned to your class.</td></tr>';
+      }
     };
 
     try {
-      const [{ items: assignmentRows }, { items: classTeacherAssignmentRows }, { items: sessions }] = await Promise.all([
+      const [{ items: assignmentRows }, { items: classTeacherAssignmentRows }, currentSession] = await Promise.all([
         TeacherAssignmentsService.list(),
         TeacherAssignmentsService.listClassTeachers(),
-        AcademicSessionsService.list({ pageSize: 100 })
+        AcademicSessionsService.current()
       ]);
       assignments = assignmentRows || [];
       classTeacherRows = classTeacherAssignmentRows || [];
-      const activeSession = sessions.find((session) => session.isActive) || sessions[0];
-      setOptions(sessionSelect, 'Select session', sessions.map((session) => ({ value: session.id, label: session.name })));
-      if (activeSession) sessionSelect.value = activeSession.id;
+      if (!currentSession?.id || currentSession.isActive === false) {
+        throw new Error('There is no active academic session. Contact the school administrator.');
+      }
+      setOptions(sessionSelect, 'Current session', [{ value: currentSession.id, label: currentSession.name }]);
+      sessionSelect.value = currentSession.id;
+      sessionLabel.textContent = currentSession.name;
       updateClasses(sessionSelect.value);
-      if (!assignments.length && !classTeacherRows.length) Toast.show('info', classSelect.options.length > 1
-        ? 'Your assigned class is available for class-teacher result entry.'
-        : 'No class/subject assignments are available for your account.');
+      if (!classSelect.value) throw new Error('You have no class assignment for the active academic session.');
     } catch (error) {
       Toast.error(error.message || 'Unable to load your assigned classes and subjects.');
+      sessionLabel.textContent = 'Unavailable';
+      termLabel.textContent = 'Unavailable';
+      classLabel.textContent = 'No assigned class';
       loadButton.disabled = true;
       saveButton.disabled = true;
       return;
@@ -118,12 +130,15 @@
       try {
         const { items: terms } = await TermsService.list({ sessionId, pageSize: 50 });
         setOptions(termSelect, 'Select term', terms.map((term) => ({ value: term.id, label: titleCaseFromEnum(term.name || term.type) })));
-        termSelect.disabled = !terms.length;
-        const selectedTerm = terms.find((term) => term.isActive) || terms[0];
+        const selectedTerm = terms.find((term) => term.isActive);
+        termSelect.disabled = !selectedTerm;
+        if (!selectedTerm) throw new Error('There is no active term for the current academic session. Contact the school administrator.');
         if (selectedTerm) termSelect.value = selectedTerm.id;
+        termLabel.textContent = titleCaseFromEnum(selectedTerm.name || selectedTerm.type);
         await updateSubjects();
       } catch (error) {
         setOptions(termSelect, 'Unable to load terms', []);
+        termLabel.textContent = 'Unavailable';
         await updateSubjects();
         Toast.error(error.message || 'Unable to load terms for this session.');
       }
@@ -167,6 +182,7 @@
     sessionSelect.addEventListener('change', () => updateTerms().catch((error) => Toast.error(error.message)));
     termSelect.addEventListener('change', () => updateSubjects().catch((error) => Toast.error(error.message)));
     classSelect.addEventListener('change', () => updateSubjects().catch((error) => Toast.error(error.message)));
+    subjectSelect.addEventListener('change', loadRoster);
     loadButton.addEventListener('click', loadRoster);
     tbody.addEventListener('input', (event) => {
       const input = event.target.closest('.score-input, .teacher-comment-input');

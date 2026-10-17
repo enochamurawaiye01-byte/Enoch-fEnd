@@ -26,5 +26,13 @@
       const payload = await ApiClient.put(SETTINGS.PREFERENCES, data);
       return ApiClient.unwrapItem(payload);
     },
+    async getModuleAccess() {
+      const payload = await ApiClient.get(SETTINGS.MODULE_ACCESS);
+      return ApiClient.unwrapList(payload).items;
+    },
+    async updateModuleAccess(data) {
+      const payload = await ApiClient.put(SETTINGS.MODULE_ACCESS, data);
+      return ApiClient.unwrapItem(payload);
+    },
   };
 })(window);

@@ -42,6 +42,7 @@
         <button type="button" class="tab-btn" data-tab-target="tab-password">Password</button>
         <button type="button" class="tab-btn" data-tab-target="tab-preferences">Preferences</button>
         <button type="button" class="tab-btn" data-tab-target="tab-school">School</button>
+        <button type="button" class="tab-btn" data-tab-target="tab-modules" id="module-access-tab" hidden>Portal Modules</button>
       </div>
 
       <div class="tab-panel settings-panel" id="tab-profile">
@@ -83,8 +84,15 @@
             <div class="form-group"><label class="form-label">Phone</label><input type="text" name="phone" /></div>
             <div class="form-group"><label class="form-label">Email</label><input type="email" name="email" /></div>
           </div>
+
           <button type="submit" class="btn btn-primary" id="school-save-btn">Save School Settings</button>
         </form>
+      </div>
+
+      <div class="tab-panel settings-panel" id="tab-modules" hidden>
+        <h2>Portal module access</h2>
+        <p class="text-muted">Disable a module to block access to its pages and APIs for everyone except Super Admins. Super Admin access remains available so modules can be re-enabled.</p>
+        <div id="module-access-list"><p class="text-muted">Loading portal modules…</p></div>
       </div>
     </main>
 

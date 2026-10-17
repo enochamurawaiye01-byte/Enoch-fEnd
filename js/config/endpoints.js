@@ -351,6 +351,7 @@
       SCHOOL: '/settings/school',
       PROFILE: '/settings/profile',
       PREFERENCES: '/settings/preferences',
+      MODULE_ACCESS: '/settings/module-access',
     },
 
     DASHBOARD: {

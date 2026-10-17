@@ -20,7 +20,8 @@
     },
     async current() {
       const payload = await ApiClient.get(ACADEMIC_SESSIONS.CURRENT);
-      return ApiClient.unwrapItem(payload);
+      const result = ApiClient.unwrapItem(payload);
+      return result?.session || result;
     },
     async create(data) {
       const payload = await ApiClient.post(ACADEMIC_SESSIONS.BASE, data);

@@ -172,7 +172,27 @@
     'children.html': 'parents',
   };
 
+  function apiModuleKeyForPage(moduleKey) {
+    const aliases = {
+      dashboards: 'dashboard',
+      teacher_classes: 'classes',
+      teacher_students: 'students',
+      teacher_results: 'results',
+      academic_sessions: 'academic-sessions',
+      class_subjects: 'class-subjects',
+      audit_logs: 'audit-logs',
+      exam_attempts: 'exam-attempts',
+      question_bank: 'question-bank',
+      teacher_attendance: 'teacher-attendance',
+    };
+    return aliases[moduleKey] || String(moduleKey).replace(/_/g, '-');
+  }
+
   function canAccessModule(role, moduleKey) {
+    if (role !== ROLES.SUPER_ADMIN && global.CurrentModuleAccess) {
+      const apiModuleKey = apiModuleKeyForPage(moduleKey);
+      if (global.CurrentModuleAccess[apiModuleKey] === false) return false;
+    }
     if (moduleKey === 'dashboards') {
       return Object.prototype.hasOwnProperty.call(ROLE_WORKSPACE, role);
     }

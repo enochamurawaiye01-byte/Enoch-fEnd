@@ -41,16 +41,21 @@
       <section class="section">
         <div class="section__head">
           <div>
-            <h2 style="margin:0;">Select a class and subject</h2>
-            <p class="text-muted text-small">Your class and subject choices come from your active teacher assignments.</p>
+            <h2 style="margin:0;">Your assigned class</h2>
+            <p class="text-muted text-small">Your assigned class, active academic session, and current term load automatically.</p>
           </div>
         </div>
         <div class="filter-bar">
-          <div class="form-group"><label for="filter-session">Academic session</label><select id="filter-session"><option value="">Select session</option></select></div>
-          <div class="form-group"><label for="filter-term">Term</label><select id="filter-term" disabled><option value="">Select term</option></select></div>
-          <div class="form-group"><label for="filter-class">Assigned class</label><select id="filter-class"><option value="">Select class</option></select></div>
+          <div class="form-group"><label>Academic session</label><strong id="current-session-label">Loading…</strong></div>
+          <div class="form-group"><label>Current term</label><strong id="current-term-label">Loading…</strong></div>
+          <div class="form-group"><label>Assigned class</label><strong id="assigned-class-label">Loading…</strong></div>
           <div class="form-group"><label for="filter-subject">Subject</label><select id="filter-subject"><option value="">Select subject</option></select></div>
           <button type="button" class="btn btn-secondary" id="load-result-sheet-btn">Load students</button>
+          <div hidden aria-hidden="true">
+            <select id="filter-session"></select>
+            <select id="filter-term"></select>
+            <select id="filter-class"></select>
+          </div>
         </div>
       </section>
       <section class="section">

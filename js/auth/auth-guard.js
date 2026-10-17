@@ -39,16 +39,14 @@
       const currentUser = freshUser || user;
       window.CurrentUser = currentUser;
       window.CurrentModuleAccess = null;
-      if (currentUser.role !== 'SUPER_ADMIN') {
-        try {
-          const payload = await ApiClient.get(ENOCH_ENDPOINTS.SETTINGS.MODULE_ACCESS);
-          const { items } = ApiClient.unwrapList(payload);
-          window.CurrentModuleAccess = Object.fromEntries(items
-            .filter((policy) => !policy.classLevelId)
-            .map((policy) => [policy.module, policy.enabled]));
-        } catch (error) {
-          console.warn('Could not load portal module access settings.', error);
-        }
+      try {
+        const payload = await ApiClient.get(ENOCH_ENDPOINTS.SETTINGS.MODULE_ACCESS);
+        const { items } = ApiClient.unwrapList(payload);
+        window.CurrentModuleAccess = Object.fromEntries(items
+          .filter((policy) => !policy.classLevelId)
+          .map((policy) => [policy.module, policy.enabled]));
+      } catch (error) {
+        console.warn('Could not load portal module access settings.', error);
       }
       const activeRoles = Array.isArray(currentUser.activeRoles) && currentUser.activeRoles.length
         ? currentUser.activeRoles

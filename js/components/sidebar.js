@@ -202,6 +202,26 @@
     ],
   };
 
+  function getModuleItems(workspace = 'admin') {
+    const modules = new Map();
+    for (const group of NAV[workspace] || []) {
+      for (const item of group.items) {
+        const pageModule = item.moduleKey || Permissions.getPageModule(item.href);
+        if (!pageModule) continue;
+        const module = Permissions.apiModuleKeyForPage(pageModule);
+        if (!modules.has(module)) {
+          modules.set(module, { module, labels: [] });
+        }
+        const entry = modules.get(module);
+        if (!entry.labels.includes(item.label)) entry.labels.push(item.label);
+      }
+    }
+    return [...modules.values()].map((entry) => ({
+      ...entry,
+      displayName: entry.labels.join(' / '),
+    }));
+  }
+
   function icon(name) {
     const common = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"';
     const paths = {
@@ -296,7 +316,7 @@
           ${g.items
             .map(
               (item) => `
-            <a class="sidebar__link ${item.href === active ? 'active' : ''}" href="${item.href}" title="${escapeHtml(item.label)}">
+            <a class="sidebar__link ${item.href === active ? 'active' : ''}" href="${item.href}" title="${escapeHtml(item.label)}" data-module-key="${Permissions.apiModuleKeyForPage(item.moduleKey || Permissions.getPageModule(item.href) || '')}">
               ${icon(item.icon)}
               <span>${escapeHtml(item.label)}</span>
             </a>`
@@ -343,6 +363,7 @@
       });
     }
 
+    refreshModuleVisibility();
     aside.addEventListener('click', (e) => {
       if (e.target.closest('.sidebar__link')) {
         document.querySelector('.app-shell')?.classList.remove('mobile-nav-open');
@@ -350,5 +371,19 @@
     });
   }
 
-  global.Sidebar = { render };
+  function refreshModuleVisibility() {
+    const links = document.querySelectorAll('.sidebar__link[data-module-key]');
+    links.forEach((link) => {
+      const disabled = window.CurrentModuleAccess?.[link.dataset.moduleKey] === false;
+      link.hidden = disabled;
+      link.style.display = disabled ? 'none' : '';
+    });
+    document.querySelectorAll('.sidebar__group').forEach((group) => {
+      const empty = !group.querySelector('.sidebar__link:not([hidden])');
+      group.hidden = empty;
+      group.style.display = empty ? 'none' : '';
+    });
+  }
+
+  global.Sidebar = { render, getModuleItems, refreshModuleVisibility };
 })(window);

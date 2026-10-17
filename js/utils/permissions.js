@@ -229,6 +229,7 @@
     getWorkspaceForRole,
     dashboardPathForRole,
     canAccessModule,
+    apiModuleKeyForPage,
     getPageModule,
   };
 })(window);

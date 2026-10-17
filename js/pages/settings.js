@@ -148,36 +148,32 @@
     if (!container) return;
     container.innerHTML = '<p class="text-muted">Loading portal modules…</p>';
     try {
-      const [policies, modulesPayload] = await Promise.all([
-        SettingsService.getModuleAccess(),
-        ApiClient.get(ENOCH_ENDPOINTS.PERMISSIONS.MODULES),
-      ]);
+      const policies = await SettingsService.getModuleAccess();
       const globalPolicies = policies.filter((policy) => !policy.classLevelId);
-      const modules = ApiClient.unwrapList(modulesPayload).items
-        .filter((module) => module.apiRoute)
-        .map((module) => ({ ...module, moduleKey: module.apiRoute.replace(/^\//, '') }))
-        .filter((module) => globalPolicies.some((policy) => policy.module === module.moduleKey))
+      const modules = Sidebar.getModuleItems('admin')
         .sort((a, b) => a.displayName.localeCompare(b.displayName));
       const policyByModule = new Map(globalPolicies.map((policy) => [policy.module, policy]));
       if (!modules.length) {
-        container.innerHTML = '<p class="text-muted">No configurable portal modules were returned.</p>';
+        container.innerHTML = '<p class="text-muted">No sidebar modules are available to configure.</p>';
         return;
       }
       container.innerHTML = modules.map((module) => {
-        const policy = policyByModule.get(module.moduleKey);
+        const policy = policyByModule.get(module.module);
+        const enabled = policy ? policy.enabled : true;
         return `<div class="card" style="margin:12px 0;padding:16px;">
           <label class="checkbox-field" style="justify-content:space-between;gap:16px;">
-            <span><strong>${escapeHtml(module.displayName)}</strong><br><small class="text-muted">${escapeHtml(module.moduleKey)}</small></span>
-            <input type="checkbox" data-module="${escapeHtml(module.moduleKey)}" aria-label="Enable ${escapeHtml(module.displayName)}" ${policy.enabled ? 'checked' : ''} />
+            <span><strong>${escapeHtml(module.displayName)}</strong><br><small class="text-muted">${escapeHtml(module.module)}</small></span>
+            <input type="checkbox" data-module="${escapeHtml(module.module)}" aria-label="Enable ${escapeHtml(module.displayName)}" ${enabled ? 'checked' : ''} />
           </label>
         </div>`;
       }).join('');
-      const policyRows = new Map(modules.map((module) => [module.moduleKey, policyByModule.get(module.moduleKey)]));
+      const policyRows = new Map(modules.map((module) => [module.module, policyByModule.get(module.module)]));
       container.addEventListener('change', async (event) => {
         const input = event.target.closest('input[data-module]');
         if (!input) return;
         const previous = !input.checked;
-        const policy = policyRows.get(input.dataset.module);
+        const module = input.dataset.module;
+        const policy = policyRows.get(module) || { module };
         input.disabled = true;
         try {
           await SettingsService.updateModuleAccess({
@@ -189,7 +185,8 @@
             endsAt: policy.endsAt || null,
           });
           if (window.CurrentModuleAccess) window.CurrentModuleAccess[policy.module] = input.checked;
-          Toast.success(`${input.checked ? 'Enabled' : 'Disabled'} ${modules.find((module) => module.moduleKey === policy.module).displayName}.`);
+          Sidebar.refreshModuleVisibility();
+          Toast.success(`${input.checked ? 'Enabled' : 'Disabled'} ${modules.find((item) => item.module === policy.module).displayName}.`);
         } catch (error) {
           input.checked = previous;
           Toast.error(error.message || 'Unable to update module access.');

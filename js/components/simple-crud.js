@@ -83,6 +83,12 @@
           <button type="button" class="icon-link" data-action="delete" title="Delete">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
           </button>
+          ${config.archiveAction && row.isActive !== false ? `<button type="button" class="icon-link" data-action="archive" title="Archive">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 4h18v4H3z"/><path d="M5 8v12h14V8M10 12h4"/></svg>
+          </button>` : ''}
+          ${config.restoreAction && row.isActive === false ? `<button type="button" class="icon-link" data-action="restore" title="Restore">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.8-2L20 12M4 12l2.6 5a7 7 0 0 0 11.8-2"/></svg>
+          </button>` : ''}
         </div>
       `;
     }
@@ -211,6 +217,32 @@
           openDeleteConfirm(row);
         } catch (err) {
           Toast.error(err.message || 'Unable to load this record.');
+        }
+      } else if (e.target.closest('[data-action="archive"]') && config.archiveAction) {
+        try {
+          const row = await service.get(id);
+          ConfirmDialog.open({
+            title: `Archive ${entityLabel}`,
+            message: config.archiveMessage ? config.archiveMessage(row) : `Archive this ${entityLabel.toLowerCase()}?`,
+            confirmLabel: 'Archive',
+            tone: 'warn',
+            onConfirm: async () => {
+              await service.archive(id);
+              Toast.success(config.archiveSuccessMessage || `${entityLabel} archived.`);
+              table.reload();
+            },
+          });
+        } catch (err) {
+          Toast.error(err.message || `Unable to archive this ${entityLabel.toLowerCase()}.`);
+        }
+      } else if (e.target.closest('[data-action="restore"]') && config.restoreAction) {
+        try {
+          const row = await service.get(id);
+          await service.update(id, { isActive: true });
+          Toast.success(config.restoreSuccessMessage || `${entityLabel} restored.`);
+          table.reload();
+        } catch (err) {
+          Toast.error(err.message || `Unable to restore this ${entityLabel.toLowerCase()}.`);
         }
       } else if (config.onRowAction) {
         config.onRowAction(e, rowEl.dataset.rowId);

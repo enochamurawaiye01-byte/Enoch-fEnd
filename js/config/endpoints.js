@@ -93,6 +93,7 @@
     SUBJECTS: {
       BASE: '/subjects',
       BY_ID: (subjectId) => `/subjects/${subjectId}`,
+      ARCHIVE: (subjectId) => `/subjects/${subjectId}/archive`,
     },
 
     DEPARTMENTS: {

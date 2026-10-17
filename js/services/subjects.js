@@ -16,15 +16,15 @@
       return ApiClient.unwrapItem(payload);
     },
     async update(id, data) {
-      const payload = await ApiClient.put(SUBJECTS.BY_ID(id), data);
-      return ApiClient.unwrapItem(payload);
-    },
-    async deactivate(id) {
-      const payload = await ApiClient.patch(`${SUBJECTS.BY_ID(id)}/deactivate`, {});
+      const payload = await ApiClient.patch(SUBJECTS.BY_ID(id), data);
       return ApiClient.unwrapItem(payload);
     },
     async delete(id) {
       return ApiClient.delete(SUBJECTS.BY_ID(id));
+    },
+    async archive(id) {
+      const payload = await ApiClient.patch(SUBJECTS.ARCHIVE(id), {});
+      return ApiClient.unwrapItem(payload);
     },
   };
 })(window);

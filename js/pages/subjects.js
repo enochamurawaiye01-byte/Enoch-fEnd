@@ -30,7 +30,7 @@
       ],
       formFields: [
         { name: 'name', label: 'Subject Name', required: true, placeholder: 'e.g. Mathematics' },
-        { name: 'code', label: 'Subject Code', placeholder: 'e.g. MTH' },
+        { name: 'code', label: 'Subject Code (optional)', placeholder: 'Leave blank if your school does not use subject codes' },
         { name: 'classGroup', label: 'Class group', type: 'select', required: true, options: [{ value: 'JSS', label: 'JSS — all junior classes' }, { value: 'SSS', label: 'SSS — selected departments' }], help: 'This assigns the subject to all existing classes in the selected group and to classes created later.' },
         { name: 'departmentIds', label: 'Senior secondary departments', type: 'checkboxGroup', required: true, options: departmentOptions, help: 'Choose one or more departments that should use this subject.' },
         { name: 'description', label: 'Description', type: 'textarea' },
@@ -52,7 +52,7 @@
         classGroup.addEventListener('change', updateDepartmentVisibility);
         updateDepartmentVisibility();
       },
-      requiredWhen: (name, values) => name !== 'departmentIds' || values.classGroup === 'SSS',
+      requiredWhen: (name, values, row) => name !== 'departmentIds' || (!row && values.classGroup === 'SSS'),
       onFormValues: (values, row) => {
         if (row) {
           delete values.classGroup;
@@ -60,10 +60,12 @@
         }
         return values;
       },
-      deleteMessage: (row) => `Delete "${row.name}"? If it is already used in classes or results, it will be archived instead so historical records remain safe.`,
-      deleteSuccessMessage: (_row, result) => result?.data?.archived
-        ? 'Subject is in use and has been archived. Historical records are preserved.'
-        : 'Subject deleted.',
+      deleteMessage: (row) => `Permanently delete "${row.name}"? This is allowed only when it has no class registrations or academic records. Use Archive to retain history.`,
+      archiveAction: true,
+      archiveMessage: (row) => `Archive "${row.name}" from future use? Existing class registrations and academic history will be preserved.`,
+      archiveSuccessMessage: 'Subject archived. Existing class registrations and academic history are preserved.',
+      restoreAction: true,
+      restoreSuccessMessage: 'Subject restored.',
     });
   });
 })();

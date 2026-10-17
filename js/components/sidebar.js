@@ -145,6 +145,7 @@
           { label: 'Examinations', href: 'examinations.html', icon: 'file-check' },
           { label: 'Question Bank', href: 'questions.html', icon: 'help-circle' },
           { label: 'Results', href: 'results.html', icon: 'award', moduleKey: 'teacher_results' },
+          { label: 'Transcripts', href: 'transcripts.html', icon: 'file', moduleKey: 'teacher_transcripts' },
         ],
       },
       { group: 'System', items: [{ label: 'Settings', href: 'settings.html', icon: 'settings' }] },

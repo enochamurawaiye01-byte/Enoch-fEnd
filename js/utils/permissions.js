@@ -93,6 +93,7 @@
     teacher_classes: [ROLES.TEACHER, 'CLASS_TEACHER', 'SUBJECT_TEACHER', 'SENIOR_TEACHER'],
     teacher_students: [ROLES.TEACHER, 'CLASS_TEACHER', 'SUBJECT_TEACHER', 'SENIOR_TEACHER'],
     teacher_results: [ROLES.TEACHER, 'CLASS_TEACHER', 'SUBJECT_TEACHER', 'SENIOR_TEACHER'],
+    teacher_transcripts: [ROLES.TEACHER, 'CLASS_TEACHER', 'SUBJECT_TEACHER', 'SENIOR_TEACHER'],
     parents: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.MANAGEMENT],
     teachers: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.MANAGEMENT, ROLES.PRINCIPAL],
     academics: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.MANAGEMENT, ROLES.PRINCIPAL, ROLES.VICE_PRINCIPAL, ROLES.HEAD_TEACHER],
@@ -178,6 +179,7 @@
       teacher_classes: 'classes',
       teacher_students: 'students',
       teacher_results: 'results',
+      teacher_transcripts: 'transcripts',
       academic_sessions: 'academic-sessions',
       class_subjects: 'class-subjects',
       audit_logs: 'audit-logs',
@@ -202,7 +204,7 @@
     if (moduleKey === 'results' && role === ROLES.STUDENT) {
       return true;
     }
-    if (moduleKey === 'teacher_classes' || moduleKey === 'teacher_students' || moduleKey === 'teacher_results') {
+    if (moduleKey === 'teacher_classes' || moduleKey === 'teacher_students' || moduleKey === 'teacher_results' || moduleKey === 'teacher_transcripts') {
       return MODULE_ACCESS[moduleKey].includes(role);
     }
     const currentUser = global.CurrentUser || (global.Storage && Storage.getUser());
@@ -219,6 +221,7 @@
     if (normalizedPath.endsWith('/pages/teacher/classes.html')) return 'teacher_classes';
     if (normalizedPath.endsWith('/pages/teacher/students.html')) return 'teacher_students';
     if (normalizedPath.endsWith('/pages/teacher/results.html')) return 'teacher_results';
+    if (normalizedPath.endsWith('/pages/teacher/transcripts.html')) return 'teacher_transcripts';
     const filename = String(pathname || '').split('/').pop();
     return PAGE_MODULES[filename] || null;
   }

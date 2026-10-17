@@ -2,7 +2,21 @@
   'use strict';
 
   function renderTranscript(container, student, transcript) {
-    const records = transcript.records || transcript.results || [];
+    const savedAssessmentRecords = (transcript.reportCards || []).flatMap((reportCard) =>
+      (reportCard.entries || []).map((entry) => ({
+        termName: [reportCard.session?.name, reportCard.term?.name || reportCard.term?.type].filter(Boolean).join(' — '),
+        subjectName: entry.subject?.name || '—',
+        firstTest: entry.firstTest,
+        secondTest: entry.secondTest,
+        exam: entry.exam,
+        score: entry.total,
+        grade: entry.grade,
+        remarks: entry.remark,
+      }))
+    );
+    const records = savedAssessmentRecords.length
+      ? savedAssessmentRecords
+      : transcript.records || transcript.results || [];
     const enrollment = (student.enrollments || []).find(
       (item) => item.status === 'ACTIVE' && item.session?.isActive
     );
@@ -49,13 +63,16 @@
                   ([term, rows]) => `
               <h3 class="transcript-term-title">${escapeHtml(titleCaseFromEnum(term))}</h3>
               <table class="data-table">
-                <thead><tr><th>Subject</th><th>Score</th><th>Grade</th><th>Remarks</th></tr></thead>
+                <thead><tr><th>Subject</th><th>1st CA</th><th>2nd CA</th><th>Exam</th><th>Total</th><th>Grade</th><th>Remarks</th></tr></thead>
                 <tbody>
                   ${rows
                     .map(
                       (r) => `
                     <tr>
                       <td>${escapeHtml(r.subjectName || r.subject?.name || '—')}</td>
+                      <td class="numeric">${escapeHtml(String(r.firstTest ?? '—'))}</td>
+                      <td class="numeric">${escapeHtml(String(r.secondTest ?? '—'))}</td>
+                      <td class="numeric">${escapeHtml(String(r.exam ?? '—'))}</td>
                       <td class="numeric">${escapeHtml(String(r.score ?? '—'))}</td>
                       <td>${escapeHtml(r.grade || '—')}</td>
                       <td>${escapeHtml(r.remarks || '—')}</td>

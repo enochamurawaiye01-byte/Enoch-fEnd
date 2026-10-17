@@ -28,6 +28,7 @@
     let dirty = false;
     let subjectUpdateId = 0;
     const classSubjectCache = new Map();
+    saveButton.disabled = true;
 
     const setOptions = (select, placeholder, values) => {
       select.innerHTML = `<option value="">${escapeHtml(placeholder)}</option>${values.map((item) => `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`).join('')}`;
@@ -35,6 +36,23 @@
     const matchingAssignments = () => assignments.filter((assignment) => assignment.classId === classSelect.value
       && (!assignment.sessionId || assignment.sessionId === sessionSelect.value)
       && (!assignment.termId || assignment.termId === termSelect.value));
+    const updateClasses = (sessionId) => {
+      const classes = new Map();
+      assignments.forEach((assignment) => {
+        if (assignment.class && (!assignment.sessionId || assignment.sessionId === sessionId)) {
+          classes.set(assignment.classId, assignment.class.name);
+        }
+      });
+      classTeacherRows.forEach((assignment) => {
+        if (assignment.class && assignment.sessionId === sessionId) {
+          classes.set(assignment.classId, assignment.class.name);
+        }
+      });
+      setOptions(classSelect, 'Select assigned class', [...classes].map(([value, label]) => ({ value, label })));
+      classSelect.disabled = !sessionId || !classes.size;
+      if (classes.has(classSelect.value)) return;
+      classSelect.value = classes.size === 1 ? classes.keys().next().value : '';
+    };
     const updateSubjects = async () => {
       const updateId = ++subjectUpdateId;
       const subjects = new Map();
@@ -67,23 +85,18 @@
     };
 
     try {
-      const [{ items: assignmentRows }, { items: classTeacherAssignmentRows }, { items: sessions }, currentConfiguration] = await Promise.all([
+      const [{ items: assignmentRows }, { items: classTeacherAssignmentRows }, { items: sessions }] = await Promise.all([
         TeacherAssignmentsService.list(),
         TeacherAssignmentsService.listClassTeachers(),
-        AcademicSessionsService.list({ pageSize: 100 }),
-        ReportCardsService.getConfiguration()
+        AcademicSessionsService.list({ pageSize: 100 })
       ]);
       assignments = assignmentRows || [];
       classTeacherRows = classTeacherAssignmentRows || [];
-      configuration = currentConfiguration;
-      const activeSession = sessions.find((session) => session.isActive);
+      const activeSession = sessions.find((session) => session.isActive) || sessions[0];
       setOptions(sessionSelect, 'Select session', sessions.map((session) => ({ value: session.id, label: session.name })));
       if (activeSession) sessionSelect.value = activeSession.id;
-      const classes = new Map();
-      assignments.forEach((assignment) => { if (assignment.class) classes.set(assignment.classId, assignment.class.name); });
-      classTeacherRows.forEach((assignment) => { if (assignment.class) classes.set(assignment.classId, assignment.class.name); });
-      setOptions(classSelect, 'Select assigned class', [...classes].map(([value, label]) => ({ value, label })));
-      if (!assignments.length) Toast.show('info', classes.size
+      updateClasses(sessionSelect.value);
+      if (!assignments.length && !classTeacherRows.length) Toast.show('info', classSelect.options.length > 1
         ? 'Your assigned class is available for class-teacher result entry.'
         : 'No class/subject assignments are available for your account.');
     } catch (error) {
@@ -96,17 +109,24 @@
     async function updateTerms() {
       const sessionId = sessionSelect.value;
       termSelect.disabled = !sessionId;
-      classSelect.disabled = !sessionId;
+      updateClasses(sessionId);
       if (!sessionId) {
         setOptions(termSelect, 'Select session first', []);
         await updateSubjects();
         return;
       }
-      const { items: terms } = await TermsService.list({ sessionId, pageSize: 50 });
-      setOptions(termSelect, 'Select term', terms.map((term) => ({ value: term.id, label: titleCaseFromEnum(term.name || term.type) })));
-      const activeTerm = terms.find((term) => term.isActive);
-      if (activeTerm) termSelect.value = activeTerm.id;
-      await updateSubjects();
+      try {
+        const { items: terms } = await TermsService.list({ sessionId, pageSize: 50 });
+        setOptions(termSelect, 'Select term', terms.map((term) => ({ value: term.id, label: titleCaseFromEnum(term.name || term.type) })));
+        termSelect.disabled = !terms.length;
+        const selectedTerm = terms.find((term) => term.isActive) || terms[0];
+        if (selectedTerm) termSelect.value = selectedTerm.id;
+        await updateSubjects();
+      } catch (error) {
+        setOptions(termSelect, 'Unable to load terms', []);
+        await updateSubjects();
+        Toast.error(error.message || 'Unable to load terms for this session.');
+      }
     }
 
     async function loadRoster() {

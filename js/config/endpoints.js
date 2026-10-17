@@ -357,6 +357,7 @@
       ADMIN: '/analytics/dashboard',
       MANAGEMENT: '/management/dashboard',
       TEACHER: '/dashboard/teacher',
+      TEACHER_ACTIVITY: '/dashboard/teacher/activity',
       STUDENT: '/dashboard/student',
       PARENT: '/dashboard/parent',
     },

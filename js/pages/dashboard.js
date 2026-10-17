@@ -169,23 +169,26 @@
     }
   }
 
-  async function loadRecentActivity(container) {
+  async function loadRecentActivity(container, workspace) {
     if (!container) return;
     container.innerHTML = Loader.spinnerHtml('Loading recent activity…');
     try {
-      const payload = await ApiClient.get(ENOCH_ENDPOINTS.ANNOUNCEMENTS.BASE, { limit: 5 });
+      const endpoint = workspace === 'teacher'
+        ? ENOCH_ENDPOINTS.DASHBOARD.TEACHER_ACTIVITY
+        : ENOCH_ENDPOINTS.ANNOUNCEMENTS.BASE;
+      const payload = await ApiClient.get(endpoint, workspace === 'teacher' ? {} : { limit: 5 });
       const { items } = ApiClient.unwrapList(payload);
       if (!items.length) {
-        container.innerHTML = '<div class="table-state"><p>No recent activity to show.</p></div>';
+        container.innerHTML = `<div class="table-state"><p>${workspace === 'teacher' ? 'No recent activity for your assigned classes.' : 'No recent activity to show.'}</p></div>`;
         return;
       }
       container.innerHTML = items
         .map(
-          (a) => `
+          (activity) => `
         <div class="list-row">
           <div>
-            <div class="list-row__title">${escapeHtml(a.title || 'Announcement')}</div>
-            <div class="list-row__sub">${timeAgo(a.createdAt || a.publishedAt)}</div>
+            <div class="list-row__title">${escapeHtml(workspace === 'teacher' ? `${activity.type}: ${activity.title}` : activity.title || 'Announcement')}</div>
+            <div class="list-row__sub">${escapeHtml(workspace === 'teacher' ? `${activity.class?.name || 'Assigned class'} · ${timeAgo(activity.updatedAt)}` : timeAgo(activity.createdAt || activity.publishedAt))}</div>
           </div>
         </div>`
         )
@@ -207,7 +210,7 @@
 
     if (quickLinksEl) quickLinksEl.innerHTML = renderQuickLinks(config.quickLinks);
     if (workspace === 'student') loadStudentIdentity(studentIdentityEl);
-    loadRecentActivity(activityEl);
+    loadRecentActivity(activityEl, workspace);
 
     statGrid.innerHTML = Loader.spinnerHtml('Loading dashboard…');
     try {

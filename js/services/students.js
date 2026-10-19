@@ -55,6 +55,35 @@
       return { ...result, items: result.items.map(normalizeStudent) };
     },
 
+    async listAll(params = {}) {
+      const pageSize = params.pageSize || 100;
+      const items = [];
+      let page = 1;
+      let totalPages = null;
+      let hasPagination = false;
+
+      do {
+        const result = await this.list({ ...params, page, pageSize });
+        items.push(...result.items);
+        const meta = result.meta;
+        if (!meta) break;
+
+        hasPagination = true;
+        const reportedPages = Number(meta.totalPages || meta.pages || meta.lastPage);
+        const total = Number(meta.total);
+        totalPages = Number.isFinite(reportedPages) && reportedPages > 0
+          ? reportedPages
+          : Number.isFinite(total) && total >= 0
+            ? Math.ceil(total / pageSize)
+            : null;
+        if (result.items.length < pageSize) break;
+        if (totalPages !== null && page >= totalPages) break;
+        page += 1;
+      } while (page <= 1000);
+
+      return { items, meta: hasPagination ? { total: items.length, pageSize } : null };
+    },
+
     async get(studentId) {
       const payload = await ApiClient.get(STUDENTS.BY_ID(studentId));
       return normalizeStudent(ApiClient.unwrapItem(payload));

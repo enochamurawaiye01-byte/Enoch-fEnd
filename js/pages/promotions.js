@@ -16,21 +16,21 @@
           <label class="form-label">Student <span class="required">*</span></label>
           <select name="studentId" required>
             <option value="">Select student…</option>
-            ${studentOptions.map((o) => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join('')}
+              ${studentOptions.map((o) => `<option value="${escapeHtml(o.value)}" data-current-class-id="${escapeHtml(o.classId || '')}">${escapeHtml(o.label)}</option>`).join('')}
           </select>
           <span class="form-error"></span>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">From Class</label>
-            <select name="fromClassId">
+              <label class="form-label">From Class <span class="required">*</span></label>
+              <select name="fromClassId" required>
               <option value="">Select…</option>
               ${classOptions.map((o) => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join('')}
             </select>
           </div>
           <div class="form-group">
             <label class="form-label">To Class <span class="required">*</span></label>
-            <select name="toClassId" required>
+              <select name="toClassId">
               <option value="">Select…</option>
               ${classOptions.map((o) => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join('')}
             </select>
@@ -39,11 +39,21 @@
         </div>
         <div class="form-group">
           <label class="form-label">Academic Session <span class="required">*</span></label>
-          <select name="academicSessionId" required>
+          <select name="sessionId" required>
             <option value="">Select…</option>
             ${sessionOptions.map((o) => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join('')}
           </select>
           <span class="form-error"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Promotion Status <span class="required">*</span></label>
+          <select name="status" required>
+            <option value="PROMOTED">Promoted</option>
+            <option value="CONDITIONAL">Conditional</option>
+            <option value="NOT_PROMOTED">Not promoted</option>
+            <option value="GRADUATED">Graduated</option>
+            <option value="WITHDRAWN">Withdrawn</option>
+          </select>
         </div>
       </form>
     `;
@@ -56,16 +66,24 @@
     if (addBtn) addBtn.hidden = !canManage;
 
     let classOptions = [], sessionOptions = [], studentOptions = [];
-    try {
-      const [{ items: classes }, { items: sessions }, { items: students }] = await Promise.all([
-        ClassesService.list({ pageSize: 100 }),
-        AcademicSessionsService.list({ pageSize: 50 }),
-        StudentsService.list({ pageSize: 200 }),
-      ]);
-      classOptions = classes.map((c) => ({ value: c.id, label: c.name }));
-      sessionOptions = sessions.map((s) => ({ value: s.id, label: s.name }));
-      studentOptions = students.map((s) => ({ value: s.id, label: `${s.firstName || ''} ${s.lastName || ''} (${s.regNumber || 'no reg.'})`.trim() }));
-    } catch (e) { /* non-fatal */ }
+    const [classesResult, sessionsResult, studentsResult] = await Promise.allSettled([
+      ClassesService.list({ pageSize: 100 }),
+      AcademicSessionsService.list({ pageSize: 50 }),
+      StudentsService.listAll({ pageSize: 100, status: 'ACTIVE' }),
+    ]);
+    if (classesResult.status === 'fulfilled') {
+      classOptions = classesResult.value.items.map((c) => ({ value: c.id, label: c.name }));
+    }
+    if (sessionsResult.status === 'fulfilled') {
+      sessionOptions = sessionsResult.value.items.map((s) => ({ value: s.id, label: s.name }));
+    }
+    if (studentsResult.status === 'fulfilled') {
+      studentOptions = studentsResult.value.items.map((s) => ({
+        value: s.id,
+        classId: s.currentClassId || s.classId || '',
+        label: `${s.firstName || ''} ${s.lastName || ''} (${s.regNumber || 'no reg.'})`.trim(),
+      }));
+    }
 
     table = DataTable.create({
       tbody: document.getElementById('promotions-tbody'),
@@ -96,27 +114,59 @@
         onMount: (modalEl) => {
           modalEl.querySelector('[data-action="cancel"]').addEventListener('click', Modal.close);
           const form = modalEl.querySelector('#promotion-form');
+          const studentSelect = form.querySelector('[name="studentId"]');
+          const fromClassSelect = form.querySelector('[name="fromClassId"]');
+          const toClassSelect = form.querySelector('[name="toClassId"]');
+          const statusSelect = form.querySelector('[name="status"]');
+          const syncFromClass = () => {
+            const selectedOption = studentSelect.selectedOptions[0];
+            const studentClassId = selectedOption?.dataset.currentClassId || '';
+            if (studentClassId && [...fromClassSelect.options].some((option) => option.value === studentClassId)) {
+              fromClassSelect.value = studentClassId;
+            } else {
+              fromClassSelect.value = '';
+            }
+          };
+          const syncTargetRequirement = () => {
+            toClassSelect.required = !['NOT_PROMOTED', 'GRADUATED'].includes(statusSelect.value);
+          };
+          studentSelect.addEventListener('change', syncFromClass);
+          statusSelect.addEventListener('change', syncTargetRequirement);
+          syncTargetRequirement();
           form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const values = Object.fromEntries(new FormData(form).entries());
             const { valid, errors } = Validators.validateForm(values, {
               studentId: [(v) => Validators.required(v, 'Student')],
-              toClassId: [(v) => Validators.required(v, 'Destination class')],
-              academicSessionId: [(v) => Validators.required(v, 'Academic session')],
+              fromClassId: [(v) => Validators.required(v, 'Source class')],
+              sessionId: [(v) => Validators.required(v, 'Academic session')],
             });
+            if (!['NOT_PROMOTED', 'GRADUATED'].includes(values.status) && !values.toClassId) {
+              errors.toClassId = 'Select a destination class.';
+            }
             form.querySelectorAll('.form-group').forEach((g) => g.classList.remove('has-error'));
-            if (!valid) {
+            if (!valid || Object.keys(errors).length) {
               Object.entries(errors).forEach(([field, message]) => {
                 const input = form.querySelector(`[name="${field}"]`);
                 const group = input && input.closest('.form-group');
-                if (group) { group.classList.add('has-error'); group.querySelector('.form-error').textContent = message; }
+                if (group) {
+                  group.classList.add('has-error');
+                  const error = group.querySelector('.form-error');
+                  if (error) error.textContent = message;
+                }
               });
               return;
             }
             const btn = document.getElementById('promotion-save-btn');
             Loader.setButtonLoading(btn, true, 'Promoting…');
             try {
-              await PromotionsService.create(values);
+              await PromotionsService.create({
+                studentId: values.studentId,
+                fromClassId: values.fromClassId,
+                toClassId: values.toClassId || null,
+                sessionId: values.sessionId,
+                status: values.status,
+              });
               Toast.success('Student promoted successfully.');
               Modal.close();
               table.reload();

@@ -32,26 +32,38 @@
       <div class="page-head">
         <div class="page-head__title">
           <h1>Timetable</h1>
-          <span class="page-head__desc">Manage class timetable entries by day and period.</span>
-        </div>
-        <div class="page-head__actions">
-          <button type="button" class="btn btn-primary" id="add-timetable-btn" hidden>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-            Add Entry
-          </button>
+          <span class="page-head__desc">Upload a timetable for each class. The All Classes view combines the active timetables for the current term.</span>
         </div>
       </div>
+      <section class="table-wrap" id="timetable-upload-panel">
+        <div class="table-toolbar">
+          <strong>Upload or replace a class timetable</strong>
+        </div>
+        <form id="timetable-upload-form" class="form-grid" style="padding: 16px; gap: 12px;">
+          <label>Class
+            <select id="timetable-upload-class" required>
+              <option value="">Select a class</option>
+            </select>
+          </label>
+          <label>Timetable file (JPG, PNG, WEBP, or PDF; maximum 5 MB)
+            <input id="timetable-upload-file" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf" required />
+          </label>
+          <div><button type="submit" class="btn btn-primary" id="timetable-upload-submit">Upload timetable</button></div>
+        </form>
+      </section>
       <div class="table-wrap">
         <div class="table-toolbar">
-          <select id="filter-class" style="min-width:200px;"><option value="">All Classes</option></select>
+          <label for="filter-class">General timetable</label>
+          <select id="filter-class" style="min-width:200px;">
+            <option value="">All Classes (combined)</option>
+          </select>
         </div>
         <div class="table-scroll">
           <table class="data-table">
-            <thead><tr><th>Class</th><th>Day</th><th>Time</th><th>Subject</th><th>Teacher</th><th style="text-align:right;">Actions</th></tr></thead>
+            <thead><tr><th>Class</th><th>Session and term</th><th>Timetable</th><th>Last updated</th></tr></thead>
             <tbody id="timetable-tbody"></tbody>
           </table>
         </div>
-        <div id="timetable-pagination"></div>
       </div>
     </main>
 

@@ -28,10 +28,168 @@
     let assignments = [];
     let classTeacherRows = [];
     let configuration = null;
-    let dirty = false;
     let subjectUpdateId = 0;
     const classSubjectCache = new Map();
+    const saveQueue = new Map();
+    let saveTimer = null;
+    let drainPromise = null;
+    let savingCount = 0;
+    let previewRequestId = 0;
+    let activeSheetKey = '';
+    let previewTimer = null;
     saveButton.disabled = true;
+
+    const sheetContext = () => ({
+      sessionId: sessionSelect.value,
+      termId: termSelect.value,
+      classId: classSelect.value
+    });
+    const sheetKey = (context = sheetContext()) => `${context.sessionId}|${context.termId}|${context.classId}|${subjectSelect.value}`;
+    const setRowStatus = (row, state, message, retry = false) => {
+      const cell = row.querySelector('[data-save-state]');
+      if (!cell) return;
+      const retryButton = retry
+        ? '<button type="button" class="btn btn-secondary btn-sm result-save-retry" data-retry-save>Retry</button>'
+        : '';
+      cell.innerHTML = `<span class="result-save-state result-save-state--${state}" role="status">${escapeHtml(message)}</span>${retryButton}`;
+      row.dataset.saveState = state;
+    };
+    const rowPayload = (row) => {
+      const fields = [...row.querySelectorAll('.score-input')];
+      const hasValue = fields.some((field) => field.value !== '');
+      if (!hasValue && row.dataset.hasScores !== 'true') return null;
+      return {
+        studentId: row.dataset.studentId,
+        firstTest: Number(fields[0].value || 0),
+        secondTest: Number(fields[1].value || 0),
+        exam: Number(fields[2].value || 0),
+        teacherComment: row.querySelector('.teacher-comment-input').value.trim()
+      };
+    };
+    const payloadKey = (payload) => payload ? JSON.stringify(payload) : '';
+    const currentRowKey = (row) => payloadKey(rowPayload(row));
+    const unsavedRows = () => [...tbody.querySelectorAll('tr[data-student-id]')]
+      .filter((row) => currentRowKey(row) !== row.dataset.savedPayload);
+    const updateSaveButton = () => {
+      const changed = unsavedRows().length > 0 || saveQueue.size > 0 || savingCount > 0;
+      saveButton.disabled = !changed;
+      saveButton.textContent = savingCount ? `Saving ${savingCount}…` : changed ? 'Save all changes' : 'All changes saved';
+      saveButton.setAttribute('aria-busy', savingCount ? 'true' : 'false');
+      if (saveStatus) {
+        saveStatus.textContent = savingCount
+          ? `Saving ${savingCount} student result${savingCount === 1 ? '' : 's'}…`
+          : saveQueue.size
+            ? `${saveQueue.size} student result${saveQueue.size === 1 ? '' : 's'} waiting to save.`
+            : changed
+              ? 'Some changes need attention.'
+              : 'All changes saved.';
+      }
+    };
+    const syncDirty = () => {
+      const dirty = unsavedRows().length > 0 || saveQueue.size > 0 || savingCount > 0;
+      window.__teacherResultsDirty = dirty;
+      updateSaveButton();
+    };
+    const contextForRow = (row) => {
+      try {
+        return JSON.parse(row.dataset.entryContext || '{}');
+      } catch (_error) {
+        return {};
+      }
+    };
+    const queueRow = (row, immediate = false) => {
+      const payload = rowPayload(row);
+      const key = payloadKey(payload);
+      if (key === row.dataset.savedPayload) {
+        saveQueue.delete(row.dataset.studentId);
+        setRowStatus(row, row.dataset.hasScores === 'true' ? 'saved' : 'idle', row.dataset.hasScores === 'true' ? 'Saved' : 'Not started');
+        syncDirty();
+        return;
+      }
+      if (!payload) {
+        setRowStatus(row, 'pending', 'Enter scores to save');
+        syncDirty();
+        return;
+      }
+      saveQueue.set(row.dataset.studentId, {
+        payload,
+        key,
+        context: contextForRow(row)
+      });
+      setRowStatus(row, 'queued', 'Waiting to save');
+      if (saveTimer) clearTimeout(saveTimer);
+      if (immediate) {
+        saveTimer = null;
+        void drainSaveQueue();
+      } else {
+        saveTimer = setTimeout(() => {
+          saveTimer = null;
+          void drainSaveQueue();
+        }, 650);
+      }
+      syncDirty();
+    };
+    const schedulePreviewRefresh = () => {
+      if (previewTimer) clearTimeout(previewTimer);
+      previewTimer = setTimeout(() => {
+        previewTimer = null;
+        void loadTermPreview();
+      }, 500);
+    };
+    const drainSaveQueue = () => {
+      if (drainPromise) return drainPromise;
+      drainPromise = (async () => {
+        while (saveQueue.size) {
+          const [studentId, item] = saveQueue.entries().next().value;
+          saveQueue.delete(studentId);
+          const row = tbody.querySelector(`tr[data-student-id="${CSS.escape(studentId)}"]`);
+          if (!row) continue;
+          savingCount += 1;
+          setRowStatus(row, 'saving', 'Saving…');
+          syncDirty();
+          try {
+            await ResultsService.saveTermEntries({
+              ...item.context,
+              entries: [item.payload]
+            });
+            row.dataset.savedPayload = item.key;
+            row.dataset.hasScores = 'true';
+            const latestKey = currentRowKey(row);
+            if (latestKey !== item.key) {
+              queueRow(row, true);
+            } else {
+              setRowStatus(row, 'saved', 'Saved');
+            }
+            schedulePreviewRefresh();
+          } catch (error) {
+            const latestKey = currentRowKey(row);
+            if (latestKey !== item.key) {
+              queueRow(row, true);
+            } else {
+              setRowStatus(row, 'error', error.message || 'Save failed', true);
+            }
+          } finally {
+            savingCount = Math.max(0, savingCount - 1);
+            syncDirty();
+          }
+        }
+      })().finally(() => {
+        drainPromise = null;
+        syncDirty();
+      });
+      return drainPromise;
+    };
+    const flushAll = async () => {
+      if (saveTimer) {
+        clearTimeout(saveTimer);
+        saveTimer = null;
+      }
+      unsavedRows().forEach((row) => queueRow(row, true));
+      await drainSaveQueue();
+      return ![...tbody.querySelectorAll('tr[data-student-id]')].some((row) =>
+        currentRowKey(row) !== row.dataset.savedPayload && row.dataset.saveState === 'error'
+      );
+    };
 
     const setOptions = (select, placeholder, values) => {
       select.innerHTML = `<option value="">${escapeHtml(placeholder)}</option>${values.map((item) => `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`).join('')}`;
@@ -88,7 +246,9 @@
       if (!subjects.has(subjectSelect.value)) subjectSelect.value = subjects.size === 1 ? subjects.keys().next().value : '';
       if (subjectSelect.value && termSelect.value) await loadRoster();
       else if (!subjects.size) {
-        tbody.innerHTML = '<tr><td colspan="7">No subjects are assigned to your class.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8">No subjects are assigned to your class.</td></tr>';
+        previewBody.innerHTML = '<tr><td colspan="4">No assigned subjects are available for this class.</td></tr>';
+        previewStatus.textContent = '';
       }
     };
 
@@ -149,19 +309,30 @@
         Toast.error('Select a session, term, class, and assigned subject first.');
         return;
       }
+      const nextSheetKey = sheetKey();
+      if (tbody.querySelector('tr[data-student-id]') && (activeSheetKey !== nextSheetKey || unsavedRows().length || saveQueue.size)) {
+        const saved = await flushAll();
+        if (!saved) {
+          Toast.error('Some scores could not be saved. Retry the affected student before loading another sheet.');
+          return;
+        }
+      }
       loadButton.disabled = true;
       saveButton.disabled = true;
-      tbody.innerHTML = '<tr><td colspan="7">Loading enrolled students…</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8">Loading enrolled students…</td></tr>';
+      previewBody.innerHTML = '<tr><td colspan="4">Loading saved subjects and completeness…</td></tr>';
+      previewStatus.textContent = '';
       try {
         const sheet = await ResultsService.termEntry({ sessionId: sessionSelect.value, termId: termSelect.value, classId: classSelect.value, subjectId: subjectSelect.value });
         configuration = sheet.configuration;
+        activeSheetKey = nextSheetKey;
         if (!sheet.students.length) {
-          tbody.innerHTML = '<tr><td colspan="7">No active students are enrolled for this class, term, and subject.</td></tr>';
-          dirty = false;
+          tbody.innerHTML = '<tr><td colspan="8">No active students are enrolled for this class, term, and subject.</td></tr>';
+          await loadTermPreview();
           return;
         }
         tbody.innerHTML = sheet.students.map((student) => `
-          <tr data-student-id="${escapeHtml(student.id)}">
+          <tr data-student-id="${escapeHtml(student.id)}" data-entry-context="${escapeHtml(JSON.stringify({ sessionId: sessionSelect.value, termId: termSelect.value, classId: classSelect.value, subjectId: subjectSelect.value }))}" data-has-scores="${student.scores ? 'true' : 'false'}" data-saved-payload="${student.scores ? escapeHtml(JSON.stringify({ studentId: student.id, firstTest: Number(student.scores.firstTest || 0), secondTest: Number(student.scores.secondTest || 0), exam: Number(student.scores.exam || 0), teacherComment: student.scores.teacherComment || '' })) : ''}" data-save-state="${student.scores ? 'saved' : 'idle'}">
             <td data-label="Student">${escapeHtml(student.fullName)}</td>
             <td data-label="Registration No.">${escapeHtml(student.registrationNumber)}</td>
             <td data-label="First CA"><input class="score-input" data-score="firstTest" type="number" min="0" max="${escapeHtml(String(configuration.firstTestMax))}" step="0.01" value="${student.scores ? escapeHtml(String(student.scores.firstTest)) : ''}" aria-label="First CA for ${escapeHtml(student.fullName)}" /></td>
@@ -169,14 +340,70 @@
             <td data-label="Examination"><input class="score-input" data-score="exam" type="number" min="0" max="${escapeHtml(String(configuration.examMax))}" step="0.01" value="${student.scores ? escapeHtml(String(student.scores.exam)) : ''}" aria-label="Examination score for ${escapeHtml(student.fullName)}" /></td>
             <td data-label="Total"><strong data-score-total>${student.scores ? escapeHtml(String(student.scores.total)) : '—'}</strong></td>
             <td data-label="Teacher remark"><textarea class="teacher-comment-input" maxlength="500" aria-label="Teacher remark for ${escapeHtml(student.fullName)}">${escapeHtml(student.scores?.teacherComment || '')}</textarea></td>
+            <td data-label="Save status" data-save-state><span class="result-save-state result-save-state--${student.scores ? 'saved' : 'idle'}" role="status">${student.scores ? 'Saved' : 'Not started'}</span></td>
           </tr>`).join('');
-        dirty = false;
-        saveButton.disabled = false;
+        syncDirty();
+        await loadTermPreview();
       } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-danger">${escapeHtml(error.message || 'Unable to load this result sheet.')}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="text-danger">${escapeHtml(error.message || 'Unable to load this result sheet.')}</td></tr>`;
       } finally {
         loadButton.disabled = false;
       }
+    }
+
+    async function loadTermPreview() {
+      if (!previewBody || !previewStatus || !sessionSelect.value || !termSelect.value || !classSelect.value) return;
+      const requestId = ++previewRequestId;
+      const context = sheetContext();
+      const subjects = [...subjectSelect.options]
+        .filter((option) => option.value)
+        .map((option) => ({ id: option.value, name: option.textContent }));
+      if (!subjects.length) {
+        previewBody.innerHTML = '<tr><td colspan="4">No assigned subjects are available for this class.</td></tr>';
+        previewStatus.textContent = '';
+        return;
+      }
+      previewStatus.textContent = 'Checking saved results across your assigned subjects…';
+      const responses = await Promise.allSettled(subjects.map((subject) =>
+        ResultsService.termEntry({ ...context, subjectId: subject.id })
+      ));
+      if (requestId !== previewRequestId) return;
+      const students = new Map();
+      let successfulSubjects = 0;
+      responses.forEach((response, index) => {
+        if (response.status !== 'fulfilled') return;
+        successfulSubjects += 1;
+        const subject = subjects[index];
+        (response.value.students || []).forEach((student) => {
+          if (!students.has(student.id)) {
+            students.set(student.id, {
+              name: student.fullName,
+              registrationNumber: student.registrationNumber,
+              expected: 0,
+              saved: []
+            });
+          }
+          const summary = students.get(student.id);
+          summary.expected += 1;
+          if (student.scores) summary.saved.push(subject.name);
+        });
+      });
+      const rows = [...students.values()];
+      previewBody.innerHTML = rows.length ? rows.map((student) => {
+        const percent = student.expected ? Math.round(student.saved.length / student.expected * 100) : 0;
+        return `<tr>
+          <td data-label="Student"><strong>${escapeHtml(student.name)}</strong><span class="text-muted result-preview-registration">${escapeHtml(student.registrationNumber || '—')}</span></td>
+          <td data-label="Saved subjects">${student.saved.length ? escapeHtml(student.saved.join(', ')) : '<span class="text-muted">No saved subjects yet</span>'}</td>
+          <td data-label="Completeness">
+            <div class="result-completeness"><span>${student.saved.length} of ${student.expected} subjects</span><strong>${percent}%</strong></div>
+            <div class="result-completeness-track" role="progressbar" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100" aria-label="${escapeHtml(student.name)} result completeness"><span style="width:${percent}%"></span></div>
+          </td>
+          <td data-label="Status"><span class="badge ${percent === 100 ? 'badge-success' : 'badge-warning'}">${percent === 100 ? 'Complete' : 'In progress'}</span></td>
+        </tr>`;
+      }).join('') : `<tr><td colspan="4">${successfulSubjects ? 'No active students were found for this class and term.' : 'Unable to load saved subject results. Try again.'}</td></tr>`;
+      previewStatus.textContent = successfulSubjects === subjects.length
+        ? `${students.size} student${students.size === 1 ? '' : 's'} · ${subjects.length} assigned subject${subjects.length === 1 ? '' : 's'} checked`
+        : `${successfulSubjects} of ${subjects.length} assigned subjects checked. Some results could not be loaded.`;
     }
 
     sessionSelect.addEventListener('change', () => updateTerms().catch((error) => Toast.error(error.message)));
@@ -187,41 +414,33 @@
     tbody.addEventListener('input', (event) => {
       const input = event.target.closest('.score-input, .teacher-comment-input');
       if (!input) return;
-      dirty = true;
-      if (input.matches('.teacher-comment-input')) return;
       const row = input.closest('tr');
-      const values = [...row.querySelectorAll('.score-input')].map((field) => Number(field.value || 0));
-      row.querySelector('[data-score-total]').textContent = values.reduce((total, value) => total + value, 0).toFixed(2).replace(/\.00$/, '');
+      if (input.matches('.score-input')) {
+        const values = [...row.querySelectorAll('.score-input')].map((field) => Number(field.value || 0));
+        row.querySelector('[data-score-total]').textContent = values.reduce((total, value) => total + value, 0).toFixed(2).replace(/\.00$/, '');
+      }
+      queueRow(row);
     });
     window.addEventListener('beforeunload', (event) => {
-      if (!dirty) return;
+      if (!window.__teacherResultsDirty) return;
       event.preventDefault();
       event.returnValue = '';
     });
-    saveButton.addEventListener('click', async () => {
-      const entries = [...tbody.querySelectorAll('tr[data-student-id]')].map((row) => {
-        const fields = [...row.querySelectorAll('.score-input')];
-        const teacherComment = row.querySelector('.teacher-comment-input').value.trim();
-        if (fields.every((field) => field.value === '') && !teacherComment) return null;
-        if (fields.every((field) => field.value === '')) return null;
-        return { studentId: row.dataset.studentId, firstTest: Number(fields[0].value || 0), secondTest: Number(fields[1].value || 0), exam: Number(fields[2].value || 0), teacherComment };
-      }).filter(Boolean);
-      if (!entries.length) {
-        Toast.error('Enter at least one student score before saving.');
-        return;
-      }
-      saveButton.disabled = true;
-      try {
-        const result = await ResultsService.saveTermEntries({ sessionId: sessionSelect.value, termId: termSelect.value, classId: classSelect.value, subjectId: subjectSelect.value, entries });
-        dirty = false;
-        Toast.success(`${result.count} student result(s) saved.`);
-        await loadRoster();
-      } catch (error) {
-        Toast.error(error.message || 'Unable to save these results.');
-      } finally {
-        saveButton.disabled = false;
-      }
+    tbody.addEventListener('click', (event) => {
+      const retry = event.target.closest('[data-retry-save]');
+      if (!retry) return;
+      const row = retry.closest('tr[data-student-id]');
+      if (row) queueRow(row, true);
     });
+    saveButton.addEventListener('click', async () => {
+      const saved = await flushAll();
+      if (saved) Toast.success('All changed student scores are saved.');
+      else Toast.error('Some scores could not be saved. Retry the affected student rows.');
+    });
+    const previewBody = document.getElementById('term-preview-tbody');
+    const previewStatus = document.getElementById('term-preview-status');
+    const saveStatus = document.getElementById('teacher-results-save-status');
+    updateSaveButton();
     await updateTerms();
   }
 

@@ -11,9 +11,89 @@
         </button>`;
     return `
       <div class="row" style="gap:4px; justify-content:flex-end;">
+        ${canManage ? `<button type="button" class="icon-link" data-action="edit-term" title="Edit term">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </button>` : ''}
         ${canManage ? activateBtn : ''}
       </div>
     `;
+  }
+
+  function openEditTermModal(term) {
+    const currentType = term.type || term.name;
+    Modal.open({
+      title: 'Edit Term',
+      bodyHtml: `
+        <form id="term-edit-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="term-edit-name">Term <span class="required">*</span></label>
+            <select id="term-edit-name" name="name" required>
+              <option value="FIRST" ${currentType === 'FIRST' ? 'selected' : ''}>First Term</option>
+              <option value="SECOND" ${currentType === 'SECOND' ? 'selected' : ''}>Second Term</option>
+              <option value="THIRD" ${currentType === 'THIRD' ? 'selected' : ''}>Third Term</option>
+            </select>
+            <span class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="term-edit-start">Start Date <span class="required">*</span></label>
+            <input id="term-edit-start" type="date" name="startDate" value="${escapeHtml(toInputDate(term.startDate) || '')}" required />
+            <span class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="term-edit-end">End Date <span class="required">*</span></label>
+            <input id="term-edit-end" type="date" name="endDate" value="${escapeHtml(toInputDate(term.endDate) || '')}" required />
+            <span class="form-error"></span>
+          </div>
+        </form>
+      `,
+      footerHtml: `
+        <button type="button" class="btn btn-secondary" data-action="cancel">Cancel</button>
+        <button type="submit" form="term-edit-form" class="btn btn-primary" id="term-edit-save-btn">Save Changes</button>
+      `,
+      onMount: (modalEl) => {
+        modalEl.querySelector('[data-action="cancel"]').addEventListener('click', Modal.close);
+        modalEl.querySelector('#term-edit-form').addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const form = event.currentTarget;
+          const values = Object.fromEntries(new FormData(form).entries());
+          const errors = {};
+          if (!values.name) errors.name = 'Select a term.';
+          if (!values.startDate) errors.startDate = 'Select a start date.';
+          if (!values.endDate) errors.endDate = 'Select an end date.';
+          if (values.startDate && values.endDate && values.endDate <= values.startDate) {
+            errors.endDate = 'End date must be after the start date.';
+          }
+          form.querySelectorAll('.form-group').forEach((group) => group.classList.remove('has-error'));
+          if (Object.keys(errors).length) {
+            Object.entries(errors).forEach(([field, message]) => {
+              const input = form.querySelector(`[name="${field}"]`);
+              const group = input.closest('.form-group');
+              group.classList.add('has-error');
+              group.querySelector('.form-error').textContent = message;
+            });
+            return;
+          }
+
+          const saveBtn = modalEl.querySelector('#term-edit-save-btn');
+          Loader.setButtonLoading(saveBtn, true, 'Saving…');
+          try {
+            await TermsService.update(term.id, {
+              name: values.name,
+              type: values.name,
+              startDate: `${values.startDate}T00:00:00.000Z`,
+              endDate: `${values.endDate}T23:59:59.999Z`,
+            });
+            Toast.success('Term updated.');
+            Modal.close();
+            table.reload();
+          } catch (error) {
+            Toast.error(error.message || 'Unable to update this term.');
+          } finally {
+            Loader.setButtonLoading(saveBtn, false);
+          }
+        });
+      },
+    });
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
@@ -66,7 +146,13 @@
       deleteMessage: (row) => `Delete ${titleCaseFromEnum(row.name)} term?`,
       extraFilters: () => ({ academicSessionId: filterSession ? filterSession.value : '' }),
       onRowAction: async (e, id) => {
-        if (e.target.closest('[data-action="activate"]')) {
+        if (e.target.closest('[data-action="edit-term"]')) {
+          try {
+            openEditTermModal(await TermsService.get(id));
+          } catch (error) {
+            Toast.error(error.message || 'Unable to load this term.');
+          }
+        } else if (e.target.closest('[data-action="activate"]')) {
           ConfirmDialog.open({
             title: 'Activate Term',
             message: 'Activating this term will make it the current active term school-wide.',

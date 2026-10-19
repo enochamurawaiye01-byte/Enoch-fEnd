@@ -35,7 +35,7 @@
           <span class="page-head__desc">Choose one of your assigned classes and subjects, then enter each student’s assessment scores.</span>
         </div>
         <div class="page-head__actions">
-          <button type="button" class="btn btn-primary" id="save-term-results-btn">Save scores</button>
+          <button type="button" class="btn btn-primary" id="save-term-results-btn" disabled>All changes saved</button>
         </div>
       </div>
       <section class="section">
@@ -74,7 +74,25 @@
           </div>
           <div id="results-pagination"></div>
         </div>
-        <p class="form-help">Only students enrolled in your selected class, session, term and subject are shown. Scores are checked against the school’s assessment settings before saving.</p>
+        <p id="teacher-results-save-status" class="form-help results-save-summary" aria-live="polite">All changes saved.</p>
+        <p class="form-help">Only students enrolled in your assigned class, session, term and subject are shown. Scores are checked against the school’s assessment settings before saving.</p>
+      </section>
+      <section class="section result-term-preview" aria-labelledby="term-preview-heading">
+        <div class="section__head">
+          <div>
+            <h2 id="term-preview-heading" style="margin:0;">Student term preview</h2>
+            <p class="text-muted text-small">Review saved subjects and overall completeness for each student in your assigned scope.</p>
+          </div>
+          <p id="term-preview-status" class="text-muted text-small" aria-live="polite"></p>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead><tr><th>Student</th><th>Saved subjects</th><th>Completeness</th><th>Status</th></tr></thead>
+              <tbody id="term-preview-tbody"><tr><td colspan="4">Load a result sheet to preview saved subjects and completeness.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
       </section>
     </main>
 

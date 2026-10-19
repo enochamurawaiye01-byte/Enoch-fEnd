@@ -125,6 +125,12 @@
       HISTORY: (studentId) => `/promotions/student/${studentId}`,
     },
 
+    PREFECTS: {
+      BASE: '/prefects',
+      BY_ID: (id_) => `/prefects/${id_}`,
+      POSITIONS: '/prefects/positions',
+    },
+
     ATTENDANCE: {
       BASE: '/attendance',
       BY_ID: (id_) => `/attendance/${id_}`,

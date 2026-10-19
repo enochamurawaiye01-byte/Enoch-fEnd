@@ -113,6 +113,7 @@
     events: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.MANAGEMENT],
     gallery: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.MANAGEMENT],
     reports: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.MANAGEMENT, ROLES.PRINCIPAL, ROLES.BURSAR],
+    prefects: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.MANAGEMENT, 'DEAN_OF_STUDENTS'],
     auditLogs: [ROLES.SUPER_ADMIN, ROLES.ADMIN],
     settings: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.MANAGEMENT, ROLES.PRINCIPAL, ROLES.VICE_PRINCIPAL, ROLES.HEAD_TEACHER, ROLES.BURSAR, ROLES.TEACHER, ROLES.STAFF, ROLES.STUDENT, ROLES.PARENT],
   };
@@ -145,6 +146,7 @@
     'questions.html': 'question_bank',
     'exam-attempts.html': 'exam_attempts',
     'results.html': 'results',
+    'prefects.html': 'prefects',
     'transcripts.html': 'transcripts',
     'transcript.html': 'transcripts',
     'fees.html': 'fees',

@@ -15,6 +15,7 @@
           { label: 'Access Control', href: 'access-control.html', icon: 'shield' },
           { label: 'Applicants', href: 'applicants.html', icon: 'user-plus' },
           { label: 'Students', href: 'students.html', icon: 'graduation' },
+          { label: 'Prefects', href: 'prefects.html', icon: 'star', moduleKey: 'prefects' },
           { label: 'Parents', href: 'parents.html', icon: 'users' },
           { label: 'Teachers / Staff', href: 'teachers.html', icon: 'chalkboard' },
         ],

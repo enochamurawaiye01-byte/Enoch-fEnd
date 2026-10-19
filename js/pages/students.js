@@ -29,14 +29,18 @@
     const filterSelect = document.getElementById('filter-class');
     try {
       const { items } = await ClassesService.list({ pageSize: 100 });
-      classesCache = items;
-      const departments = await DepartmentsService.list({ pageSize: 100 });
-      departmentsCache = departments.items || [];
+      classesCache = items || [];
       if (filterSelect) {
         filterSelect.innerHTML = `<option value="">All Classes</option>${classOptionsHtml('')}`;
       }
     } catch (err) {
       Toast.error('Unable to load classes for filtering.');
+    }
+    try {
+      const departments = await DepartmentsService.list({ pageSize: 100 });
+      departmentsCache = departments.items || [];
+    } catch (err) {
+      departmentsCache = [];
     }
   }
 

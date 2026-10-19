@@ -1,55 +1,81 @@
 (function () {
   'use strict';
 
-  const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
-
   document.addEventListener('DOMContentLoaded', async () => {
     if (!window.CurrentUser) return;
 
-    let classOptions = [], subjectOptions = [], teacherOptions = [];
-    try {
-      const [{ items: classes }, { items: subjects }, { items: teachers }] = await Promise.all([
-        ClassesService.list({ pageSize: 100 }),
-        SubjectsService.list({ pageSize: 200 }),
-        TeachersService.list({ pageSize: 200 }),
-      ]);
-      classOptions = classes.map((c) => ({ value: c.id, label: c.name }));
-      subjectOptions = subjects.map((s) => ({ value: s.id, label: s.name }));
-      teacherOptions = teachers.map((t) => ({ value: t.id, label: `${t.firstName || ''} ${t.lastName || ''}`.trim() || t.name }));
-    } catch (e) { /* non-fatal */ }
-
+    const tbody = document.getElementById('timetable-tbody');
     const filterClass = document.getElementById('filter-class');
-    if (filterClass) {
-      filterClass.innerHTML = '<option value="">All Classes</option>' +
-        classOptions.map((o) => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join('');
+    const uploadPanel = document.getElementById('timetable-upload-panel');
+    const uploadClass = document.getElementById('timetable-upload-class');
+    const uploadForm = document.getElementById('timetable-upload-form');
+    const submitButton = document.getElementById('timetable-upload-submit');
+    const canUpload = ['SUPER_ADMIN', 'ADMIN'].includes(window.CurrentUser.role);
+    if (!canUpload && uploadPanel) uploadPanel.hidden = true;
+
+    const formatDate = (value) => value ? new Date(value).toLocaleDateString() : '—';
+    const renderFile = (record) => {
+      if (!record.scheduleFileUrl) return '<span class="text-muted">No file uploaded</span>';
+      const url = escapeHtml(record.scheduleFileUrl);
+      const name = escapeHtml(record.scheduleFileName || 'View timetable');
+      const isImage = /\.(jpe?g|png|webp)$/i.test(record.scheduleFileName || '');
+      return `${isImage ? `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" alt="${name}" style="display:block;max-width:180px;max-height:120px;object-fit:contain;margin-bottom:6px;"></a>` : ''}<a href="${url}" target="_blank" rel="noopener">${name}</a>`;
+    };
+
+    const loadRecords = async () => {
+      Loader.tableLoading(tbody, 4, 'Loading class timetables…');
+      try {
+        const filters = { isActive: 'true' };
+        if (filterClass?.value) filters.classId = filterClass.value;
+        const { items } = await TimetableService.list(filters);
+        if (!items.length) {
+          Loader.tableEmpty(tbody, 4, 'No class timetables have been uploaded for the active term yet.');
+          return;
+        }
+        tbody.innerHTML = items.map((record) => `
+          <tr>
+            <td>${escapeHtml(record.class?.name || '—')}</td>
+            <td>${escapeHtml(record.session?.name || '—')}<br>${escapeHtml(record.term?.name || '—')}</td>
+            <td>${renderFile(record)}</td>
+            <td>${formatDate(record.updatedAt)}</td>
+          </tr>`).join('');
+      } catch (error) {
+        Loader.tableError(tbody, 4, error.message);
+      }
+    };
+
+    try {
+      const { items: classes } = await ClassesService.list({ pageSize: 100 });
+      const options = classes.map((schoolClass) =>
+        `<option value="${escapeHtml(schoolClass.id)}">${escapeHtml(schoolClass.name)}</option>`
+      ).join('');
+      if (uploadClass) uploadClass.insertAdjacentHTML('beforeend', options);
+      if (filterClass) filterClass.insertAdjacentHTML('beforeend', options);
+    } catch (error) {
+      Toast.error(error.message || 'Unable to load classes.');
     }
 
-    const table = SimpleCrudPage.init({
-      tbody: document.getElementById('timetable-tbody'),
-      paginationEl: document.getElementById('timetable-pagination'),
-      addBtn: document.getElementById('add-timetable-btn'),
-      moduleKey: 'teaching',
-      entityLabel: 'Timetable Entry',
-      service: TimetableService,
-      columns: [
-        { key: 'className', label: 'Class', render: (r) => escapeHtml(r.className || r.class?.name || '—') },
-        { key: 'dayOfWeek', label: 'Day', render: (r) => escapeHtml(titleCaseFromEnum(r.dayOfWeek)) },
-        { key: 'time', label: 'Time', render: (r) => `${formatTime(r.startTime)} – ${formatTime(r.endTime)}` },
-        { key: 'subjectName', label: 'Subject', render: (r) => escapeHtml(r.subjectName || r.subject?.name || '—') },
-        { key: 'teacherName', label: 'Teacher', render: (r) => escapeHtml(r.teacherName || r.teacher?.name || '—') },
-      ],
-      formFields: [
-        { name: 'classId', label: 'Class', type: 'select', required: true, options: classOptions },
-        { name: 'dayOfWeek', label: 'Day of Week', type: 'select', required: true, options: DAYS.map((d) => ({ value: d, label: titleCaseFromEnum(d) })) },
-        { name: 'startTime', label: 'Start Time', type: 'time', required: true },
-        { name: 'endTime', label: 'End Time', type: 'time', required: true },
-        { name: 'subjectId', label: 'Subject', type: 'select', required: true, options: subjectOptions },
-        { name: 'teacherId', label: 'Teacher', type: 'select', options: teacherOptions },
-      ],
-      deleteMessage: () => 'Remove this timetable entry?',
-      extraFilters: () => ({ classId: filterClass ? filterClass.value : '' }),
+    filterClass?.addEventListener('change', loadRecords);
+    uploadForm?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const file = document.getElementById('timetable-upload-file')?.files?.[0];
+      if (!uploadClass.value || !file) {
+        Toast.error('Select a class and timetable file before uploading.');
+        return;
+      }
+      submitButton.disabled = true;
+      try {
+        await TimetableService.uploadFile({ classId: uploadClass.value, file });
+        uploadForm.reset();
+        Toast.success('Class timetable uploaded.');
+        await loadRecords();
+      } catch (error) {
+        Toast.error(error.message || 'Unable to upload timetable.');
+      } finally {
+        submitButton.disabled = false;
+      }
     });
 
-    if (filterClass) filterClass.addEventListener('change', () => table.setFilters({ classId: filterClass.value }));
+    await loadRecords();
   });
 })();

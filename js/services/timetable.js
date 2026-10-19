@@ -29,5 +29,11 @@
     async delete(id) {
       return ApiClient.delete(TIMETABLE.BY_ID(id));
     },
+    async uploadFile({ classId, file }) {
+      const formData = new FormData();
+      formData.append('classId', classId);
+      formData.append('file', file);
+      return ApiClient.unwrapItem(await ApiClient.upload(`${TIMETABLE.BASE}/files`, formData));
+    },
   };
 })(window);

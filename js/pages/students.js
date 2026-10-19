@@ -297,7 +297,11 @@
       emptyActionHtml: canManage ? '<button type="button" class="btn btn-primary btn-sm" data-action="empty-add">Add Student</button>' : '',
     });
 
-    table.load();
+    table.load(1, {
+      search: searchInput.value.trim(),
+      classId: filterClass.value,
+      status: filterStatus.value,
+    });
 
     tbody.addEventListener('click', async (e) => {
       const row = e.target.closest('tr[data-row-id]');

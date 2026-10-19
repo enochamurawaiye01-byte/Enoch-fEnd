@@ -1,6 +1,6 @@
 /**
  * Students service — all student-related API calls.
- * Registration numbers (e.g. MIC/2026/000001) are backend-generated;
+ * Registration numbers (e.g. MIC/2026/4821) are backend-generated;
  * this service never fabricates or edits them client-side.
  */
 (function (global) {

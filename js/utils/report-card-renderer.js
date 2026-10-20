@@ -61,11 +61,11 @@
             <div><span>Overall average</span><strong>${report.average == null ? '—' : `${escapeHtml(Number(report.average).toFixed(1))}%`}</strong></div>
           </div>
           <table class="report-card-table">
-            <thead><tr><th>Subject</th><th>1st CA<br /><small>/ 20</small></th><th>2nd CA<br /><small>/ 20</small></th><th>Exam<br /><small>/ 50</small></th><th>Total<br /><small>/ 90</small></th><th>Percentage</th><th>Grade</th><th>Remark</th></tr></thead>
+            <thead><tr><th>Subject</th><th>1st CA<br /><small>/ 20</small></th><th>2nd CA<br /><small>/ 20</small></th><th>Exam<br /><small>/ 60</small></th><th>Total<br /><small>/ 100</small></th><th>Percentage</th><th>Grade</th><th>Remark</th></tr></thead>
             <tbody>
               ${entries.map((entry) => {
                 const total = isComplete(entry) ? Number(entry.total ?? 0) : null;
-                const percentage = total == null ? null : total / 90 * 100;
+                const percentage = total == null ? null : total;
                 return `<tr>
                   <td>${escapeHtml(entry.subject?.name || '—')}</td>
                   ${scoreCell(entry.firstTest, 'test')}

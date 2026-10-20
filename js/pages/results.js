@@ -430,7 +430,7 @@
       previewBody.innerHTML = rows.length ? rows.map((student) => {
         const completed = student.saved.filter((item) => item.complete).length;
         const percent = student.expected ? Math.round(completed / student.expected * 100) : 0;
-        const max = configuration || { firstTestMax: 20, secondTestMax: 20, examMax: 50 };
+        const max = configuration || { firstTestMax: 20, secondTestMax: 20, examMax: 60 };
         const format = (value, maximum) => `${value == null ? '—' : escapeHtml(String(value))}/${maximum}`;
         return `<tr>
           <td data-label="Student"><strong>${escapeHtml(student.name)}</strong><span class="text-muted result-preview-registration">${escapeHtml(student.registrationNumber || '—')}</span></td>

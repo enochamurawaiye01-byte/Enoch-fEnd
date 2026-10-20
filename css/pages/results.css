@@ -16,10 +16,55 @@
 .search-result-item:last-child { border-bottom: none; }
 
 .transcript-sheet { background: var(--surface-bg); border: 1px solid var(--surface-border); border-radius: var(--radius-lg); padding: var(--space-6); }
-.transcript-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: var(--space-6); gap: var(--space-3); }
-.transcript-term-title { margin-top: var(--space-6); margin-bottom: var(--space-2); font-size: 1rem; }
-.transcript-sheet .data-table { margin-bottom: var(--space-2); }
+.report-card-actions { display: flex; justify-content: flex-end; margin-bottom: var(--space-4); }
+.report-card-page { max-width: 960px; margin: 0 auto var(--space-6); padding: 28px; color: #172033; background: #fff; border: 1px solid #d8dee8; }
+.report-card-school { display: flex; align-items: center; justify-content: center; gap: 18px; padding-bottom: 14px; border-bottom: 3px double #1d3557; text-align: center; }
+.report-school-logo { width: 78px; height: 78px; object-fit: contain; }
+.report-card-school__identity h1 { margin: 0; color: #122b4a; font-size: 1.65rem; font-weight: 800; letter-spacing: .035em; text-transform: uppercase; }
+.report-card-school__identity p { margin: 3px 0 0; color: #48566a; font-size: .78rem; }
+.report-card-school__identity .report-school-motto { font-weight: 700; font-style: italic; }
+.report-card-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 15px 0 11px; }
+.report-card-title h2 { margin: 0; font-size: 1.05rem; letter-spacing: .07em; }
+.report-card-title > span { color: #34465e; font-weight: 700; }
+.report-student-details { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 14px; margin-bottom: 16px; padding: 12px; background: #f3f6fa; border: 1px solid #dce3eb; }
+.report-student-details > div, .report-card-summary > div { display: flex; flex-direction: column; gap: 3px; }
+.report-student-details span, .report-card-summary span { color: #59677a; font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; }
+.report-student-details strong, .report-card-summary strong { font-size: .83rem; }
+.report-card-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+.report-card-table th, .report-card-table td { padding: 8px 7px; border: 1px solid #cbd4df; text-align: left; vertical-align: middle; }
+.report-card-table thead th { background: #eaf0f7; color: #1d3557; font-weight: 800; }
+.report-card-table th small { color: #59677a; font-weight: 600; }
+.report-card-table .numeric { text-align: center; font-variant-numeric: tabular-nums; font-weight: 700; }
+.score-band--red { background-color: #fee2e2 !important; color: #991b1b !important; }
+.score-band--orange { background-color: #ffedd5 !important; color: #9a3412 !important; }
+.score-band--green { background-color: #dcfce7 !important; color: #166534 !important; }
+.score-input { width: 76px; }
+.report-card-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 15px; }
+.report-card-summary > div { min-height: 52px; padding: 9px; border: 1px solid #dce3eb; }
+.report-card-summary p { margin: 2px 0 0; font-size: .82rem; }
+.report-signatures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin: 34px 0 15px; }
+.report-signatures span { padding-top: 7px; border-top: 1px solid #78869a; color: #34465e; text-align: center; font-size: .72rem; }
+.report-card-page footer { padding-top: 8px; border-top: 1px solid #dce3eb; color: #59677a; text-align: center; font-size: .68rem; }
 
+@media (max-width: 700px) {
+  .report-card-page { padding: 14px; }
+  .report-card-school__identity h1 { font-size: 1.15rem; }
+  .report-student-details { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .report-card-table { font-size: .66rem; }
+  .report-card-table th, .report-card-table td { padding: 5px 3px; }
+  .report-card-summary { grid-template-columns: 1fr; }
+}
+
+@page { size: A4 portrait; margin: 12mm; }
 @media print {
-  .transcript-sheet { border: none; padding: 0; }
+  body * { visibility: hidden !important; }
+  .transcript-sheet, .transcript-sheet * { visibility: visible !important; }
+  .transcript-sheet { position: absolute; inset: 0; width: 100%; padding: 0; border: 0; border-radius: 0; background: #fff; }
+  .report-card-actions { display: none !important; }
+  .report-card-page { max-width: none; margin: 0; padding: 0; border: 0; break-after: page; page-break-after: always; }
+  .report-card-page:last-child { break-after: auto; page-break-after: auto; }
+  .report-card-school__identity h1 { font-size: 20pt; }
+  .report-card-table { font-size: 9pt; }
+  .report-student-details strong { font-size: 9pt; }
+  .score-band--red, .score-band--orange, .score-band--green { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 }

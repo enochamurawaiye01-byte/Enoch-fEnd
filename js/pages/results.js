@@ -1,6 +1,14 @@
 (function () {
   'use strict';
 
+  const scoreTone = (value, kind) => {
+    if (value === '' || value == null) return '';
+    const score = Number(value);
+    if (kind === 'test') return score < 10 ? 'score-band--red' : score < 15 ? 'score-band--orange' : 'score-band--green';
+    if (kind === 'exam') return score < 30 ? 'score-band--red' : score < 40 ? 'score-band--orange' : 'score-band--green';
+    return score < 40 ? 'score-band--red' : score < 60 ? 'score-band--orange' : 'score-band--green';
+  };
+
   function rowActions(row, canManage) {
     const publishBtn = row.status !== 'PUBLISHED' && canManage
       ? `<button type="button" class="icon-link" data-action="publish" title="Publish">
@@ -58,13 +66,14 @@
       const fields = [...row.querySelectorAll('.score-input')];
       const hasValue = fields.some((field) => field.value !== '');
       if (!hasValue && row.dataset.hasScores !== 'true') return null;
-      return {
-        studentId: row.dataset.studentId,
-        firstTest: Number(fields[0].value || 0),
-        secondTest: Number(fields[1].value || 0),
-        exam: Number(fields[2].value || 0),
-        teacherComment: row.querySelector('.teacher-comment-input').value.trim()
-      };
+      const payload = { studentId: row.dataset.studentId };
+      fields.forEach((field) => {
+        if (field.value !== '') payload[field.dataset.score] = Number(field.value);
+      });
+      if (hasValue || row.dataset.hasScores === 'true') {
+        payload.teacherComment = row.querySelector('.teacher-comment-input').value.trim();
+      }
+      return payload;
     };
     const payloadKey = (payload) => payload ? JSON.stringify(payload) : '';
     const currentRowKey = (row) => payloadKey(rowPayload(row));
@@ -331,17 +340,27 @@
           await loadTermPreview();
           return;
         }
-        tbody.innerHTML = sheet.students.map((student) => `
-          <tr data-student-id="${escapeHtml(student.id)}" data-entry-context="${escapeHtml(JSON.stringify({ sessionId: sessionSelect.value, termId: termSelect.value, classId: classSelect.value, subjectId: subjectSelect.value }))}" data-has-scores="${student.scores ? 'true' : 'false'}" data-saved-payload="${student.scores ? escapeHtml(JSON.stringify({ studentId: student.id, firstTest: Number(student.scores.firstTest || 0), secondTest: Number(student.scores.secondTest || 0), exam: Number(student.scores.exam || 0), teacherComment: student.scores.teacherComment || '' })) : ''}" data-save-state="${student.scores ? 'saved' : 'idle'}">
+        tbody.innerHTML = sheet.students.map((student) => {
+          const savedPayload = student.scores ? {
+            studentId: student.id,
+            ...(student.scores.firstTest != null ? { firstTest: Number(student.scores.firstTest) } : {}),
+            ...(student.scores.secondTest != null ? { secondTest: Number(student.scores.secondTest) } : {}),
+            ...(student.scores.exam != null ? { exam: Number(student.scores.exam) } : {}),
+            teacherComment: student.scores.teacherComment || ''
+          } : null;
+          const complete = student.scores && ['firstTest', 'secondTest', 'exam'].every((field) => student.scores[field] != null);
+          return `
+          <tr data-student-id="${escapeHtml(student.id)}" data-entry-context="${escapeHtml(JSON.stringify({ sessionId: sessionSelect.value, termId: termSelect.value, classId: classSelect.value, subjectId: subjectSelect.value }))}" data-has-scores="${student.scores ? 'true' : 'false'}" data-saved-payload="${savedPayload ? escapeHtml(JSON.stringify(savedPayload)) : ''}" data-save-state="${student.scores ? 'saved' : 'idle'}">
             <td data-label="Student">${escapeHtml(student.fullName)}</td>
             <td data-label="Registration No.">${escapeHtml(student.registrationNumber)}</td>
-            <td data-label="First CA"><input class="score-input" data-score="firstTest" type="number" min="0" max="${escapeHtml(String(configuration.firstTestMax))}" step="0.01" value="${student.scores ? escapeHtml(String(student.scores.firstTest)) : ''}" aria-label="First CA for ${escapeHtml(student.fullName)}" /></td>
-            <td data-label="Second CA"><input class="score-input" data-score="secondTest" type="number" min="0" max="${escapeHtml(String(configuration.secondTestMax))}" step="0.01" value="${student.scores ? escapeHtml(String(student.scores.secondTest)) : ''}" aria-label="Second CA for ${escapeHtml(student.fullName)}" /></td>
-            <td data-label="Examination"><input class="score-input" data-score="exam" type="number" min="0" max="${escapeHtml(String(configuration.examMax))}" step="0.01" value="${student.scores ? escapeHtml(String(student.scores.exam)) : ''}" aria-label="Examination score for ${escapeHtml(student.fullName)}" /></td>
-            <td data-label="Total"><strong data-score-total>${student.scores ? escapeHtml(String(student.scores.total)) : '—'}</strong></td>
+            <td data-label="First CA"><input class="score-input ${scoreTone(student.scores?.firstTest, 'test')}" data-score="firstTest" type="number" min="0" max="${escapeHtml(String(configuration.firstTestMax))}" step="0.01" value="${student.scores?.firstTest == null ? '' : escapeHtml(String(student.scores.firstTest))}" aria-label="First CA for ${escapeHtml(student.fullName)}" /></td>
+            <td data-label="Second CA"><input class="score-input ${scoreTone(student.scores?.secondTest, 'test')}" data-score="secondTest" type="number" min="0" max="${escapeHtml(String(configuration.secondTestMax))}" step="0.01" value="${student.scores?.secondTest == null ? '' : escapeHtml(String(student.scores.secondTest))}" aria-label="Second CA for ${escapeHtml(student.fullName)}" /></td>
+            <td data-label="Examination"><input class="score-input ${scoreTone(student.scores?.exam, 'exam')}" data-score="exam" type="number" min="0" max="${escapeHtml(String(configuration.examMax))}" step="0.01" value="${student.scores?.exam == null ? '' : escapeHtml(String(student.scores.exam))}" aria-label="Examination score for ${escapeHtml(student.fullName)}" /></td>
+            <td data-label="Total"><strong class="${complete ? scoreTone(student.scores.total, 'overall') : ''}" data-score-total>${complete ? escapeHtml(String(student.scores.total)) : student.scores ? `Partial · ${escapeHtml(String(student.scores.total ?? 0))}` : '—'}</strong></td>
             <td data-label="Teacher remark"><textarea class="teacher-comment-input" maxlength="500" aria-label="Teacher remark for ${escapeHtml(student.fullName)}">${escapeHtml(student.scores?.teacherComment || '')}</textarea></td>
             <td data-label="Save status" data-save-state><span class="result-save-state result-save-state--${student.scores ? 'saved' : 'idle'}" role="status">${student.scores ? 'Saved' : 'Not started'}</span></td>
-          </tr>`).join('');
+          </tr>`;
+        }).join('');
         syncDirty();
         await loadTermPreview();
       } catch (error) {
@@ -416,8 +435,15 @@
       if (!input) return;
       const row = input.closest('tr');
       if (input.matches('.score-input')) {
-        const values = [...row.querySelectorAll('.score-input')].map((field) => Number(field.value || 0));
-        row.querySelector('[data-score-total]').textContent = values.reduce((total, value) => total + value, 0).toFixed(2).replace(/\.00$/, '');
+        const scoreInputs = [...row.querySelectorAll('.score-input')];
+        const complete = scoreInputs.every((field) => field.value !== '');
+        const totalElement = row.querySelector('[data-score-total]');
+        const total = scoreInputs.reduce((sum, field) => sum + Number(field.value || 0), 0);
+        totalElement.textContent = complete ? total.toFixed(2).replace(/\.00$/, '') : `Partial · ${total.toFixed(2).replace(/\.00$/, '')}`;
+        totalElement.className = complete ? scoreTone(total, 'overall') : '';
+        input.classList.remove('score-band--red', 'score-band--orange', 'score-band--green');
+        const tone = scoreTone(input.value, input.dataset.score === 'exam' ? 'exam' : 'test');
+        if (tone) input.classList.add(tone);
       }
       queueRow(row);
     });

@@ -39,6 +39,8 @@
 .score-band--orange { background-color: #ffedd5 !important; color: #9a3412 !important; }
 .score-band--green { background-color: #dcfce7 !important; color: #166534 !important; }
 .score-input { width: 76px; }
+.result-preview-score { padding: 3px 0; }
+.result-preview-score + .result-preview-score { border-top: 1px solid var(--surface-border); }
 .report-card-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 15px; }
 .report-card-summary > div { min-height: 52px; padding: 9px; border: 1px solid #dce3eb; }
 .report-card-summary p { margin: 2px 0 0; font-size: .82rem; }

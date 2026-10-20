@@ -4,7 +4,7 @@
   const formatScore = (value) => value == null ? '—' : String(value);
   const scoreTone = (value, kind) => {
     if (value == null) return '';
-    const score = Number(value);
+    const score = Number(String(value).replace('%', ''));
     if (kind === 'test') return score < 10 ? 'score-band--red' : score < 15 ? 'score-band--orange' : 'score-band--green';
     if (kind === 'exam') return score < 30 ? 'score-band--red' : score < 40 ? 'score-band--orange' : 'score-band--green';
     return score < 40 ? 'score-band--red' : score < 60 ? 'score-band--orange' : 'score-band--green';
@@ -61,17 +61,18 @@
             <div><span>Overall average</span><strong>${report.average == null ? '—' : `${escapeHtml(Number(report.average).toFixed(1))}%`}</strong></div>
           </div>
           <table class="report-card-table">
-            <thead><tr><th>Subject</th><th>1st CA<br /><small>/ 20</small></th><th>2nd CA<br /><small>/ 20</small></th><th>Exam<br /><small>/ 60</small></th><th>Total<br /><small>/ 100</small></th><th>Percentage</th><th>Grade</th><th>Remark</th></tr></thead>
+            <thead><tr><th>Subject</th><th>1st CA<br /><small>/ 20</small></th><th>2nd CA<br /><small>/ 20</small></th><th>Exam<br /><small>/ 50</small></th><th>Total<br /><small>/ 90</small></th><th>Percentage</th><th>Grade</th><th>Remark</th></tr></thead>
             <tbody>
               ${entries.map((entry) => {
                 const total = isComplete(entry) ? Number(entry.total ?? 0) : null;
+                const percentage = total == null ? null : total / 90 * 100;
                 return `<tr>
                   <td>${escapeHtml(entry.subject?.name || '—')}</td>
                   ${scoreCell(entry.firstTest, 'test')}
                   ${scoreCell(entry.secondTest, 'test')}
                   ${scoreCell(entry.exam, 'exam')}
                   ${scoreCell(total, 'overall')}
-                  ${scoreCell(total == null ? null : `${total.toFixed(1)}%`, 'overall')}
+                  ${scoreCell(percentage == null ? null : `${percentage.toFixed(1)}%`, 'overall')}
                   <td><strong>${escapeHtml(isComplete(entry) ? entry.grade || '—' : 'Pending')}</strong></td>
                   <td>${escapeHtml(isComplete(entry) ? entry.remark || '—' : 'Assessment incomplete')}</td>
                 </tr>`;

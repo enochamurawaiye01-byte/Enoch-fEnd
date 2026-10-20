@@ -62,33 +62,33 @@
         <div class="section__head">
           <div>
             <h2 style="margin:0;">Student assessment scores</h2>
-            <p class="text-muted text-small">Enter 1st CA, 2nd CA and Exam. Students outside the selected class roster cannot be added.</p>
+            <p class="text-muted text-small">Enter either CA score or the exam score as it becomes available. Each CA is out of 20 and the exam is out of 50. Scores save automatically and can be edited until results are published.</p>
           </div>
         </div>
         <div class="table-wrap">
           <div class="table-scroll">
             <table class="data-table">
-              <thead><tr><th>Student</th><th>Registration No.</th><th>1st CA</th><th>2nd CA</th><th>Exam</th><th>Total</th><th>Teacher remark</th></tr></thead>
+              <thead><tr><th>Student</th><th>Registration No.</th><th>1st CA</th><th>2nd CA</th><th>Exam</th><th>Total</th><th>Teacher remark</th><th>Save status</th></tr></thead>
               <tbody id="results-tbody"><tr><td colspan="7">Select a session, term, class and subject, then load the student list.</td></tr></tbody>
             </table>
           </div>
           <div id="results-pagination"></div>
         </div>
         <p id="teacher-results-save-status" class="form-help results-save-summary" aria-live="polite">All changes saved.</p>
-        <p class="form-help">Only students enrolled in your assigned class, session, term and subject are shown. Scores are checked against the school’s assessment settings before saving.</p>
+        <p class="form-help">Only students enrolled in your assigned class, session, term and subject are shown. Partial results are saved and remain editable until results are published.</p>
       </section>
       <section class="section result-term-preview" aria-labelledby="term-preview-heading">
         <div class="section__head">
           <div>
             <h2 id="term-preview-heading" style="margin:0;">Student term preview</h2>
-            <p class="text-muted text-small">Review saved subjects and overall completeness for each student in your assigned scope.</p>
+            <p class="text-muted text-small">Review saved scores and see which subject results are complete or still in progress.</p>
           </div>
           <p id="term-preview-status" class="text-muted text-small" aria-live="polite"></p>
         </div>
         <div class="table-wrap">
           <div class="table-scroll">
             <table class="data-table">
-              <thead><tr><th>Student</th><th>Saved subjects</th><th>Completeness</th><th>Status</th></tr></thead>
+              <thead><tr><th>Student</th><th>Saved subject scores</th><th>Completeness</th><th>Status</th></tr></thead>
               <tbody id="term-preview-tbody"><tr><td colspan="4">Load a result sheet to preview saved subjects and completeness.</td></tr></tbody>
             </table>
           </div>

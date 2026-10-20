@@ -68,7 +68,7 @@
       if (!hasValue && row.dataset.hasScores !== 'true') return null;
       const payload = { studentId: row.dataset.studentId };
       fields.forEach((field) => {
-        if (field.value !== '') payload[field.dataset.score] = Number(field.value);
+        payload[field.dataset.score] = field.value === '' ? null : Number(field.value);
       });
       if (hasValue || row.dataset.hasScores === 'true') {
         payload.teacherComment = row.querySelector('.teacher-comment-input').value.trim();
@@ -117,6 +117,19 @@
       }
       if (!payload) {
         setRowStatus(row, 'pending', 'Enter scores to save');
+        syncDirty();
+        return;
+      }
+      const invalidScore = [...row.querySelectorAll('.score-input')].find((field) => {
+        if (field.value === '') return false;
+        const maximum = Number(configuration?.[`${field.dataset.score}Max`]);
+        const value = Number(field.value);
+        return !Number.isFinite(value) || value < 0 || value > maximum;
+      });
+      if (invalidScore) {
+        saveQueue.delete(row.dataset.studentId);
+        const maximum = configuration?.[`${invalidScore.dataset.score}Max`];
+        setRowStatus(row, 'error', `Maximum score is ${maximum}`);
         syncDirty();
         return;
       }
@@ -343,9 +356,9 @@
         tbody.innerHTML = sheet.students.map((student) => {
           const savedPayload = student.scores ? {
             studentId: student.id,
-            ...(student.scores.firstTest != null ? { firstTest: Number(student.scores.firstTest) } : {}),
-            ...(student.scores.secondTest != null ? { secondTest: Number(student.scores.secondTest) } : {}),
-            ...(student.scores.exam != null ? { exam: Number(student.scores.exam) } : {}),
+            firstTest: student.scores.firstTest == null ? null : Number(student.scores.firstTest),
+            secondTest: student.scores.secondTest == null ? null : Number(student.scores.secondTest),
+            exam: student.scores.exam == null ? null : Number(student.scores.exam),
             teacherComment: student.scores.teacherComment || ''
           } : null;
           const complete = student.scores && ['firstTest', 'secondTest', 'exam'].every((field) => student.scores[field] != null);
@@ -404,20 +417,29 @@
           }
           const summary = students.get(student.id);
           summary.expected += 1;
-          if (student.scores) summary.saved.push(subject.name);
+          if (student.scores) {
+            summary.saved.push({
+              name: subject.name,
+              scores: student.scores,
+              complete: ['firstTest', 'secondTest', 'exam'].every((field) => student.scores[field] != null)
+            });
+          }
         });
       });
       const rows = [...students.values()];
       previewBody.innerHTML = rows.length ? rows.map((student) => {
-        const percent = student.expected ? Math.round(student.saved.length / student.expected * 100) : 0;
+        const completed = student.saved.filter((item) => item.complete).length;
+        const percent = student.expected ? Math.round(completed / student.expected * 100) : 0;
+        const max = configuration || { firstTestMax: 20, secondTestMax: 20, examMax: 50 };
+        const format = (value, maximum) => `${value == null ? '—' : escapeHtml(String(value))}/${maximum}`;
         return `<tr>
           <td data-label="Student"><strong>${escapeHtml(student.name)}</strong><span class="text-muted result-preview-registration">${escapeHtml(student.registrationNumber || '—')}</span></td>
-          <td data-label="Saved subjects">${student.saved.length ? escapeHtml(student.saved.join(', ')) : '<span class="text-muted">No saved subjects yet</span>'}</td>
+          <td data-label="Saved subject scores">${student.saved.length ? student.saved.map((item) => `<div class="result-preview-score"><strong>${escapeHtml(item.name)}</strong>: CA1 ${format(item.scores.firstTest, max.firstTestMax)} · CA2 ${format(item.scores.secondTest, max.secondTestMax)} · Exam ${format(item.scores.exam, max.examMax)} <span class="badge ${item.complete ? 'badge-success' : 'badge-warning'}">${item.complete ? 'Complete' : 'Incomplete'}</span></div>`).join('') : '<span class="text-muted">No scores saved yet</span>'}</td>
           <td data-label="Completeness">
-            <div class="result-completeness"><span>${student.saved.length} of ${student.expected} subjects</span><strong>${percent}%</strong></div>
+            <div class="result-completeness"><span>${completed} complete of ${student.expected} subjects</span><strong>${percent}%</strong></div>
             <div class="result-completeness-track" role="progressbar" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100" aria-label="${escapeHtml(student.name)} result completeness"><span style="width:${percent}%"></span></div>
           </td>
-          <td data-label="Status"><span class="badge ${percent === 100 ? 'badge-success' : 'badge-warning'}">${percent === 100 ? 'Complete' : 'In progress'}</span></td>
+          <td data-label="Status"><span class="badge ${percent === 100 ? 'badge-success' : student.saved.length ? 'badge-warning' : 'badge-secondary'}">${percent === 100 ? 'Complete' : student.saved.length ? 'In progress' : 'Not started'}</span></td>
         </tr>`;
       }).join('') : `<tr><td colspan="4">${successfulSubjects ? 'No active students were found for this class and term.' : 'Unable to load saved subject results. Try again.'}</td></tr>`;
       previewStatus.textContent = successfulSubjects === subjects.length
@@ -436,6 +458,8 @@
       const row = input.closest('tr');
       if (input.matches('.score-input')) {
         const scoreInputs = [...row.querySelectorAll('.score-input')];
+        const maximum = Number(configuration?.[`${input.dataset.score}Max`]);
+        input.setCustomValidity(input.value !== '' && Number(input.value) > maximum ? `Maximum score is ${maximum}.` : '');
         const complete = scoreInputs.every((field) => field.value !== '');
         const totalElement = row.querySelector('[data-score-total]');
         const total = scoreInputs.reduce((sum, field) => sum + Number(field.value || 0), 0);

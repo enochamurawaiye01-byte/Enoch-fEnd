@@ -29,13 +29,7 @@
     if (teachersResult.status === 'fulfilled') {
       const teachers = teachersResult.value.items || [];
       teacherOptions = teachers.map((t) => ({ value: t.id, label: `${t.firstName || t.user?.fullName || ''} ${t.lastName || ''}`.trim() || t.name }));
-      classTeacherOptions = teachers
-        .filter((teacher) => teacher.user?.role === 'CLASS_TEACHER'
-          || teacher.user?.roleAssignments?.some((assignment) => assignment.role?.name === 'CLASS_TEACHER'))
-        .map((teacher) => ({
-          value: teacher.id,
-          label: `${teacher.firstName || teacher.user?.fullName || ''} ${teacher.lastName || ''}`.trim() || teacher.name
-        }));
+      classTeacherOptions = teacherOptions;
     } else {
       Toast.error(teachersResult.reason.message || 'Unable to load active teachers.');
     }

@@ -133,6 +133,7 @@
 
     ATTENDANCE: {
       BASE: '/attendance',
+      ROSTER: '/attendance/roster',
       BY_ID: (id_) => `/attendance/${id_}`,
       CLASS: (classId) => `/attendance/class/${classId}`,
       STUDENT: (studentId) => `/attendance/student/${studentId}`,

@@ -19,23 +19,32 @@
     ).join('');
   }
 
+  let rosterRequestId = 0;
+  let attendanceContext = null;
+
   async function loadRoster(classId) {
+    const requestId = ++rosterRequestId;
     const rosterEl = document.getElementById('attendance-roster');
-    rosterEl.innerHTML = Loader.spinnerHtml('Loading class roster…');
+    rosterEl.innerHTML = Loader.spinnerHtml('Loading enrolled students…');
     if (!classId) {
       rosterEl.innerHTML = '<div class="table-state"><p>Select a class to mark attendance.</p></div>';
       return;
     }
+    if (!attendanceContext) {
+      rosterEl.innerHTML = '<div class="table-state table-state--error"><p>Attendance roster is unavailable because there is no active session and term.</p></div>';
+      return;
+    }
     try {
-      const { items } = await ClassesService.students(classId, { pageSize: 200 });
+      const date = document.getElementById('mark-date').value;
+      if (!date) throw new Error('Select an attendance date first.');
+      const sheet = await AttendanceService.roster({ ...attendanceContext, classId, date });
+      if (requestId !== rosterRequestId) return;
+      const items = sheet.students || [];
       if (!items.length) {
         rosterEl.innerHTML = '<div class="table-state"><p>No students found in this class.</p></div>';
         return;
       }
-      const date = document.getElementById('mark-date').value;
-      const { items: existingRecords } = await AttendanceService.list({ classId, date });
-      const savedMarks = new Map(existingRecords.map((record) => [record.studentId, record.status]));
-      const marks = Object.fromEntries(items.map((student) => [student.id, savedMarks.get(student.id) || 'PRESENT']));
+      const marks = Object.fromEntries(items.map((student) => [student.id, student.status || 'PRESENT']));
       rosterEl.dataset.studentMarks = JSON.stringify(marks);
       rosterEl.innerHTML = `
         <div class="table-scroll">
@@ -47,7 +56,7 @@
                   (s) => `
                 <tr data-student-row="${escapeHtml(s.id)}">
                   <td>${escapeHtml(`${s.firstName || ''} ${s.lastName || ''}`)}</td>
-                  <td>${escapeHtml(s.regNumber || '—')}</td>
+                  <td>${escapeHtml(s.registrationNumber || s.regNumber || '—')}</td>
                   <td><div class="chip-toggle-group">${statusButtonsHtml(s.id, marks[s.id])}</div></td>
                 </tr>`
                 )
@@ -57,7 +66,7 @@
         </div>
       `;
     } catch (err) {
-      rosterEl.innerHTML = `<div class="table-state table-state--error"><p>${escapeHtml(err.message)}</p></div>`;
+      if (requestId === rosterRequestId) rosterEl.innerHTML = `<div class="table-state table-state--error"><p>${escapeHtml(err.message)}</p></div>`;
     }
   }
 
@@ -72,7 +81,6 @@
       Toast.error(error.message || 'Unable to load classes for attendance.');
     }
 
-    let attendanceContext = null;
     try {
       const session = await AcademicSessionsService.current();
       if (!session?.id) throw new Error('There is no active academic session.');

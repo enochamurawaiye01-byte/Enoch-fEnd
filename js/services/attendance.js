@@ -6,6 +6,10 @@
       const payload = await ApiClient.get(ATTENDANCE.BASE, params);
       return ApiClient.unwrapList(payload);
     },
+    async roster(params = {}) {
+      const payload = await ApiClient.get(ATTENDANCE.ROSTER, params);
+      return ApiClient.unwrapItem(payload);
+    },
     async get(id) {
       const payload = await ApiClient.get(ATTENDANCE.BY_ID(id));
       return ApiClient.unwrapItem(payload);

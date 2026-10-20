@@ -61,25 +61,40 @@
       let page = 1;
       let totalPages = null;
       let hasPagination = false;
+      let finished = false;
 
-      do {
+      while (page <= 1000) {
         const result = await this.list({ ...params, page, pageSize });
         items.push(...result.items);
         const meta = result.meta;
-        if (!meta) break;
+        if (!meta) {
+          finished = true;
+          break;
+        }
 
         hasPagination = true;
         const reportedPages = Number(meta.totalPages || meta.pages || meta.lastPage);
         const total = Number(meta.total);
+        const actualPageSize = Number(meta.pageSize);
         totalPages = Number.isFinite(reportedPages) && reportedPages > 0
           ? reportedPages
           : Number.isFinite(total) && total >= 0
-            ? Math.ceil(total / pageSize)
+            ? Math.ceil(total / (Number.isFinite(actualPageSize) && actualPageSize > 0 ? actualPageSize : pageSize))
             : null;
-        if (result.items.length < pageSize) break;
-        if (totalPages !== null && page >= totalPages) break;
+        if (totalPages !== null && page >= totalPages) {
+          finished = true;
+          break;
+        }
+        if (totalPages === null && result.items.length < pageSize) {
+          finished = true;
+          break;
+        }
         page += 1;
-      } while (page <= 1000);
+      }
+
+      if (!finished) {
+        throw new Error('Unable to load all students because the result spans more than 1,000 pages. Narrow the filters and try again.');
+      }
 
       return { items, meta: hasPagination ? { total: items.length, pageSize } : null };
     },

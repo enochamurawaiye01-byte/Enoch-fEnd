@@ -24,6 +24,10 @@
       const payload = await ApiClient.get(TEACHER_ASSIGNMENTS.CLASS_TEACHERS, params);
       return ApiClient.unwrapList(payload);
     },
+    async listClassTeacherCandidates() {
+      const payload = await ApiClient.get(TEACHER_ASSIGNMENTS.CLASS_TEACHER_CANDIDATES);
+      return ApiClient.unwrapList(payload);
+    },
     async assignClassTeacher(data) {
       const payload = await ApiClient.post(TEACHER_ASSIGNMENTS.CLASS_TEACHERS, data);
       return ApiClient.unwrapItem(payload);

@@ -111,6 +111,7 @@
       BASE: '/teacher-assignments',
       BY_ID: (id_) => `/teacher-assignments/${id_}`,
       CLASS_TEACHERS: '/teacher-assignments/class-teachers',
+      CLASS_TEACHER_CANDIDATES: '/teacher-assignments/class-teacher-candidates',
       CLASS_TEACHER_BY_ID: (id_) => `/teacher-assignments/class-teachers/${id_}`,
     },
 

@@ -8,9 +8,10 @@
         ClassesService.list({ pageSize: 100 }),
         SubjectsService.list({ pageSize: 200 }),
         TeachersService.list({ pageSize: 200 }),
+        TeacherAssignmentsService.listClassTeacherCandidates(),
         AcademicSessionsService.list({ pageSize: 50 }),
     ]);
-    const [classesResult, subjectsResult, teachersResult, sessionsResult] = optionResults;
+    const [classesResult, subjectsResult, teachersResult, classTeacherCandidatesResult, sessionsResult] = optionResults;
     if (classesResult.status === 'fulfilled') {
       const classes = classesResult.value.items || [];
       classOptions = classes.map((c) => {
@@ -29,9 +30,16 @@
     if (teachersResult.status === 'fulfilled') {
       const teachers = teachersResult.value.items || [];
       teacherOptions = teachers.map((t) => ({ value: t.id, label: `${t.firstName || t.user?.fullName || ''} ${t.lastName || ''}`.trim() || t.name }));
-      classTeacherOptions = teacherOptions;
     } else {
       Toast.error(teachersResult.reason.message || 'Unable to load active teachers.');
+    }
+    if (classTeacherCandidatesResult.status === 'fulfilled') {
+      classTeacherOptions = classTeacherCandidatesResult.value.items.map((t) => ({
+        value: t.id,
+        label: `${t.firstName || t.user?.fullName || ''} ${t.lastName || ''}`.trim() || t.name,
+      }));
+    } else {
+      Toast.error(classTeacherCandidatesResult.reason.message || 'Unable to load active staff for class-teacher assignment.');
     }
     if (sessionsResult.status === 'fulfilled') {
       const sessions = sessionsResult.value.items || [];
@@ -98,7 +106,7 @@
         bodyHtml: `
           <form id="class-teacher-form" class="form">
             <div class="form-group"><label for="class-teacher-class">Class</label><select id="class-teacher-class" name="classId" required><option value="">Select class</option>${classOptions.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join('')}</select></div>
-            <div class="form-group"><label for="class-teacher-staff">Teacher</label><select id="class-teacher-staff" name="staffId" required><option value="">${classTeacherOptions.length ? 'Select an assigned class teacher' : 'Assign the CLASS_TEACHER role first'}</option>${classTeacherOptions.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join('')}</select></div>
+            <div class="form-group"><label for="class-teacher-staff">Teacher</label><select id="class-teacher-staff" name="staffId" required><option value="">${classTeacherOptions.length ? 'Select teacher' : 'No active teachers available'}</option>${classTeacherOptions.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join('')}</select></div>
             <div class="form-group"><label for="class-teacher-session">Academic session</label><select id="class-teacher-session" name="sessionId" required><option value="">Select session</option>${sessionOptions.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join('')}</select></div>
           </form>
         `,

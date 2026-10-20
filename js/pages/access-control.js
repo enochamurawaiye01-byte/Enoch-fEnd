@@ -772,10 +772,19 @@
         const users = await loadAllRoleUsers(force);
         const assignments = users.flatMap((user) => {
           if (isStudentAccount(user)) return [];
-          return (user.roleAssignments || [])
+          const activeAssignments = (user.roleAssignments || [])
             .filter((assignment) => ['ACTIVE', 'PENDING'].includes(assignment.status)
-              && normalizeRoleKey(assignment.role) !== 'STUDENT')
-            .map((assignment) => ({ user, assignment }));
+              && normalizeRoleKey(assignment.role) !== 'STUDENT');
+          const hasPrimaryRoleAssignment = activeAssignments.some(
+            (assignment) => normalizeRoleKey(assignment.role) === user.role
+          );
+          const primaryRole = user.role && !hasPrimaryRoleAssignment && user.role !== 'STUDENT'
+            ? [{ user, assignment: { role: { name: user.role }, status: 'ACTIVE', isPrimary: true } }]
+            : [];
+          return [
+            ...activeAssignments.map((assignment) => ({ user, assignment })),
+            ...primaryRole,
+          ];
         }).sort((left, right) => {
           const nameOrder = (left.user.fullName || '').localeCompare(right.user.fullName || '');
           return nameOrder || formatRoleName(normalizeRoleKey(left.assignment.role))
@@ -820,10 +829,6 @@
         const user = roleUsersCache?.find((item) => item.id === userId);
         if (!user || isStudentAccount(user)) return;
 
-        const remainingRoles = (user.roleAssignments || [])
-          .filter((assignment) => ['ACTIVE', 'PENDING'].includes(assignment.status)
-            && normalizeRoleKey(assignment.role) !== roleName)
-          .map((assignment) => normalizeRoleKey(assignment.role));
         const userName = user.fullName || user.email || 'this user';
 
         ConfirmDialog.open({
@@ -833,7 +838,7 @@
           tone: 'danger',
           onConfirm: async () => {
             try {
-              await RolesService.changeUserRole(userId, remainingRoles);
+              await RolesService.revoke({ userId, roleName });
               Toast.success(`${formatRoleName(roleName)} was removed from ${userName}.`);
               roleUsersCache = null;
               await loadRoleAssignments(true);

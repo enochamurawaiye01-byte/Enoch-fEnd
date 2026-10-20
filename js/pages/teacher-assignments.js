@@ -3,23 +3,47 @@
   document.addEventListener('DOMContentLoaded', async () => {
     if (!window.CurrentUser) return;
 
-    let classOptions = [], subjectOptions = [], teacherOptions = [], sessionOptions = [];
-    try {
-      const [{ items: classes }, { items: subjects }, { items: teachers }, { items: sessions }] = await Promise.all([
+    let classOptions = [], subjectOptions = [], teacherOptions = [], classTeacherOptions = [], sessionOptions = [];
+    const optionResults = await Promise.allSettled([
         ClassesService.list({ pageSize: 100 }),
         SubjectsService.list({ pageSize: 200 }),
         TeachersService.list({ pageSize: 200 }),
         AcademicSessionsService.list({ pageSize: 50 }),
-      ]);
+    ]);
+    const [classesResult, subjectsResult, teachersResult, sessionsResult] = optionResults;
+    if (classesResult.status === 'fulfilled') {
+      const classes = classesResult.value.items || [];
       classOptions = classes.map((c) => {
         const levelCode = String(c.classLevel?.code || '').toUpperCase();
         return { value: c.id, label: c.name, level: levelCode.startsWith('SS') ? 'SSS' : levelCode.startsWith('JSS') ? 'JSS' : '' };
       });
+    } else {
+      Toast.error(classesResult.reason.message || 'Unable to load classes for teacher assignments.');
+    }
+    if (subjectsResult.status === 'fulfilled') {
+      const subjects = subjectsResult.value.items || [];
       subjectOptions = subjects.map((s) => ({ value: s.id, label: s.name }));
+    } else {
+      Toast.error(subjectsResult.reason.message || 'Unable to load subjects for teacher assignments.');
+    }
+    if (teachersResult.status === 'fulfilled') {
+      const teachers = teachersResult.value.items || [];
       teacherOptions = teachers.map((t) => ({ value: t.id, label: `${t.firstName || t.user?.fullName || ''} ${t.lastName || ''}`.trim() || t.name }));
+      classTeacherOptions = teachers
+        .filter((teacher) => teacher.user?.role === 'CLASS_TEACHER'
+          || teacher.user?.roleAssignments?.some((assignment) => assignment.role?.name === 'CLASS_TEACHER'))
+        .map((teacher) => ({
+          value: teacher.id,
+          label: `${teacher.firstName || teacher.user?.fullName || ''} ${teacher.lastName || ''}`.trim() || teacher.name
+        }));
+    } else {
+      Toast.error(teachersResult.reason.message || 'Unable to load active teachers.');
+    }
+    if (sessionsResult.status === 'fulfilled') {
+      const sessions = sessionsResult.value.items || [];
       sessionOptions = sessions.map((session) => ({ value: session.id, label: session.name }));
-    } catch (error) {
-      Toast.error(error.message || 'Unable to load teacher assignment options.');
+    } else {
+      Toast.error(sessionsResult.reason.message || 'Unable to load academic sessions.');
     }
 
     SimpleCrudPage.init({
@@ -37,7 +61,7 @@
         { key: 'className', label: 'Class', render: (r) => escapeHtml(r.className || r.class?.name || '—') },
       ],
       formFields: [
-        { name: 'staffId', label: 'Teacher', type: 'select', required: true, options: teacherOptions },
+        { name: 'staffId', label: 'Teacher', type: 'select', required: true, placeholder: teacherOptions.length ? 'Select teacher' : 'No active teachers available', options: teacherOptions },
         { name: 'subjectId', label: 'Subject', type: 'select', required: true, options: subjectOptions },
         { name: 'classLevel', label: 'Teaching level', type: 'select', default: 'BOTH', options: [
           { value: 'JSS', label: 'JSS' },
@@ -80,7 +104,7 @@
         bodyHtml: `
           <form id="class-teacher-form" class="form">
             <div class="form-group"><label for="class-teacher-class">Class</label><select id="class-teacher-class" name="classId" required><option value="">Select class</option>${classOptions.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join('')}</select></div>
-            <div class="form-group"><label for="class-teacher-staff">Teacher</label><select id="class-teacher-staff" name="staffId" required><option value="">Select teacher</option>${teacherOptions.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join('')}</select></div>
+            <div class="form-group"><label for="class-teacher-staff">Teacher</label><select id="class-teacher-staff" name="staffId" required><option value="">${classTeacherOptions.length ? 'Select an assigned class teacher' : 'Assign the CLASS_TEACHER role first'}</option>${classTeacherOptions.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join('')}</select></div>
             <div class="form-group"><label for="class-teacher-session">Academic session</label><select id="class-teacher-session" name="sessionId" required><option value="">Select session</option>${sessionOptions.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join('')}</select></div>
           </form>
         `,

@@ -137,7 +137,7 @@
       CLASS: (classId) => `/attendance/class/${classId}`,
       STUDENT: (studentId) => `/attendance/student/${studentId}`,
       STATS: '/attendance/stats',
-      MARK: '/attendance/mark',
+      MARK: '/attendance/batch',
     },
 
     TIMETABLE: {

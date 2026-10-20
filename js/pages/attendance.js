@@ -32,7 +32,11 @@
         rosterEl.innerHTML = '<div class="table-state"><p>No students found in this class.</p></div>';
         return;
       }
-      rosterEl.dataset.studentMarks = JSON.stringify(items.reduce((acc, s) => ({ ...acc, [s.id]: 'PRESENT' }), {}));
+      const date = document.getElementById('mark-date').value;
+      const { items: existingRecords } = await AttendanceService.list({ classId, date });
+      const savedMarks = new Map(existingRecords.map((record) => [record.studentId, record.status]));
+      const marks = Object.fromEntries(items.map((student) => [student.id, savedMarks.get(student.id) || 'PRESENT']));
+      rosterEl.dataset.studentMarks = JSON.stringify(marks);
       rosterEl.innerHTML = `
         <div class="table-scroll">
           <table class="data-table">
@@ -44,7 +48,7 @@
                 <tr data-student-row="${escapeHtml(s.id)}">
                   <td>${escapeHtml(`${s.firstName || ''} ${s.lastName || ''}`)}</td>
                   <td>${escapeHtml(s.regNumber || '—')}</td>
-                  <td><div class="chip-toggle-group">${statusButtonsHtml(s.id, 'PRESENT')}</div></td>
+                  <td><div class="chip-toggle-group">${statusButtonsHtml(s.id, marks[s.id])}</div></td>
                 </tr>`
                 )
                 .join('')}
@@ -64,7 +68,21 @@
     try {
       const { items } = await ClassesService.list({ pageSize: 100 });
       classOptions = items.map((c) => ({ value: c.id, label: c.name }));
-    } catch (e) { /* non-fatal */ }
+    } catch (error) {
+      Toast.error(error.message || 'Unable to load classes for attendance.');
+    }
+
+    let attendanceContext = null;
+    try {
+      const session = await AcademicSessionsService.current();
+      if (!session?.id) throw new Error('There is no active academic session.');
+      const { items: terms } = await TermsService.list({ sessionId: session.id });
+      const term = terms.find((item) => item.isActive);
+      if (!term?.id) throw new Error('There is no active term in the current session.');
+      attendanceContext = { sessionId: session.id, termId: term.id };
+    } catch (error) {
+      Toast.error(error.message || 'Unable to determine the active academic session and term.');
+    }
 
     const classSelect = document.getElementById('mark-class-select');
     const filterClassSelect = document.getElementById('filter-class');
@@ -74,8 +92,11 @@
 
     const dateInput = document.getElementById('mark-date');
     if (dateInput) dateInput.value = toInputDate(new Date());
+    const saveButton = document.getElementById('save-attendance-btn');
+    if (saveButton) saveButton.disabled = !attendanceContext;
 
     if (classSelect) classSelect.addEventListener('change', () => loadRoster(classSelect.value));
+    if (dateInput) dateInput.addEventListener('change', () => loadRoster(classSelect?.value));
 
     const rosterEl = document.getElementById('attendance-roster');
     rosterEl.addEventListener('click', (e) => {
@@ -94,6 +115,14 @@
         Toast.warning('Please select a class first.');
         return;
       }
+      if (!attendanceContext) {
+        Toast.error('Attendance cannot be saved because the active session or term is unavailable.');
+        return;
+      }
+      if (!dateInput.value) {
+        Toast.warning('Select an attendance date first.');
+        return;
+      }
       const marks = JSON.parse(rosterEl.dataset.studentMarks || '{}');
       const records = Object.entries(marks).map(([studentId, status]) => ({ studentId, status }));
       if (!records.length) {
@@ -103,7 +132,7 @@
       const btn = document.getElementById('save-attendance-btn');
       Loader.setButtonLoading(btn, true, 'Saving…');
       try {
-        await AttendanceService.mark({ classId: classSelect.value, date: dateInput.value, records });
+        await AttendanceService.mark({ ...attendanceContext, classId: classSelect.value, date: dateInput.value, records });
         Toast.success('Attendance saved successfully.');
         historyTable.reload();
       } catch (err) {

@@ -20,17 +20,14 @@
       ]);
       const activeClassTeacherAssignments = (teacher.classTeacherAssignments || [])
         .filter((assignment) => assignment.session?.isActive)
-      if (activeClassTeacherAssignments.length) {
-        activeClassTeacherAssignments.forEach((assignment) => {
-          const classId = assignment.classId || assignment.class?.id;
-          if (classId) classOptionsById.set(classId, assignment.class?.name || '—');
-        });
-      } else {
-        items.forEach((a) => {
-          const classId = a.classId || a.class?.id;
-          if (classId) classOptionsById.set(classId, a.className || a.class?.name || '—');
-        });
-      }
+      items.forEach((a) => {
+        const classId = a.classId || a.class?.id;
+        if (classId) classOptionsById.set(classId, a.className || a.class?.name || '—');
+      });
+      activeClassTeacherAssignments.forEach((assignment) => {
+        const classId = assignment.classId || assignment.class?.id;
+        if (classId) classOptionsById.set(classId, assignment.class?.name || '—');
+      });
     } catch (error) {
       classSelect.innerHTML = '<option value="">Could not load your classes</option>';
       Loader.tableError(tbody, 3, error.message || 'Could not load your class assignments.');

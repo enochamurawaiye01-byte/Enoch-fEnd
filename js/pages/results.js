@@ -221,16 +221,18 @@
       && (!assignment.termId || assignment.termId === termSelect.value));
     const updateClasses = (sessionId) => {
       const classes = new Map();
-      assignments.forEach((assignment) => {
-        if (assignment.class && (!assignment.sessionId || assignment.sessionId === sessionId)) {
-          classes.set(assignment.classId, assignment.class.name);
-        }
-      });
-      classTeacherRows.forEach((assignment) => {
-        if (assignment.class && assignment.sessionId === sessionId) {
-          classes.set(assignment.classId, assignment.class.name);
-        }
-      });
+      const currentClassTeacherRows = classTeacherRows.filter((assignment) => assignment.sessionId === sessionId);
+      if (currentClassTeacherRows.length) {
+        currentClassTeacherRows.forEach((assignment) => {
+          if (assignment.class) classes.set(assignment.classId, assignment.class.name);
+        });
+      } else {
+        assignments.forEach((assignment) => {
+          if (assignment.class && (!assignment.sessionId || assignment.sessionId === sessionId)) {
+            classes.set(assignment.classId, assignment.class.name);
+          }
+        });
+      }
       setOptions(classSelect, 'Select assigned class', [...classes].map(([value, label]) => ({ value, label })));
       classSelect.disabled = !sessionId || !classes.size;
       if (!classes.has(classSelect.value)) classSelect.value = classes.keys().next().value || '';

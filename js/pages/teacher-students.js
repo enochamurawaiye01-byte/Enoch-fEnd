@@ -18,16 +18,19 @@
         TeachersService.assignments(window.CurrentUser.id),
         TeachersService.getCurrent(),
       ]);
-      items.forEach((a) => {
-        const classId = a.classId || a.class?.id;
-        if (classId) classOptionsById.set(classId, a.className || a.class?.name || '—');
-      });
-      (teacher.classTeacherAssignments || [])
+      const activeClassTeacherAssignments = (teacher.classTeacherAssignments || [])
         .filter((assignment) => assignment.session?.isActive)
-        .forEach((assignment) => {
+      if (activeClassTeacherAssignments.length) {
+        activeClassTeacherAssignments.forEach((assignment) => {
           const classId = assignment.classId || assignment.class?.id;
           if (classId) classOptionsById.set(classId, assignment.class?.name || '—');
         });
+      } else {
+        items.forEach((a) => {
+          const classId = a.classId || a.class?.id;
+          if (classId) classOptionsById.set(classId, a.className || a.class?.name || '—');
+        });
+      }
     } catch (error) {
       classSelect.innerHTML = '<option value="">Could not load your classes</option>';
       Loader.tableError(tbody, 3, error.message || 'Could not load your class assignments.');

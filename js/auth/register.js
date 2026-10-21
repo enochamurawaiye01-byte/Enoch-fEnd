@@ -13,7 +13,6 @@
     const currentClassSelect = qs('#currentClassId');
     const departmentGroup = qs('#department-group');
     const departmentSelect = qs('#desiredDepartmentIds');
-    const applicationLetterInput = qs('#applicationLetter');
     const departmentRequirementByClassId = new Map();
     const passwordInput = qs('#password');
     const pwContainer = qs('#pw-strength-container');
@@ -29,7 +28,6 @@
       parentFields.hidden = !isParent;
       studentFields.hidden = !isStudent;
       currentClassSelect.required = isStudent;
-      if (applicationLetterInput) applicationLetterInput.required = isTeacher;
       const childRegistrationNumber = qs('#childRegistrationNumber');
       if (childRegistrationNumber) childRegistrationNumber.required = isParent;
       submitButton.textContent = isTeacher ? 'Submit Teacher Application' : isParent ? 'Submit Parent Application' : 'Submit Student Application';
@@ -184,15 +182,6 @@
         setFieldError('desiredDepartmentIds', 'Select at least one department for this class.');
         hasError = true;
       }
-      const applicationLetter = applicationLetterInput?.files?.[0];
-      if (rawData.role === 'TEACHER' && !applicationLetter) {
-        setFieldError('applicationLetter', 'Upload your application letter to continue.');
-        hasError = true;
-      } else if (rawData.role === 'TEACHER' && applicationLetter.size > 115 * 1024) {
-        setFieldError('applicationLetter', 'Application letter must not exceed 115 KB.');
-        hasError = true;
-      }
-
       const passwordError = Validators.passwordStrength(rawData.password);
       if (!rawData.password) { setFieldError('password', 'Password is required.'); hasError = true; }
       else if (passwordError) { setFieldError('password', passwordError); hasError = true; }
@@ -217,17 +206,7 @@
       submitButton.textContent = 'Submitting application...';
 
       try {
-        if (rawData.role === 'TEACHER') {
-          const application = new FormData();
-          Object.entries(rawData).forEach(([key, value]) => {
-            if (Array.isArray(value)) value.forEach((item) => application.append(key, item));
-            else application.append(key, value);
-          });
-          application.append('applicationLetter', applicationLetter);
-          await AuthService.register(application);
-        } else {
-          await AuthService.register(rawData);
-        }
+        await AuthService.register(rawData);
         form.hidden = true;
         if (successBox) {
           successBox.textContent = 'Application submitted successfully! Your account is pending administrator approval before you can sign in.';

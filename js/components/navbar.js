@@ -182,7 +182,7 @@
           tone: 'danger',
           onConfirm: async () => {
             await AuthService.logout();
-            window.location.href = `${rootPrefix()}login.html`;
+            window.location.href = `${rootPrefix()}index.html`;
           },
         });
       });
